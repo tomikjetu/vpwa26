@@ -53,7 +53,9 @@ export default defineConfig((ctx) => {
 
       // publicPath: '/',
       // analyze: true,
-      // env: {},
+      env: {
+        SOCKETURL: process.env.SOCKETURL || 'ws://localhost:3001',
+      },
       // rawDefine: {}
       // ignorePublicFolder: true,
       // minify: false,
