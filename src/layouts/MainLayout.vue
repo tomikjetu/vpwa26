@@ -29,12 +29,12 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from 'vue';
+import { ref, computed } from 'vue';
 import { useRouter } from 'vue-router';
 import { Notify, Dialog } from 'quasar';
 import EssentialLink, { type EssentialLinkProps } from 'components/EssentialLink.vue';
 import { authService } from 'src/services/authService';
-import type { User } from 'src/utils/types';
+import { useAuthStore } from 'src/stores/auth-store';
 
 const linksList: EssentialLinkProps[] = [
   {
@@ -82,9 +82,10 @@ const linksList: EssentialLinkProps[] = [
 ];
 
 const router = useRouter();
+const authStore = useAuthStore();
 
 const leftDrawerOpen = ref(false);
-const currentUser = ref<User | null>(authService.getCurrentUser());
+const currentUser = computed(() => authStore.getCurrentUser);
 
 function toggleLeftDrawer() {
   leftDrawerOpen.value = !leftDrawerOpen.value;
@@ -98,7 +99,6 @@ function logout() {
     persistent: true
   }).onOk(() => {
     authService.logout();
-    currentUser.value = null;
 
     Notify.create({
       type: 'positive',
@@ -109,9 +109,4 @@ function logout() {
     void router.push('/auth/login');
   });
 }
-
-// Update current user when component mounts
-onMounted(() => {
-  currentUser.value = authService.getCurrentUser();
-});
 </script>

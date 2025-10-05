@@ -1,70 +1,30 @@
 import type { User, LoginCredentials, RegisterCredentials } from 'src/utils/types';
-
-const TOKEN_KEY = 'auth_token';
-const USER_KEY = 'auth_user';
+import { useAuthStore } from 'src/stores/auth-store';
 
 class AuthService {
-  private currentUser: User | null = null;
-
-  constructor() {
-    // Initialize from localStorage on service creation
-    this.loadUserFromStorage();
-  }
-
-  /**
-   * Load user data from localStorage
-   */
-  private loadUserFromStorage(): void {
-    const token = localStorage.getItem(TOKEN_KEY);
-    const userData = localStorage.getItem(USER_KEY);
-
-    if (token && userData) {
-      try {
-        this.currentUser = JSON.parse(userData);
-      } catch (error) {
-        console.error('Failed to parse user data from localStorage:', error);
-        this.clearAuthData();
-      }
-    }
-  }
-
-  /**
-   * Save authentication data to localStorage
-   */
-  private saveAuthData(token: string, user: User): void {
-    localStorage.setItem(TOKEN_KEY, token);
-    localStorage.setItem(USER_KEY, JSON.stringify(user));
-    this.currentUser = user;
-  }
-
-  /**
-   * Clear authentication data from localStorage
-   */
-  private clearAuthData(): void {
-    localStorage.removeItem(TOKEN_KEY);
-    localStorage.removeItem(USER_KEY);
-    this.currentUser = null;
+  private getAuthStore() {
+    return useAuthStore();
   }
 
   /**
    * Check if user is currently authenticated
    */
   isAuthenticated(): boolean {
-    return !!this.getToken() && !!this.currentUser;
+    return this.getAuthStore().checkAuthenticated;
   }
 
   /**
    * Get current authentication token
    */
   getToken(): string | null {
-    return localStorage.getItem(TOKEN_KEY);
+    return this.getAuthStore().getToken;
   }
 
   /**
    * Get current authenticated user
    */
   getCurrentUser(): User | null {
-    return this.currentUser;
+    return this.getAuthStore().getCurrentUser;
   }
 
   /**
@@ -87,7 +47,7 @@ class AuthService {
         };
 
         const token = 'mock-jwt-token-' + Date.now();
-        this.saveAuthData(token, user);
+        this.getAuthStore().setAuth(token, user);
         return user;
       } else {
         throw new Error('Invalid email or password');
@@ -120,7 +80,7 @@ class AuthService {
       };
 
       const token = 'mock-jwt-token-' + Date.now();
-      this.saveAuthData(token, user);
+      this.getAuthStore().setAuth(token, user);
       return user;
     } catch (error) {
       throw error instanceof Error ? error : new Error('Registration failed');
@@ -131,7 +91,7 @@ class AuthService {
    * Logout current user
    */
   logout(): void {
-    this.clearAuthData();
+    this.getAuthStore().clearAuth();
   }
 
   /**
@@ -143,10 +103,10 @@ class AuthService {
       await this.simulateApiDelay();
 
       const newToken = 'refreshed-mock-jwt-token-' + Date.now();
-      localStorage.setItem(TOKEN_KEY, newToken);
+      this.getAuthStore().updateToken(newToken);
       return newToken;
     } catch {
-      this.clearAuthData();
+      this.getAuthStore().clearAuth();
       throw new Error('Token refresh failed');
     }
   }
@@ -155,7 +115,8 @@ class AuthService {
    * Update user profile
    */
   async updateProfile(userData: Partial<User>): Promise<User> {
-    if (!this.isAuthenticated() || !this.currentUser) {
+    const currentUser = this.getCurrentUser();
+    if (!this.isAuthenticated() || !currentUser) {
       throw new Error('User not authenticated');
     }
 
@@ -164,13 +125,12 @@ class AuthService {
       await this.simulateApiDelay();
 
       const updatedUser: User = {
-        ...this.currentUser,
+        ...currentUser,
         ...userData,
-        id: this.currentUser.id, // Ensure ID cannot be changed
+        id: currentUser.id, // Ensure ID cannot be changed
       };
 
-      const token = this.getToken()!;
-      this.saveAuthData(token, updatedUser);
+      this.getAuthStore().updateUser(updatedUser);
       return updatedUser;
     } catch (error) {
       throw error instanceof Error ? error : new Error('Profile update failed');
