@@ -43,11 +43,6 @@ const filteredAll = computed(() => {
 
 
 <style scoped>
-.scroll {
-  overflow-y: auto;
-  /* enable vertical scrolling */
-}
-
 .channels-bar-container {
   border-right: 1px solid rgb(195, 195, 195);
   height: 100vh;
