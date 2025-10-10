@@ -13,6 +13,8 @@
       </q-toolbar>
     </q-header>
 
+    <CommandLine />
+
     <q-page-container>
       <router-view />
     </q-page-container>
@@ -25,6 +27,7 @@ import { useRouter } from 'vue-router';
 import { Notify, Dialog } from 'quasar';
 import { authService } from 'src/services/authService';
 import { useAuthStore } from 'src/stores/auth-store';
+import CommandLine from 'src/components/CommandLine.vue';
 
 const router = useRouter();
 const authStore = useAuthStore();
