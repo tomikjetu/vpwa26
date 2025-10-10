@@ -1,14 +1,14 @@
 <template>
   <div class="chat-container">
     <ChatTopBar></ChatTopBar>
-    <MessageList></MessageList>
-    <ChattingInput></ChattingInput>
+    <ChatMessageList></ChatMessageList>
+    <ChatInput></ChatInput>
   </div>
 </template>
 
 <script setup lang="ts">
-import ChattingInput from './ChattingInput.vue'
-import MessageList from './MessageList.vue'
+import ChatInput from './ChatInput.vue'
+import ChatMessageList from './ChatMessageList.vue'
 import ChatTopBar from './ChatTopBar.vue'
 </script>
 

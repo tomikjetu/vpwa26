@@ -1,6 +1,4 @@
 import type { RouteRecordRaw } from 'vue-router';
-import TestPage from 'pages/TestPage.vue';
-import ChannelsPage from 'pages/ChannelsPage.vue';
 import { requireAuth, requireGuest } from './middleware';
 
 const routes: RouteRecordRaw[] = [
@@ -33,10 +31,9 @@ const routes: RouteRecordRaw[] = [
     children: [
       {
         path: '',
-        component: () => import('pages/IndexPage.vue'),
+        redirect: '/channels',
       },
-      { path: 'test', component: TestPage },
-      { path: 'channels', component: ChannelsPage },
+      { path: 'channels', component: () => import('pages/ChannelsPage.vue') },
     ],
   },
 
