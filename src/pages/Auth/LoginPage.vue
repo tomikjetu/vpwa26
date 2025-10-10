@@ -1,0 +1,109 @@
+<template>
+    <div class="login-page">
+        <div class="text-center q-mb-lg">
+            <h5 class="text-weight-medium q-my-md">Sign In</h5>
+        </div>
+
+        <q-form @submit="onSubmit" class="q-gutter-md">
+            <q-input v-model="form.email" type="email" label="Email" outlined :rules="[
+                val => !!val || 'Email is required',
+                val => /.+@.+\..+/.test(val) || 'Please enter a valid email'
+            ]" :loading="loading" :disable="loading">
+                <template v-slot:prepend>
+                    <q-icon name="email" />
+                </template>
+            </q-input>
+
+            <q-input v-model="form.password" :type="showPassword ? 'text' : 'password'" label="Password" outlined
+                :rules="[val => !!val || 'Password is required']" :loading="loading" :disable="loading">
+                <template v-slot:prepend>
+                    <q-icon name="lock" />
+                </template>
+                <template v-slot:append>
+                    <q-icon :name="showPassword ? 'visibility_off' : 'visibility'" class="cursor-pointer"
+                        @click="showPassword = !showPassword" />
+                </template>
+            </q-input>
+
+            <div class="row justify-between items-center">
+                <q-checkbox v-model="rememberMe" label="Remember me" :disable="loading" />
+                <q-btn flat no-caps color="primary" label="Forgot password?" size="sm" :disable="loading" />
+            </div>
+
+            <div class="row justify-center q-pa-none">
+                <q-btn type="submit" color="primary" label="Sign In" class="full-width" size="lg" :loading="loading"
+                    :disable="loading" />
+            </div>
+        </q-form>
+
+        <q-separator class="q-my-lg" />
+
+        <div class="text-center">
+            <p class="text-grey-6">
+                Don't have an account?
+                <router-link to="/auth/register" class="text-primary text-weight-medium">
+                    Sign up
+                </router-link>
+            </p>
+        </div>
+    </div>
+</template>
+
+<script setup lang="ts">
+import { ref } from 'vue';
+import { useRouter } from 'vue-router';
+import { Notify } from 'quasar';
+import { authService } from 'src/services/authService';
+import type { LoginCredentials } from 'src/utils/types';
+
+const router = useRouter();
+
+const form = ref<LoginCredentials>({
+    email: '',
+    password: ''
+});
+
+const showPassword = ref(false);
+const rememberMe = ref(false);
+const loading = ref(false);
+
+async function onSubmit() {
+    loading.value = true;
+
+    try {
+        const user = await authService.login(form.value);
+
+        Notify.create({
+            type: 'positive',
+            message: `Welcome back, ${user.name}!`,
+            position: 'top'
+        });
+
+        // Redirect to intended destination or home page
+        const redirect = router.currentRoute.value.query.redirect as string || '/';
+        await router.push(redirect);
+    } catch (error) {
+        Notify.create({
+            type: 'negative',
+            message: error instanceof Error ? error.message : 'Login failed',
+            position: 'top'
+        });
+    } finally {
+        loading.value = false;
+    }
+}
+</script>
+
+<style scoped lang="scss">
+.login-page {
+    width: 100%;
+}
+
+a {
+    text-decoration: none;
+}
+
+a:hover {
+    text-decoration: underline;
+}
+</style>

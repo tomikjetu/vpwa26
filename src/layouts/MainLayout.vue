@@ -6,7 +6,11 @@
 
         <q-toolbar-title> Quasar App </q-toolbar-title>
 
-        <div>Quasar v{{ $q.version }}</div>
+        <div class="row items-center q-gutter-sm">
+          <span v-if="currentUser" class="text-caption">Welcome, {{ currentUser.name }}</span>
+          <q-btn v-if="currentUser" flat round dense icon="logout" @click="logout" title="Logout" />
+          <div class="text-caption">Quasar v{{ $q.version }}</div>
+        </div>
       </q-toolbar>
     </q-header>
 
@@ -25,8 +29,12 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue';
+import { ref, computed } from 'vue';
+import { useRouter } from 'vue-router';
+import { Notify, Dialog } from 'quasar';
 import EssentialLink, { type EssentialLinkProps } from 'components/EssentialLink.vue';
+import { authService } from 'src/services/authService';
+import { useAuthStore } from 'src/stores/auth-store';
 
 const linksList: EssentialLinkProps[] = [
   {
@@ -73,9 +81,32 @@ const linksList: EssentialLinkProps[] = [
   },
 ];
 
+const router = useRouter();
+const authStore = useAuthStore();
+
 const leftDrawerOpen = ref(false);
+const currentUser = computed(() => authStore.getCurrentUser);
 
 function toggleLeftDrawer() {
   leftDrawerOpen.value = !leftDrawerOpen.value;
+}
+
+function logout() {
+  Dialog.create({
+    title: 'Confirm Logout',
+    message: 'Are you sure you want to logout?',
+    cancel: true,
+    persistent: true
+  }).onOk(() => {
+    authService.logout();
+
+    Notify.create({
+      type: 'positive',
+      message: 'Successfully logged out',
+      position: 'top'
+    });
+
+    void router.push('/auth/login');
+  });
 }
 </script>
