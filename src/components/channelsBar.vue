@@ -34,6 +34,7 @@
 <script setup lang="ts">
 import { ref, computed } from 'vue'
 import { useChannelStore } from 'src/stores/channelStore'
+import ChannelList from './ChannelList.vue'
 
 const search = ref('')
 const channelStore = useChannelStore()

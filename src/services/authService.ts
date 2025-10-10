@@ -39,7 +39,7 @@ class AuthService {
       // Mock authentication - in real app, this would be an API call
       if (credentials.email === 'test@example.com' && credentials.password === 'password') {
         const user: User = {
-          id: '1',
+          id: 1,
           name: 'John',
           surname: 'Doe',
           nickName: 'johndoe',
@@ -72,7 +72,7 @@ class AuthService {
 
       // Mock registration - in real app, this would be an API call
       const user: User = {
-        id: Date.now().toString(),
+        id: Number(Date.now().toString()),
         name: credentials.name,
         surname: credentials.surname,
         nickName: credentials.nickName,

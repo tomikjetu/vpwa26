@@ -16,7 +16,7 @@ export function createChannel(name: string) {
     icon: 'default-icon.png',
     color: '#000000',
     infoColor: '#FFFFFF',
-    isFolder: false,
+    isPublic: false,
   };
 
   channelStore.addChannel(Channel);

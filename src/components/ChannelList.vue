@@ -17,7 +17,7 @@
             <q-item-section>
                 <q-item-label lines="1">{{ channel.name }}</q-item-label>
                 <q-item-label lines="1" caption>
-                {{ !channel.isOwner ? 'Joined' : 'Created' }} {{ channel.date }}
+                {{ channel.ownerId != getCurrentUser?.id ? 'Joined' : 'Created' }} {{ channel.ownerId != getCurrentUser?.id ? channel.joinedAt : channel.createdAt }}
                 </q-item-label>
             </q-item-section>
 
@@ -37,21 +37,26 @@
 </template>
 
 <script setup lang="ts">
-import type { ChannelItem, DropdownItem } from './models.js'
+import type { Channel, DropdownItem } from 'src/utils/types.js'
 import ChannelDropdown from './ChannelDropdown.vue'
+import { useAuthStore } from 'src/stores/auth-store'
+import { storeToRefs } from 'pinia'
 
-const getMenuOptions = (item: ChannelItem): DropdownItem[] => {
+const authStore = useAuthStore()
+const { getCurrentUser } = storeToRefs(authStore)
+
+const getMenuOptions = (channel: Channel): DropdownItem[] => {
   return [
-    { label: 'Invite', class: '', disable: !item.canInvite },
+    { label: 'Invite', class: '', disable: channel.ownerId != getCurrentUser.value?.id && !channel.isPublic },
     { label: 'Members', class: '', disable: false },
     { label: 'Change icon', class: '', disable: false },
-    { label: item.isOwner ? 'Leave' : 'Remove', class: 'warning', disable: false }
+    { label:  channel.ownerId != getCurrentUser.value?.id ? 'Leave' : 'Remove', class: 'warning', disable: false }
   ]
 }
 
 defineProps<{
   title: string,
-  channels: ChannelItem[],
+  channels: Channel[],
   flex: number
 }>()
 </script>

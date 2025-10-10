@@ -18,7 +18,7 @@
 </template>
 
 <script setup lang="ts">
-import type { DropdownItem } from './models.ts'
+import type { DropdownItem } from 'src/utils/types.ts'
 
 defineProps<{
   items: DropdownItem[]
