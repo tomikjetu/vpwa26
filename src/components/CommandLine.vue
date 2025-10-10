@@ -4,15 +4,16 @@
             <q-input v-model="command" borderless placeholder="Enter command..." autofocus @keyup.enter="executeCommand"
                 style="width: 600px;" />
             <q-list>
-                <q-item v-for="command in filteredCommands" :key="command.name" clickable v-ripple>
+                <q-item v-for="cmd in filteredCommands" :key="cmd.id" clickable v-ripple
+                    @click="command = cmd.cmd; executeCommand()">
                     <q-item-section avatar>
                         <q-avatar rounded>
-                            <q-icon :name="command.icon" />
+                            <q-icon :name="cmd.icon" />
                         </q-avatar>
                     </q-item-section>
                     <q-item-section>
-                        <q-item-label>{{ command.name }}</q-item-label>
-                        <q-item-label caption>{{ command.description }}</q-item-label>
+                        <q-item-label>{{ cmd.name }}</q-item-label>
+                        <q-item-label caption>{{ cmd.description }}</q-item-label>
                     </q-item-section>
                 </q-item>
             </q-list>
@@ -22,13 +23,28 @@
 
 <script setup lang="ts">
 import { onMounted, onBeforeUnmount, computed } from 'vue';
+import { useChannelStore } from 'src/stores/channelStore';
+import { authService } from 'src/services/authService';
 import { ref } from 'vue';
+
+const channelStore = useChannelStore();
 
 const isOpen = ref(false);
 const command = ref('');
 
+const channelToggleCommands = computed(() => {
+    return channelStore.channels.map(channel => ({
+        id: "channel-" + channel.id,
+        name: `switch to ${channel.name}`,
+        cmd: 'open ' + channel.id,
+        description: `Switch to channel ${channel.name}`,
+        icon: 'chat'
+    }));
+})
+
 const commands = [
-    { name: 'logout', description: 'Log out of the application', icon: 'logout' }
+    { id: "1", name: 'logout', cmd: 'logout', description: 'Log out of the application', icon: 'logout' },
+    ...channelToggleCommands.value
 ]
 
 const filteredCommands = computed(() => {
@@ -39,9 +55,12 @@ const filteredCommands = computed(() => {
 });
 
 function executeCommand() {
-    // Placeholder for command execution logic
-    console.log(`Executing command: ${command.value}`);
-    command.value = ''; // Clear the input after execution
+    // TODO: optimize executor
+    if (command.value === 'logout') {
+        authService.logout();
+        window.location.href = '/auth/login';
+        return;
+    }
 }
 
 function onKeydown(e: KeyboardEvent) {
