@@ -1,4 +1,6 @@
 import type { RouteRecordRaw } from 'vue-router';
+import TestPage from 'pages/TestPage.vue';
+import ChannelsPage from 'pages/ChannelsPage.vue';
 import { requireAuth, requireGuest } from './middleware';
 
 const routes: RouteRecordRaw[] = [
@@ -33,6 +35,8 @@ const routes: RouteRecordRaw[] = [
         path: '',
         component: () => import('pages/IndexPage.vue'),
       },
+      { path: 'test', component: TestPage },
+      { path: 'channels', component: ChannelsPage },
     ],
   },
 
