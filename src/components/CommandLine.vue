@@ -1,22 +1,25 @@
 <template>
     <div v-if="isOpen" class="overlay">
-        <div class="cli-wrapper">
-            <q-input v-model="command" borderless placeholder="Enter command..." autofocus @keyup.enter="executeCommand"
-                style="width: 600px;" />
-            <q-list>
-                <q-item v-for="cmd in filteredCommands" :key="cmd.id" clickable v-ripple
-                    @click="command = cmd.cmd; executeCommand()">
-                    <q-item-section avatar>
-                        <q-avatar rounded>
-                            <q-icon :name="cmd.icon" />
-                        </q-avatar>
-                    </q-item-section>
-                    <q-item-section>
-                        <q-item-label>{{ cmd.name }}</q-item-label>
-                        <q-item-label caption>{{ cmd.description }}</q-item-label>
-                    </q-item-section>
-                </q-item>
-            </q-list>
+        <div class="cli-wrapper" id="cli">
+            <q-input v-model="command" borderless placeholder="Enter command..." autofocus @keyup="filterCommands"
+                @keyup.enter="executeCommand" style="width: 600px;" />
+
+            <q-scroll-area style="height: 300px;">
+                <q-list id="cli-suggestions">
+                    <q-item v-for="cmd in filteredCommands" :key="cmd.id" @focus="focusCommand(cmd.cmd)"
+                        @keydown="itemMove" clickable v-ripple @click="command = cmd.cmd; executeCommand()">
+                        <q-item-section avatar>
+                            <q-avatar rounded>
+                                <q-icon :name="cmd.icon" />
+                            </q-avatar>
+                        </q-item-section>
+                        <q-item-section>
+                            <q-item-label>{{ cmd.name }}</q-item-label>
+                            <q-item-label caption>{{ cmd.description }}</q-item-label>
+                        </q-item-section>
+                    </q-item>
+                </q-list>
+            </q-scroll-area>
         </div>
     </div>
 </template>
@@ -36,7 +39,7 @@ const channelToggleCommands = computed(() => {
     return channelStore.channels.map(channel => ({
         id: "channel-" + channel.id,
         name: `switch to ${channel.name}`,
-        cmd: 'open ' + channel.id,
+        cmd: 'open ' + channel.name,
         description: `Switch to channel ${channel.name}`,
         icon: 'chat'
     }));
@@ -47,12 +50,53 @@ const commands = [
     ...channelToggleCommands.value
 ]
 
-const filteredCommands = computed(() => {
+const filteredCommands = ref([...commands]);
+
+function filterCommands(e: KeyboardEvent) {
     if (!command.value) {
-        return commands;
+        filteredCommands.value = [...commands];
+    } else {
+        filteredCommands.value = commands.filter(c =>
+            c.cmd.toLowerCase().includes(command.value.toLowerCase())
+        );
     }
-    return commands.filter(c => c.name.toLowerCase().includes(command.value.toLowerCase()));
-});
+    if (e.key === 'Escape') isOpen.value = false;
+    if (e.key === 'ArrowDown' || e.key === 'ArrowUp') e.preventDefault();
+    if (e.key === 'ArrowDown') {
+        const list = document.querySelector('.q-list');
+        if (!list) return;
+        const firstItem = list.querySelector('.q-item');
+        if (firstItem) (firstItem as HTMLElement).focus();
+    }
+}
+
+function focusCommand(cmd: string) {
+    command.value = cmd;
+}
+
+function itemMove(e: KeyboardEvent) {
+    const list = document.querySelector('#cli-suggestions');
+    if (!list) return;
+    e.preventDefault();
+    const items = list.querySelectorAll('.q-item');
+    if (items.length === 0) return;
+
+    const focusedElement = document.activeElement;
+    let currentIndex = Array.from(items).indexOf(focusedElement as Element);
+    console.log("CUR:", currentIndex);
+
+    if (e.key === 'ArrowDown') {
+        currentIndex = (currentIndex + 1) % items.length;
+        console.log(currentIndex, items[currentIndex]);
+        (items[currentIndex] as HTMLElement).focus();
+    } else if (e.key === 'ArrowUp') {
+        currentIndex = (currentIndex - 1 + items.length) % items.length;
+        (items[currentIndex] as HTMLElement).focus();
+    } else if (e.key === 'Tab' || e.key === "Backspace") {
+        e.preventDefault();
+        (document.querySelector('#cli input') as HTMLElement).focus();
+    }
+}
 
 function executeCommand() {
     // TODO: optimize executor
