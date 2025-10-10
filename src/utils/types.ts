@@ -4,7 +4,12 @@ export type Channel = {
   name: string;
   createdAt: Date;
   updatedAt: Date;
+  joinedAt: Date;
   description?: string;
+  icon: string;
+  color: string;
+  infoColor: string;
+  isFolder: boolean;
 };
 export type User = {
   id: string;

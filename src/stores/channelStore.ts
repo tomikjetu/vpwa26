@@ -1,31 +1,48 @@
-import { defineStore } from "pinia"
-import { Channel } from "src/utils/types"
+import { defineStore } from 'pinia';
+import { type Channel } from 'src/utils/types';
 
-export const useChannelStore = defineStore("channels", {
+export const useChannelStore = defineStore('channels', {
   state: () => ({
-    channels: [] as Channel[] 
+    channels: [
+      {
+        id: 1,
+        ownerId: 1,
+        name: 'Channel_1',
+        createdAt: new Date(),
+        updatedAt: new Date(),
+        joinedAt: new Date(),
+        description: 'This is a folder channel',
+        icon: 'lock',
+        color: 'primary',
+        infoColor: 'grey',
+        isFolder: true,
+      },
+    ] as Channel[],
   }),
 
   actions: {
     addChannel(channel: Channel) {
-      if (!this.channels.find(c => c.id === channel.id)) {
-        this.channels.push(channel)
+      if (!this.channels.find((c) => c.id === channel.id)) {
+        this.channels.push(channel);
       }
     },
 
     setChannels(channelList: Channel[]) {
-      this.channels = channelList
+      this.channels = channelList;
     },
 
     removeChannel(channelId: number) {
-      this.channels = this.channels.filter(c => c.id !== channelId)
-    }
+      this.channels = this.channels.filter((c) => c.id !== channelId);
+    },
   },
 
   getters: {
     getChannelById: (state) => {
-      return (id: number) => state.channels.find(c => c.id === id)
+      return (id: number) => state.channels.find((c) => c.id === id);
     },
-    totalChannels: (state) => state.channels.length
-  }
-})
+    getOwnedChannels: (state) => {
+      return state.channels.filter((c) => c.ownerId === 1 && !c.isFolder);
+    },
+    totalChannels: (state) => state.channels.length,
+  },
+});
