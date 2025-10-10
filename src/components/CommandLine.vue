@@ -27,8 +27,10 @@
 <script setup lang="ts">
 import { onMounted, onBeforeUnmount, computed } from 'vue';
 import { useChannelStore } from 'src/stores/channelStore';
-import { authService } from 'src/services/authService';
 import { ref } from 'vue';
+
+import Logout from './CommandLine/Logout';
+import Open from './CommandLine/Open';
 
 const channelStore = useChannelStore();
 
@@ -38,7 +40,7 @@ const command = ref('');
 const channelToggleCommands = computed(() => {
     return channelStore.channels.map(channel => ({
         id: "channel-" + channel.id,
-        name: `switch to ${channel.name}`,
+        name: `${channel.name}`,
         cmd: 'open ' + channel.name,
         description: `Switch to channel ${channel.name}`,
         icon: 'chat'
@@ -46,7 +48,7 @@ const channelToggleCommands = computed(() => {
 })
 
 const commands = [
-    { id: "1", name: 'logout', cmd: 'logout', description: 'Log out of the application', icon: 'logout' },
+    { id: "1", name: 'Log Out', cmd: 'logout', description: 'Log out of the application', icon: 'logout' },
     ...channelToggleCommands.value
 ]
 
@@ -83,11 +85,9 @@ function itemMove(e: KeyboardEvent) {
 
     const focusedElement = document.activeElement;
     let currentIndex = Array.from(items).indexOf(focusedElement as Element);
-    console.log("CUR:", currentIndex);
 
     if (e.key === 'ArrowDown') {
         currentIndex = (currentIndex + 1) % items.length;
-        console.log(currentIndex, items[currentIndex]);
         (items[currentIndex] as HTMLElement).focus();
     } else if (e.key === 'ArrowUp') {
         currentIndex = (currentIndex - 1 + items.length) % items.length;
@@ -98,13 +98,19 @@ function itemMove(e: KeyboardEvent) {
     }
 }
 
+const executors = [
+    Logout(),
+    Open()
+]
+
 function executeCommand() {
-    // TODO: optimize executor
-    if (command.value === 'logout') {
-        authService.logout();
-        window.location.href = '/auth/login';
-        return;
-    }
+    const cmdInput = command.value.toLowerCase().trim();
+    const cmd = cmdInput.split(' ')[0];
+    const args = cmdInput.split(' ').slice(1);
+    command.value = '';
+    isOpen.value = false;
+    const executor = executors.find(ex => ex.cmd === cmd);
+    if (executor) executor.execute(args);
 }
 
 function onKeydown(e: KeyboardEvent) {
