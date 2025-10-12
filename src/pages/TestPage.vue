@@ -1,6 +1,6 @@
 <template>
   <q-page class="flex flex-center column q-pa-lg">
-    <channelsBar/>
+    <ChannelsBar/>
 
     <div class="q-pa-md q-gutter-sm">
 
@@ -53,7 +53,7 @@
 
 <script setup lang="ts">
   import { ref } from 'vue'
-  import channelsBar from 'components/channelsBar.vue'
+  import ChannelsBar from 'src/components/ChannelsBar.vue'
 
   const name = ref('')
   const greeting = ref('')

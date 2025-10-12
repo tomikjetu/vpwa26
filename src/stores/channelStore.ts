@@ -15,7 +15,7 @@ export const useChannelStore = defineStore('channels', {
         icon: 'lock',
         color: 'primary',
         infoColor: 'grey',
-        isFolder: true,
+        isPublic: true,
       },
     ] as Channel[],
   }),
@@ -41,7 +41,7 @@ export const useChannelStore = defineStore('channels', {
       return (id: number) => state.channels.find((c) => c.id === id);
     },
     getOwnedChannels: (state) => {
-      return state.channels.filter((c) => c.ownerId === 1 && !c.isFolder);
+      return state.channels.filter((c) => c.ownerId === 1 && !c.isPublic);
     },
     totalChannels: (state) => state.channels.length,
   },

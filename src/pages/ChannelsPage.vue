@@ -1,12 +1,12 @@
 <template>
     <div style="display: flex;">
-        <channelsBar></channelsBar>
-        <CustomChat></CustomChat>
+        <ChannelsBar></ChannelsBar>
+        <ChatContainer></ChatContainer>
     </div>
 </template>
 
 
 <script setup lang="ts">
-    import channelsBar from 'components/channelsBar.vue'
-    import CustomChat from 'components/CustomChat.vue'
+    import ChannelsBar from 'src/components/ChannelsBar.vue'
+    import ChatContainer from 'components/ChatContainer.vue'
 </script>

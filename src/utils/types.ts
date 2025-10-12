@@ -9,10 +9,10 @@ export type Channel = {
   icon: string;
   color: string;
   infoColor: string;
-  isFolder: boolean;
+  isPublic: boolean;
 };
 export type User = {
-  id: string;
+  id: number;
   name: string;
   surname: string;
   nickName: string;
@@ -32,3 +32,9 @@ export type RegisterCredentials = {
   password: string;
   confirmPassword: string;
 };
+
+export interface DropdownItem {
+  label: string,
+  class: string,
+  disable: boolean
+}
