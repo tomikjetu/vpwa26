@@ -31,6 +31,12 @@ import { ref } from 'vue';
 
 import Logout from './CommandLine/Logout';
 import Open from './CommandLine/Open';
+import Cancel from './CommandLine/Cancel';
+import Invite from './CommandLine/Invite';
+import Revoke from './CommandLine/Revoke';
+import Quit from './CommandLine/Quit';
+import Join from './CommandLine/Join';
+import Kick from './CommandLine/Kick';
 
 const channelStore = useChannelStore();
 
@@ -99,8 +105,14 @@ function itemMove(e: KeyboardEvent) {
 }
 
 const executors = [
+    Cancel(),
+    Invite(),
+    Join(),
+    Kick(),
     Logout(),
-    Open()
+    Open(),
+    Quit(),
+    Revoke()
 ]
 
 function executeCommand() {
