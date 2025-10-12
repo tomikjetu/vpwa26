@@ -31,9 +31,8 @@ const routes: RouteRecordRaw[] = [
     children: [
       {
         path: '',
-        redirect: '/channels',
+        component: () => import('pages/ChannelsPage.vue'),
       },
-      { path: 'channels', component: () => import('pages/ChannelsPage.vue') },
     ],
   },
 
