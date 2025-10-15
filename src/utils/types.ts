@@ -38,3 +38,14 @@ export interface DropdownItem {
   class: string,
   disable: boolean
 }
+
+export interface ChatMessagePayload {
+  user: string,
+  text: string,
+  time: string,
+  files: File[]
+}
+
+export interface File {
+  name: string
+}

@@ -14,7 +14,7 @@
     <q-input
       outlined
       dense
-      v-model="message"
+      v-model="text"
       placeholder="Type a message..."
       class="col q-mx-sm"
       @keyup.enter="sendMessage"
@@ -32,20 +32,37 @@
       color="primary"
       icon="send"
       @click="sendMessage"
-      :disable="!message.trim()"
+      :disable="!text.trim()"
     />
   </div>
 </template>
 
 <script setup lang="ts">
 import { ref } from 'vue'
+import type { ChatMessagePayload } from 'src/utils/types.js'
+import { storeToRefs } from 'pinia'
+import { useAuthStore } from 'src/stores/auth-store'
 
-const message = ref('')
+const authStore = useAuthStore()
+const { getCurrentUser } = storeToRefs(authStore)
 
-function sendMessage () {
-  if (!message.value.trim()) return
-  console.log('Sending:', message.value)
-  message.value = ''
+const text = ref('')
+
+const emit = defineEmits<{
+  (e: 'send', msg: ChatMessagePayload): void
+}>()
+
+function sendMessage() {
+  if (!getCurrentUser.value?.id) return
+  if (text.value.trim()) {
+    emit('send', {
+      user: getCurrentUser.value?.nickName,
+      text: text.value,
+      time: new Date().toLocaleTimeString(),
+      files: []
+    })
+    text.value = ''
+  }
 }
 
 function attachFile () {

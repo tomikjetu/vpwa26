@@ -1,29 +1,21 @@
 import { defineStore } from 'pinia';
-import { type Channel } from 'src/utils/types';
+import type { Channel, ChatMessagePayload } from 'src/utils/types';
+import { storeToRefs } from 'pinia'
+import { useAuthStore } from 'src/stores/auth-store'
 
+const authStore = useAuthStore()
+const { getCurrentUser } = storeToRefs(authStore)
 export const useChannelStore = defineStore('channels', {
   state: () => ({
-    channels: [
-      {
-        id: 1,
-        ownerId: 1,
-        name: 'Channel_1',
-        createdAt: new Date(),
-        updatedAt: new Date(),
-        joinedAt: new Date(),
-        description: 'This is a folder channel',
-        icon: 'lock',
-        color: 'primary',
-        infoColor: 'grey',
-        isPublic: true,
-      },
-    ] as Channel[],
+    channels: [] as Channel[],
+    messages: {} as Record<number, ChatMessagePayload[]>,
   }),
 
   actions: {
     addChannel(channel: Channel) {
       if (!this.channels.find((c) => c.id === channel.id)) {
         this.channels.push(channel);
+        this.messages[channel.id] = []
       }
     },
 
@@ -33,7 +25,15 @@ export const useChannelStore = defineStore('channels', {
 
     removeChannel(channelId: number) {
       this.channels = this.channels.filter((c) => c.id !== channelId);
+      delete this.messages[channelId]
     },
+
+    addMessage(msg: ChatMessagePayload, channelId: number) {
+      if (!this.messages[channelId]) {
+        this.messages[channelId] = []
+      }
+      this.messages[channelId].push(msg)
+    }
   },
 
   getters: {
@@ -41,8 +41,14 @@ export const useChannelStore = defineStore('channels', {
       return (id: number) => state.channels.find((c) => c.id === id);
     },
     getOwnedChannels: (state) => {
-      return state.channels.filter((c) => c.ownerId === 1 && !c.isPublic);
+      return state.channels.filter((c) => c.ownerId === getCurrentUser.value?.id);
+    },
+    getJoinedChannels: (state) => {
+      return state.channels.filter((c) => c.ownerId !== getCurrentUser.value?.id);
     },
     totalChannels: (state) => state.channels.length,
+    getMessagesByChannelId: (state) => {
+      return (channelId: number) => state.messages[channelId] || []
+    },
   },
 });

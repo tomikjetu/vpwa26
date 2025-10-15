@@ -2,16 +2,25 @@
   <div class="info-bar row items-start justify-between q-pa-sm">
     <!-- Left side (Name + Created) -->
     <div class="column">
-      <div class="text-bold q-ma-sm text-h5">Channel_Name</div>
+      <div class="text-bold q-ma-sm text-h5">{{ props.channel ? props.channel.name : '' }}</div>
       <div class="text-caption text-grey-7 q-ml-sm">
-        Joined/Created 2025-10-07
+        {{ props.channel ? props.channel.createdAt : '' }}
       </div>
     </div>
 
     <!-- Right side (Private) -->
-    <div class="text-caption text-grey-8 q-mr-lg">Private</div>
+    <div class="text-caption text-grey-8 q-mr-lg">{{ props.channel ? props.channel.isPublic ? 'Public' : 'Private' : '' }}</div>
   </div>
 </template>
+
+<script setup lang="ts">
+import type { Channel } from 'src/utils/types.ts'
+
+const props = defineProps<{
+  channel: Channel | null
+}>()
+
+</script>
 
 <style scoped>
 .info-bar {

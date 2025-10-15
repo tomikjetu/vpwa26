@@ -12,12 +12,14 @@
     <!-- 🟣 Main container for lists -->
     <div class="channels-list-container">
       <template v-if="search.trim() !== ''">
-        <ChannelList title="All channels" :channels="filteredAll" :flex="1"></ChannelList>
+        <AllChannelList
+          :channels="filteredAll"
+          @select-channel="handleSelectChannel" />
       </template>
 
       <template v-else>
-        <ChannelList title="Channels" :channels="channelStore.channels" :flex="2"></ChannelList>
-        <ChannelList title="Owned channels" :channels="channelStore.getOwnedChannels" :flex="1"></ChannelList>
+        <JoinedChannelList :channels="channelStore.getJoinedChannels" @select-channel="handleSelectChannel" ></JoinedChannelList>
+        <OwnedChannelList :channels="channelStore.getOwnedChannels" @select-channel="handleSelectChannel" ></OwnedChannelList>
       </template>
     </div>
   </q-page>
@@ -26,18 +28,26 @@
 <script setup lang="ts">
 import { ref, computed } from 'vue'
 import { useChannelStore } from 'src/stores/channelStore'
-import ChannelList from './ChannelList.vue'
+import AllChannelList from './AllChannelList.vue'
+import JoinedChannelList from './JoinedChannelList.vue'
+import OwnedChannelList from './OwnedChannelList.vue'
+import type { Channel } from 'src/utils/types.ts'
 
 const search = ref('')
 const channelStore = useChannelStore()
 
 // Merge and filter lists when searching 
 const filteredAll = computed(() => {
-  const allItems = [...channelStore.channels, ...channelStore.getOwnedChannels]
-  return allItems.filter((item) =>
-    item.name.toLowerCase().includes(search.value.toLowerCase())
-  )
+  return channelStore.channels
 })
+
+const emit = defineEmits<{
+  (e: 'channel-selected', channel: Channel): void
+}>()
+
+function handleSelectChannel(channel: Channel) {
+  emit('channel-selected', channel) // 🔁 Re-emit upward
+}
 </script>
 
 
@@ -60,13 +70,5 @@ const filteredAll = computed(() => {
   flex: 1 1 auto;
   display: flex;
   flex-direction: column;
-}
-
-.flex-1 {
-  flex: 1;
-}
-
-.flex-2 {
-  flex: 1;
 }
 </style>

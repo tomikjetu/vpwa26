@@ -1,8 +1,8 @@
 <template>
   <div class="chat-container">
-    <ChatTopBar></ChatTopBar>
-    <ChatMessageList></ChatMessageList>
-    <ChatInput></ChatInput>
+    <ChatTopBar :channel="props.channel"></ChatTopBar>
+    <ChatMessageList :messages="messages"></ChatMessageList>
+    <ChatInput v-if="props.channel" @send="addMessage" ></ChatInput>
   </div>
 </template>
 
@@ -10,7 +10,28 @@
 import ChatInput from './ChatInput.vue'
 import ChatMessageList from './ChatMessageList.vue'
 import ChatTopBar from './ChatTopBar.vue'
+import type { ChatMessagePayload, Channel } from 'src/utils/types.js'
+import { useChannelStore } from 'src/stores/channelStore'
+import { computed } from 'vue'
+
+const props = defineProps<{
+  channel: Channel | null
+}>()
+
+const channelStore = useChannelStore()
+
+const messages = computed(() => {
+  if (!props.channel) return []
+  return channelStore.getMessagesByChannelId(props.channel.id)
+})
+
+function addMessage(msg: ChatMessagePayload) {
+  if (props.channel) { 
+    channelStore.addMessage(msg, props.channel.id)
+  }
+}
 </script>
+
 
 <style scoped>
 .chat-container {

@@ -8,27 +8,27 @@
           <q-icon name="person" />
         </q-avatar>
 
-        <div class="text-bold">{{ name }}</div>
+        <div class="text-bold">{{ payload.user }}</div>
       </div>
 
       <!-- Right side: date -->
       <div class="text-caption text-grey-7">
-        {{ date }}
+        {{ payload.time }}
       </div>
     </div>
 
     <!-- Message text -->
     <div class="q-mt-xs text-body2 message-body">
-      {{ text }}
+      {{ payload.text }}
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
+import type { ChatMessagePayload } from 'src/utils/types';
+
 defineProps<{
-  name: string
-  date: string
-  text: string
+  payload: ChatMessagePayload
 }>()
 </script>
 

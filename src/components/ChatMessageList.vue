@@ -1,12 +1,16 @@
 <template>
   <div class="messages-container">
-    <Message v-for="n in 2" :key="n" :name="'Name ' + n"  :date="'2025-10-' + n" text="Hello, This is the message text. Hooraaaaayyyy!">
-    </Message>
+    <ChatMessage v-for="(m, index) in messages" :payload="m" :key="index" />
   </div>
 </template>
 
 <script setup lang="ts">
-import Message from './ChatMessage.vue'
+import ChatMessage from './ChatMessage.vue'
+import type { ChatMessagePayload } from 'src/utils/types.js'
+
+defineProps<{
+  messages: ChatMessagePayload[]
+}>()
 </script>
 
 <style scoped>
