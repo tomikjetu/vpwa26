@@ -13,7 +13,44 @@
             <div class="row no-wrap q-pa-md">
               <div class="column">
                 <div class="text-h6 q-mb-md">Settings</div>
-                <q-toggle v-model="darkMode" label="Dark Mode" />
+
+                <q-toggle v-model="darkMode" label="Dark Mode" class="q-mb-sm" />
+
+                <div class="row items-center">
+                  <q-btn
+                    outline
+                    size="sm"
+                    class="q-mr-sm"
+                    :style="{ color: 'rgb(60, 60, 60)'}"
+                  >
+                    <q-icon name="circle" :color="stateColor" size="18px" class="q-mr-sm" />
+                    <label>{{ userState }}</label>
+                    <q-menu ref="stateMenu">
+                      <q-list style="min-width: 120px">
+                        <q-item clickable v-ripple @click.stop="setUserState('online')">
+                          <q-item-section avatar>
+                            <q-icon name="circle" color="green" size="18px" />
+                          </q-item-section>
+                          <q-item-section>Online</q-item-section>
+                        </q-item>
+
+                        <q-item clickable v-ripple @click.stop="setUserState('dnd')">
+                          <q-item-section avatar>
+                            <q-icon name="circle" color="orange" size="18px" />
+                          </q-item-section>
+                          <q-item-section>Do Not Disturb</q-item-section>
+                        </q-item>
+
+                        <q-item clickable v-ripple @click.stop="setUserState('offline')">
+                          <q-item-section avatar>
+                            <q-icon name="circle" color="grey" size="18px" />
+                          </q-item-section>
+                          <q-item-section>Offline</q-item-section>
+                        </q-item>
+                      </q-list>
+                    </q-menu>
+                  </q-btn>
+                </div>
               </div>
 
               <q-separator vertical inset class="q-mx-lg" />
@@ -21,9 +58,24 @@
               <div class="column items-center">
                 <q-avatar size="72px" icon="person" />
 
-                <div class="text-subtitle1 q-mb-xs">{{ currentUser.name }}</div>
+                <div class="row items-center text-subtitle1 q-mb-xs">
+                  <q-icon
+                    name="circle"
+                    size="18px"
+                    class="q-mr-xs"
+                    :color="stateColor"
+                  />
+                  <span>{{ currentUser.name }}</span>
+                </div>
 
-                <q-btn color="red" icon="logout" label="Logout" @click="logout" size="md" v-close-popup />
+                <q-btn
+                  color="red"
+                  icon="logout"
+                  label="Logout"
+                  @click="logout"
+                  size="md"
+                  v-close-popup
+                />
               </div>
             </div>
           </q-menu>
@@ -41,7 +93,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue';
+import { ref, computed } from 'vue';
 import { useRouter } from 'vue-router';
 import { Notify, Dialog } from 'quasar';
 import { authService } from 'src/services/authService';
@@ -81,6 +133,30 @@ function logout() {
     void router.push('/auth/login');
   });
 }
+
+// 🔹 Track user state
+const userState = ref<'online' | 'dnd' | 'offline'>('online')
+const stateMenu = ref()
+
+// Set state via menu
+function setUserState(state: 'online' | 'dnd' | 'offline') {
+  userState.value = state
+  stateMenu.value?.hide()
+}
+
+// Computed color for current state
+const stateColor = computed(() => {
+  switch (userState.value) {
+    case 'online':
+      return 'green'
+    case 'dnd':
+      return 'orange'
+    case 'offline':
+      return 'grey'
+    default:
+      return 'grey' // fallback color
+  }
+})
 </script>
 
 <style>

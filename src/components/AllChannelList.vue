@@ -42,7 +42,10 @@
                 >
                 <ChannelDropdown
                     :items="getMenuOptions(channel)"
-                    @select="handleDropdownSelect(channel, $event)" />
+                    :channels="channels"
+                    :channel="channel"
+                    @show-members="onShowMembers"
+                    />
                 </q-btn>
             </q-item-section>
         </q-item>
@@ -51,25 +54,15 @@
 </template>
 
 <script setup lang="ts">
-import type { Channel, DropdownItem } from 'src/utils/types.ts'
+import type { Channel } from 'src/utils/types.ts'
 import ChannelDropdown from './ChannelDropdown.vue'
 import { useAuthStore } from 'src/stores/auth-store'
 import { storeToRefs } from 'pinia'
 import { ref } from 'vue'
-import { useChannelStore } from 'src/stores/channelStore'
+import { getMenuOptions } from 'src/composables/useChannelList'
 
-const channelStore = useChannelStore()
 const authStore = useAuthStore()
 const { getCurrentUser } = storeToRefs(authStore)
-
-const getMenuOptions = (channel: Channel): DropdownItem[] => {
-  return [
-    { label: 'Invite', class: '', disable: channel.ownerId != getCurrentUser.value?.id && !channel.isPublic },
-    { label: 'Members', class: '', disable: false },
-    { label: 'Change icon', class: '', disable: false },
-    { label: channel.ownerId != getCurrentUser.value?.id ? 'Leave' : 'Remove', class: 'warning', disable: false }
-  ]
-}
 
 const props = defineProps<{
   channels: Channel[]
@@ -77,27 +70,16 @@ const props = defineProps<{
 
 const channels = ref<Channel[]>(props.channels)
 
-/** Removes a channel by its numeric ID */
-function removeChannel(channelId: number): void {
-  // 1️⃣ Remove it from the store (main data source)
-  channelStore.removeChannel(channelId)
-
-  // 2️⃣ Also update the local copy if needed
-  channels.value = channels.value.filter(channel => channel.id !== channelId)
-}
-/** Handles a dropdown option selection */
-function handleDropdownSelect(channel: Channel, option: DropdownItem) {
-  const label = option.label.toLowerCase()
-  if (label.includes('remove') || label.includes('delete')) {
-    removeChannel(channel.id)
-  }
-}
-
 const emit = defineEmits<{
   (e: 'select-channel', channel: Channel): void
+  (e: 'show-members', channel: Channel): void
 }>()
 
 function onChannelClick(channel: Channel) {
   emit('select-channel', channel)
+}
+
+function onShowMembers(channel: Channel) {
+  emit('show-members', channel)
 }
 </script>

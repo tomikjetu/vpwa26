@@ -7,7 +7,25 @@ const authStore = useAuthStore()
 const { getCurrentUser } = storeToRefs(authStore)
 export const useChannelStore = defineStore('channels', {
   state: () => ({
-    channels: [] as Channel[],
+    channels: [
+      {
+        id: 1,
+        ownerId: 1,
+        name: "Channel_1",
+        createdAt: new Date(),
+        updatedAt: new Date(),
+        joinedAt: new Date(),
+        description: "The default channel",
+        icon: "group",
+        color: "grey",
+        infoColor: "red",
+        isPublic: true,
+        members: {
+          1: { id: 1, nickname: 'Alice', isOwner: true, kickVotes: 0, currentlyTyping: "Ahoj, ako s" },
+          2: { id: 2, nickname: 'Bob', isOwner: false, kickVotes: 0 }
+        }
+      }
+    ] as Channel[],
     messages: {} as Record<number, ChatMessagePayload[]>,
   }),
 

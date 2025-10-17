@@ -56,10 +56,11 @@ function sendMessage() {
   if (!getCurrentUser.value?.id) return
   if (text.value.trim()) {
     emit('send', {
-      user: getCurrentUser.value?.nickName,
+      user: getCurrentUser.value?.id,
       text: text.value,
       time: new Date().toLocaleTimeString(),
-      files: []
+      files: [],
+      userNickname: getCurrentUser.value.nickName
     })
     text.value = ''
   }

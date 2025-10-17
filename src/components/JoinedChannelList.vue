@@ -73,7 +73,9 @@
           <q-btn round dense icon="more_horiz" @click.stop @mousedown.stop>
             <ChannelDropdown
               :items="getMenuOptions(channel)"
-              @select="handleDropdownSelect(channel, $event)"
+              :channels="channels"
+              :channel="channel"
+              @show-members="onShowMembers"
             />
           </q-btn>
         </q-item-section>
@@ -82,25 +84,15 @@
   </q-scroll-area>
 </template>
 <script setup lang="ts">
-import type { Channel, DropdownItem } from 'src/utils/types.js'
+import type { Channel } from 'src/utils/types.ts'
 import ChannelDropdown from './ChannelDropdown.vue'
 import { useAuthStore } from 'src/stores/auth-store'
 import { storeToRefs } from 'pinia'
 import { ref } from 'vue'
-import { useChannelStore } from 'src/stores/channelStore'
+import { getMenuOptions, addChannel } from 'src/composables/useChannelList'
 
-const channelStore = useChannelStore()
 const authStore = useAuthStore()
 const { getCurrentUser } = storeToRefs(authStore)
-
-const getMenuOptions = (channel: Channel): DropdownItem[] => {
-    return [
-        { label: 'Invite', class: '', disable: channel.ownerId != getCurrentUser.value?.id && !channel.isPublic },
-        { label: 'Members', class: '', disable: false },
-        { label: 'Change icon', class: '', disable: false },
-        { label: channel.ownerId != getCurrentUser.value?.id ? 'Leave' : 'Remove', class: 'warning', disable: false }
-    ]
-}
 
 const props = defineProps<{
     channels: Channel[]
@@ -108,29 +100,9 @@ const props = defineProps<{
 
 const channels = ref<Channel[]>(props.channels)
 
-function addChannel(newChannel: Channel): void {
-  channels.value.push(newChannel)
-
-  channelStore.addChannel(newChannel)
-}
-/** Removes a channel by its numeric ID */
-function removeChannel(channelId: number): void {
-  channelStore.removeChannel(channelId)
-
-  channels.value = channels.value.filter(channel => channel.id !== channelId)
-}
-
-/** Handles a dropdown option selection */
-function handleDropdownSelect(channel: Channel, option: DropdownItem) {
-  const label = option.label.toLowerCase()
-  if (label.includes('leave')) {
-    removeChannel(channel.id)
-  }
-}
 // State for dialog and form
 const showAddDialog = ref(false)
 const newChannelName = ref('')
-const isPublic = ref(true)
 
 function onAddClick(): void {
   showAddDialog.value = true
@@ -144,7 +116,7 @@ function confirmAdd(): void {
   const newChannel: Channel = {
     id: Math.floor(Math.random() * 1_000_000_000),
     name: newChannelName.value.trim(),
-    isPublic: isPublic.value,
+    isPublic: true,
     createdAt: currDate,
     ownerId: getCurrentUser.value?.id + 1,
     icon: 'group', // default icon
@@ -152,21 +124,33 @@ function confirmAdd(): void {
     updatedAt: currDate,
     joinedAt: currDate,
     infoColor: 'grey',
+    members: {
+      [getCurrentUser.value.id]: {
+        id: getCurrentUser.value.id,
+        nickname: getCurrentUser.value.nickName,
+        kickVotes: 0,
+        isOwner: true
+      }
+    }
   }
 
-  addChannel(newChannel)
+  addChannel(newChannel, channels.value)
 
   // Reset and close
   newChannelName.value = ''
-  isPublic.value = true
   showAddDialog.value = false
 }
 
 const emit = defineEmits<{
   (e: 'select-channel', channel: Channel): void
+  (e: 'show-members', channel: Channel): void
 }>()
 
 function onChannelClick(channel: Channel) {
   emit('select-channel', channel)
+}
+
+function onShowMembers(channel: Channel) {
+  emit('show-members', channel)
 }
 </script>

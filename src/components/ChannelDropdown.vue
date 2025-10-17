@@ -1,4 +1,29 @@
 <template>
+
+  <!-- 🟣 Dialog -->
+  <q-dialog v-model="showInviteDialog" persistent>
+    <q-card style="min-width: 350px">
+      <q-card-section>
+        <div class="text-h6">Invite to Channel</div>
+      </q-card-section>
+
+      <q-card-section>
+        <q-input
+          v-model="personName"
+          label="Enter person's name"
+          filled
+          autofocus
+          clearable
+        />
+      </q-card-section>
+
+      <q-card-actions align="right">
+        <q-btn flat label="Cancel" color="secondary" v-close-popup />
+        <q-btn flat label="Invite" color="primary" @click="invitePerson" />
+      </q-card-actions>
+    </q-card>
+  </q-dialog>
+
   <q-menu anchor="bottom right" self="top right">
     <q-list style="min-width: 120px">
       <q-item
@@ -8,7 +33,7 @@
         v-close-popup
         :class="option.class"
         :disable="option.disable"
-        @click="onSelect(option)"
+        @click="onDropdownSelect(option)"
       >
         <q-item-section>
           {{ option.label }}
@@ -19,18 +44,34 @@
 </template>
 
 <script setup lang="ts">
-import type { DropdownItem } from 'src/utils/types.ts'
+import type { DropdownItem, Channel } from 'src/utils/types.ts'
+import { handleDropdownSelect } from 'src/composables/useChannelList';
+import { ref } from 'vue'
 
 const props = defineProps<{
-  items: DropdownItem[]
+  items: DropdownItem[],
+  channels: Channel[],
+  channel: Channel
 }>()
 
 const emit = defineEmits<{
-  (e: 'select', option: DropdownItem): void
+  (e: 'show-members', channel: Channel): void
 }>()
 
-function onSelect(option: DropdownItem) {
-  emit('select', option)
+const showInviteDialog = ref(false)
+const personName = ref('')
+
+function invitePerson() {
+  if (!personName.value.trim()) return
+  
+  console.log(`Inviting ${personName.value} to the channel ${props.channel.name}`)
+
+  showInviteDialog.value = false
+  personName.value = ''
+}
+
+function onDropdownSelect(option: DropdownItem) {
+  handleDropdownSelect(emit, showInviteDialog, props.channel, props.channels, option)
 }
 </script>
 

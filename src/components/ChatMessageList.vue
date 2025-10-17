@@ -1,16 +1,26 @@
 <template>
   <div class="messages-container">
-    <ChatMessage v-for="(m, index) in messages" :payload="m" :key="index" />
+    <ChatMessage v-for="(m, index) in messages" :payload="m" :key="index" @show-member-info="onShowMemberInfo" />
   </div>
 </template>
 
 <script setup lang="ts">
 import ChatMessage from './ChatMessage.vue'
-import type { ChatMessagePayload } from 'src/utils/types.js'
+import type { ChatMessagePayload, Channel } from 'src/utils/types.js'
+import { useDialogStore } from 'src/stores/dialog-store'
 
-defineProps<{
-  messages: ChatMessagePayload[]
+const props = defineProps<{
+  messages: ChatMessagePayload[],
+  channel: Channel | null
 }>()
+
+const Dialog = useDialogStore()
+
+function onShowMemberInfo(id: number) {
+  if (!props.channel) return
+  const member = props.channel.members[id]
+  if (member) Dialog.openMemberInfo(member)
+}
 </script>
 
 <style scoped>

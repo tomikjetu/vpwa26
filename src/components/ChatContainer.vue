@@ -1,7 +1,7 @@
 <template>
   <div class="chat-container">
     <ChatTopBar :channel="props.channel"></ChatTopBar>
-    <ChatMessageList :messages="messages"></ChatMessageList>
+    <ChatMessageList :channel="props.channel" :messages="messages"></ChatMessageList>
     <ChatInput v-if="props.channel" @send="addMessage" ></ChatInput>
   </div>
 </template>
@@ -37,9 +37,9 @@ function addMessage(msg: ChatMessagePayload) {
 .chat-container {
   display: flex;
   flex-direction: column;
-  height: 100vh;
   width: 100%;
   border: 1px solid #ddd;
   overflow: hidden;
+  flex: 1;
 }
 </style>

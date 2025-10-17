@@ -3,12 +3,17 @@
     <!-- Header -->
     <div class="row justify-between items-start message-header">
       <!-- Left side: icon + name -->
-      <div class="row items-center">
+      <div class="row items-center clickable-name" @click="$emit('show-member-info', payload.user)">
         <q-avatar color="primary" text-color="white" size="32px" class="q-mr-sm">
           <q-icon name="person" />
         </q-avatar>
 
-        <div class="text-bold">{{ payload.user }}</div>
+        <!-- 🔹 Clickable name -->
+        <div
+          class="text-bold"
+        >
+          {{ payload.userNickname }}
+        </div>
       </div>
 
       <!-- Right side: date -->
@@ -25,7 +30,7 @@
 </template>
 
 <script setup lang="ts">
-import type { ChatMessagePayload } from 'src/utils/types';
+import type { ChatMessagePayload } from 'src/utils/types'
 
 defineProps<{
   payload: ChatMessagePayload
@@ -48,5 +53,16 @@ defineProps<{
 .message-body {
   padding: 0.8rem;
   padding-bottom: 0.8rem;
+}
+
+.clickable-name {
+  cursor: pointer;
+  color: var(--q-color-primary);
+  transition: color 0.2s ease;
+}
+
+.clickable-name:hover {
+  color: var(--q-color-primary-light);
+  text-decoration: underline;
 }
 </style>
