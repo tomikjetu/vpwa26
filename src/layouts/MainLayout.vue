@@ -98,7 +98,7 @@ import { useRouter } from 'vue-router';
 import { Notify, Dialog } from 'quasar';
 import { authService } from 'src/services/authService';
 import { useAuthStore } from 'src/stores/auth-store';
-import CommandLine from 'src/components/CommandLine.vue';
+import CommandLine from 'src/components/CommandLine/CommandLine.vue';
 import { useQuasar } from 'quasar';
 import { storeToRefs } from 'pinia'
 import { useContacts } from 'src/stores/contacts-store'

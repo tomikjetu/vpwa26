@@ -9,10 +9,10 @@
 
 
 <script setup lang="ts">
-    import ChannelsBar from 'src/components/ChannelsBar.vue'
-    import ChatContainer from 'components/ChatContainer.vue'
+    import ChannelsBar from 'src/components/Channels/ChannelsBar.vue'
+    import ChatContainer from 'src/components/Chat/ChatContainer.vue'
     import { useDialogStore } from 'src/stores/dialog-store'
-    import MemberInfo from 'src/components/MemberInfo.vue'
+    import MemberInfo from 'src/components/Dialog/MemberInfo.vue'
 
     const dialog = useDialogStore()
 </script>

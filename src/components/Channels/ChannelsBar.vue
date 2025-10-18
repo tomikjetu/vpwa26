@@ -14,15 +14,16 @@
       </template>
 
       <template v-else-if="(search ?? '').trim() !== ''">
-        <AllChannelList
+        <ChannelList
           :channels="filteredAll"
+          :mode="'all'"
           @select-channel="handleSelectChannel" 
           @show-members="handleShowMembers"/>
       </template>
 
       <template v-else>
-        <JoinedChannelList :channels="channelStore.getJoinedChannels" @select-channel="handleSelectChannel" @show-members="handleShowMembers"></JoinedChannelList>
-        <OwnedChannelList :channels="channelStore.getOwnedChannels" @select-channel="handleSelectChannel" @show-members="handleShowMembers"></OwnedChannelList>
+        <ChannelList :channels="channelStore.getJoinedChannels" :mode="'joined'" @select-channel="handleSelectChannel" @show-members="handleShowMembers" />
+        <ChannelList :channels="channelStore.getOwnedChannels" :mode="'owned'" @select-channel="handleSelectChannel" @show-members="handleShowMembers" />
       </template>
     </div>
   </q-page>
@@ -31,9 +32,7 @@
 <script setup lang="ts">
 import { ref, computed } from 'vue'
 import { useChannelStore } from 'src/stores/channelStore'
-import AllChannelList from './AllChannelList.vue'
-import JoinedChannelList from './JoinedChannelList.vue'
-import OwnedChannelList from './OwnedChannelList.vue'
+import ChannelList from './ChannelList.vue'
 import type { Channel } from 'src/utils/types.ts'
 import MembersList from './MembersList.vue'
 import type { Member } from 'src/utils/types.ts'
