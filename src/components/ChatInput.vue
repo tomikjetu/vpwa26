@@ -108,7 +108,6 @@ function handleFileSelection(event: Event) {
   if (input.files) {
     // Append new files to existing ones
     selectedFiles.value = [...selectedFiles.value, ...Array.from(input.files)]
-    console.log('Selected files:', selectedFiles.value)
   }
 }
 

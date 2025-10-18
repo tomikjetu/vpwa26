@@ -59,10 +59,6 @@ export interface ChatMessagePayload {
   user: number,
   text: string,
   time: Date,
-  files: File[],
+  files: (File | string)[],
   userNickname: string
-}
-
-export interface File {
-  name: string
 }
