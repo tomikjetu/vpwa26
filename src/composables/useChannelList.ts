@@ -3,6 +3,8 @@ import type { Channel, DropdownItem } from 'src/utils/types.ts'
 import { useAuthStore } from 'src/stores/auth-store'
 import { storeToRefs } from 'pinia'
 import { type Ref } from 'vue'
+import { useChatStore } from 'src/stores/chat-store'
+import { useDialogStore } from 'src/stores/dialog-store'
 
 export const getMenuOptions = (channel: Channel): DropdownItem[] => {
     const authStore = useAuthStore()
@@ -34,9 +36,18 @@ export function removeChannel(channelId: number, channels: Channel[]): void {
 }
 
 /** Handles a dropdown option selection */
-export function handleDropdownSelect(emit: (event: 'show-members', channel: Channel) => void, showInviteDialog: Ref<boolean>, channel: Channel, channels: Channel[], option: DropdownItem) {
+export async function handleDropdownSelect(emit: (event: 'show-members', channel: Channel) => void, showInviteDialog: Ref<boolean>, channel: Channel, channels: Channel[], option: DropdownItem) {
   const label = option.label.toLowerCase()
   if (label.includes('remove') || label.includes('leave')) {
+    const dialogStore = useDialogStore()
+    const authStore = useAuthStore()
+    const { getCurrentUser } = storeToRefs(authStore)
+
+    const confirmation = await dialogStore.confirmLeaveChannel(getCurrentUser.value?.id == channel.ownerId)
+    if (!confirmation) return
+
+     const chatStore = useChatStore()
+    chatStore.closeChat()
     removeChannel(channel.id, channels)
   }
   else if (label.includes('invite')) {

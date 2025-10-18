@@ -10,7 +10,7 @@
 
     <div class="channels-list-container">
       <template v-if="showMembersList">
-        <MembersList :members="membersListContent" @cancel="handleCancelMembersList"></MembersList>
+        <MembersList :channel="memberListChannel" :members="membersListContent" @cancel="handleCancelMembersList"></MembersList>
       </template>
 
       <template v-else-if="(search ?? '').trim() !== ''">
@@ -36,11 +36,14 @@ import JoinedChannelList from './JoinedChannelList.vue'
 import OwnedChannelList from './OwnedChannelList.vue'
 import type { Channel } from 'src/utils/types.ts'
 import MembersList from './MembersList.vue'
-import type { Member } from 'src/utils/types.ts' 
+import type { Member } from 'src/utils/types.ts'
+import { useChatStore } from 'src/stores/chat-store'
 
+const chatStore = useChatStore()
 const search = ref('')
 const channelStore = useChannelStore()
 const showMembersList = ref(false)
+const memberListChannel = ref<Channel | undefined>()
 
 // Merge and filter lists when searching 
 const filteredAll = computed(() => {
@@ -54,13 +57,11 @@ const filteredAll = computed(() => {
   )
 })
 
-const emit = defineEmits<{
-  (e: 'channel-selected', channel: Channel): void,
-  (e: 'show-member-info', member: Member): void
-}>()
-
 function handleSelectChannel(channel: Channel) {
-  emit('channel-selected', channel)
+  if(chatStore.channel) {
+    channelStore.markAsRead(chatStore.channel.id)
+  }
+  chatStore.openChat(channel)
 }
 
 const membersListContent = ref<Member[]>([])
@@ -68,6 +69,7 @@ const membersListContent = ref<Member[]>([])
 function handleShowMembers(channel: Channel) {
   showMembersList.value = true
   membersListContent.value = Object.values(channel.members)
+  memberListChannel.value = channel
 }
 
 function handleCancelMembersList() {

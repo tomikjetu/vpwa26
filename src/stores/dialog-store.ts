@@ -1,32 +1,58 @@
 import { defineStore } from 'pinia'
-import type { Member } from 'src/utils/types'
-import { ref } from 'vue'
+import type { Member, Channel } from 'src/utils/types'
+import { Dialog } from 'quasar'
 
-export const useDialogStore = defineStore('dialogStore', () => {
-    
-  const showMemberInfoDialog = ref(false)
+export const useDialogStore = defineStore('dialogStore', {
 
-  const dialogMember = ref<Member | null>(null)
+  state: () => ({
+    // Member info dialog
+    showMemberInfoDialog: false as boolean,
+    dialogMember: null as Member | null,
+    shownChannel: null as Channel | null,
+  }),
 
-  /** Open the Member Info dialog with the given member */
-  function openMemberInfo(member: Member) {
-    dialogMember.value = member
-    showMemberInfoDialog.value = true
-  }
+  getters: {
+    currentChannelName: (state) => state.shownChannel?.name ?? ''
+  },
 
-  /** Close the Member Info dialog */
-  function closeMemberInfo() {
-    showMemberInfoDialog.value = false
-    dialogMember.value = null
-  }
+  actions: {
+    /** Open the Member Info dialog with the given member and channel */
+    openMemberInfo(member: Member, channel: Channel) {
+      this.dialogMember = member
+      this.shownChannel = channel
+      this.showMemberInfoDialog = true
+    },
 
-  return {
-    // state
-    showMemberInfoDialog,
-    dialogMember,
+    /** Close the Member Info dialog */
+    closeMemberInfo() {
+      this.showMemberInfoDialog = false
+      this.dialogMember = null
+      this.shownChannel = null
+    },
 
-    // actions
-    openMemberInfo,
-    closeMemberInfo
+    confirmLeaveChannel(isOwner: boolean): Promise<boolean> {
+      const message = isOwner
+        ? 'Are you sure you want to remove this channel permanently?'
+        : 'Are you sure you want to leave this channel?'
+
+      const title = isOwner ? 'Remove Channel' : 'Leave Channel'
+      const confirmLabel = isOwner ? 'Remove' : 'Leave'
+
+      return new Promise((resolve) => {
+        Dialog.create({
+          title,
+          message,
+          persistent: true,
+          ok: {
+            label: confirmLabel,
+            color: 'negative',
+          },
+          cancel: { label: 'Cancel' },
+        })
+          .onOk(() => resolve(true))
+          .onCancel(() => resolve(false))
+          .onDismiss(() => resolve(false))
+      })
+    }
   }
 })

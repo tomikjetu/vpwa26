@@ -4,7 +4,7 @@
     <div class="column">
       <div class="text-bold q-ma-sm text-h5">{{ props.channel ? props.channel.name : '' }}</div>
       <div class="text-caption text-grey-7 q-ml-sm">
-        {{ props.channel ? props.channel.createdAt : '' }}
+        {{ props.channel ? props.channel.createdAt.toDateString() : '' }}
       </div>
     </div>
 

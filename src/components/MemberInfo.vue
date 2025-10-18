@@ -5,19 +5,35 @@
       <q-card-section class="row items-center justify-between">
         <div class="row items-center">
           <q-icon name="person" size="md" class="q-mr-sm" />
-          <div class="text-h6">{{ member ? member.nickname : "" }}</div>
+          <div class="text-h6">{{ member ? member.nickname : '' }}</div>
         </div>
 
         <!-- Right side: owner or vote count -->
         <div class="row items-center">
-          <template v-if="member && member.isOwner">
+          <template v-if="member && getCurrentUser && (member.isOwner || getCurrentUser.id === member.id)">
             <q-icon name="star" color="amber" class="q-mr-xs" />
-            <span class="text-subtitle2 text-bold">Owner</span>
-          </template>
-          <template v-else>
-            <span class="text-subtitle2 text-grey-8">
-              Kick votes: {{ member ? member.kickVotes : 0 }} / 3
+            <span class="text-subtitle2 text-bold">
+              {{ member.isOwner ? 'Owner' : 'You' }}
             </span>
+          </template>
+
+          <template v-else>
+            <div class="row items-center">
+              <span class="text-subtitle2 text-grey-8">
+                {{member && getCurrentUser ? (member.kickVoters.includes(getCurrentUser.id) ? 'Voted: ' : 'Vote to kick: ') + member.kickVotes + '/3' : 'Failed to load member or current user'}}
+              </span>
+              <q-btn
+                :disable="member && getCurrentUser ? member.kickVoters.includes(getCurrentUser.id) : true"
+                flat
+                dense
+                round
+                icon="person_off"
+                color="red"
+                size="sm"
+                :class="'q-ml-sm ' + (member && getCurrentUser && member.kickVoters.includes(getCurrentUser.id) ? 'disabled-btn' : '')"
+                @click="confirmKickVote"
+              />
+            </div>
           </template>
         </div>
       </q-card-section>
@@ -31,12 +47,15 @@
         <div
           class="typing-box"
           :class="{
-            'text-grey-6': member && (!member.currentlyTyping || member.currentlyTyping.trim() === '')
+            'text-grey-6':
+              member && (!member.currentlyTyping || member.currentlyTyping.trim() === '')
           }"
         >
-          {{ member && member.currentlyTyping && member.currentlyTyping.trim() !== ''
-            ? member.currentlyTyping
-            : 'User is currently not typing' }}
+          {{
+            member && member.currentlyTyping && member.currentlyTyping.trim() !== ''
+              ? member.currentlyTyping
+              : 'User is currently not typing'
+          }}
         </div>
       </q-card-section>
 
@@ -50,13 +69,48 @@
 
 <script setup lang="ts">
 import { defineProps, defineModel } from 'vue'
+import { useQuasar } from 'quasar'
 import type { Member } from 'src/utils/types.ts'
+import { useChannelStore } from 'src/stores/channelStore';
+import { storeToRefs } from 'pinia'
+import { useAuthStore } from 'src/stores/auth-store'
 
+const authStore = useAuthStore()
+const { getCurrentUser } = storeToRefs(authStore)
+
+const $q = useQuasar()
 const show = defineModel<boolean>('modelValue', { required: true })
 
-defineProps<{
+const channelStore = useChannelStore()
+
+const props = defineProps<{
   member: Member | null
+  channelId: number | null
 }>()
+
+/** Ask for confirmation before voting to kick */
+function confirmKickVote() {
+  if (!props.member) return
+
+  $q.dialog({
+    title: 'Confirm Kick Vote',
+    message: `Are you sure you want to vote to kick <strong>${props.member.nickname}</strong>?<br><br>
+    It takes <strong>3 votes</strong> for a member to be kicked out.`,
+    html: true,
+    persistent: true,
+    ok: {
+      label: 'Yes, Vote to Kick',
+      color: 'red'
+    },
+    cancel: {
+      label: 'Cancel',
+      color: 'grey'
+    }
+  }).onOk(() => {
+    if (!props.member || !props.channelId || !getCurrentUser.value) return
+    channelStore.incrementKickCounter(props.member.id, props.channelId, getCurrentUser.value.id)
+  })
+}
 </script>
 
 <style scoped>
@@ -73,5 +127,10 @@ defineProps<{
 
 .text-grey-6 {
   color: var(--q-color-grey-6);
+}
+
+.disabled-btn {
+  opacity: 0.4 !important;
+  filter: grayscale(50%);
 }
 </style>

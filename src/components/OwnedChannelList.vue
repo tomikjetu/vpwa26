@@ -59,11 +59,20 @@
                 </q-item-section>
 
                 <q-item-section>
+                  <div style="display: flex; flex-direction: row;">
+                    <q-icon
+                      v-if="channel.hasUnreadMsgs"
+                      name="priority_high"
+                      color="red"
+                      size="16px"
+                      class="blink-icon"
+                    />
                     <q-item-label lines="1">{{ channel.name }}</q-item-label>
-                    <q-item-label lines="1" caption>
-                        Created {{ channel.ownerId !=
-                            getCurrentUser?.id ? channel.joinedAt.toDateString() : channel.createdAt.toDateString() }}
-                    </q-item-label>
+                  </div>
+                  <q-item-label lines="1" caption>
+                      Created {{ channel.ownerId !=
+                          getCurrentUser?.id ? channel.joinedAt.toDateString() : channel.createdAt.toDateString() }}
+                  </q-item-label>
                 </q-item-section>
 
                 <q-item-section side>
@@ -123,12 +132,14 @@ function confirmAdd(): void {
     updatedAt: currDate,
     joinedAt: currDate,
     infoColor: 'grey',
+    hasUnreadMsgs: false,
     members: {
       [getCurrentUser.value.id]: {
         id: getCurrentUser.value.id,
         nickname: getCurrentUser.value.nickName,
         kickVotes: 0,
-        isOwner: true
+        isOwner: true,
+        kickVoters: []
       }
     }
   }

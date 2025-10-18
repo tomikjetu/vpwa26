@@ -59,7 +59,16 @@
         </q-item-section>
 
         <q-item-section>
-          <q-item-label lines="1">{{ channel.name }}</q-item-label>
+          <div style="display: flex; flex-direction: row;">
+            <q-icon
+              v-if="channel.hasUnreadMsgs"
+              name="priority_high"
+              color="red"
+              size="16px"
+              class="blink-icon"
+            />
+            <q-item-label lines="1">{{ channel.name }}</q-item-label>
+          </div>
           <q-item-label lines="1" caption>
             Joined {{
               channel.ownerId != getCurrentUser?.id
@@ -124,12 +133,14 @@ function confirmAdd(): void {
     updatedAt: currDate,
     joinedAt: currDate,
     infoColor: 'grey',
+    hasUnreadMsgs: false,
     members: {
       [getCurrentUser.value.id]: {
         id: getCurrentUser.value.id,
         nickname: getCurrentUser.value.nickName,
         kickVotes: 0,
-        isOwner: true
+        isOwner: true,
+        kickVoters: []
       }
     }
   }

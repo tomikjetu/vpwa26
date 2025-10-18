@@ -43,7 +43,7 @@
 
                         <q-item clickable v-ripple @click.stop="setUserState('offline')">
                           <q-item-section avatar>
-                            <q-icon name="circle" color="grey" size="18px" />
+                            <q-icon name="circle" color="red" size="18px" />
                           </q-item-section>
                           <q-item-section>Offline</q-item-section>
                         </q-item>
@@ -99,8 +99,10 @@ import { Notify, Dialog } from 'quasar';
 import { authService } from 'src/services/authService';
 import { useAuthStore } from 'src/stores/auth-store';
 import CommandLine from 'src/components/CommandLine.vue';
-
 import { useQuasar } from 'quasar';
+import { storeToRefs } from 'pinia'
+import { useContacts } from 'src/stores/contacts-store'
+
 const dark = useQuasar().dark;
 
 const router = useRouter();
@@ -134,14 +136,18 @@ function logout() {
   });
 }
 
-// 🔹 Track user state
+const contacts = useContacts()
+const { getCurrentUser } = storeToRefs(authStore)
 const userState = ref<'online' | 'dnd' | 'offline'>('online')
 const stateMenu = ref()
 
 // Set state via menu
 function setUserState(state: 'online' | 'dnd' | 'offline') {
+  if (!getCurrentUser.value) return
   userState.value = state
   stateMenu.value?.hide()
+
+  contacts.updateStatus(getCurrentUser.value?.id, state)
 }
 
 // Computed color for current state
@@ -152,7 +158,7 @@ const stateColor = computed(() => {
     case 'dnd':
       return 'orange'
     case 'offline':
-      return 'grey'
+      return 'red'
     default:
       return 'grey' // fallback color
   }

@@ -18,7 +18,7 @@
 
       <!-- Right side: date -->
       <div class="text-caption text-grey-7">
-        {{ payload.time }}
+        {{ payload.time.toDateString() }}
       </div>
     </div>
 
