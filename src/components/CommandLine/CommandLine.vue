@@ -29,14 +29,14 @@ import { onMounted, onBeforeUnmount, computed } from 'vue';
 import { useChannelStore } from 'src/stores/channelStore';
 import { ref } from 'vue';
 
-import Logout from './CommandLine/Logout';
-import Open from './CommandLine/Open';
-import Cancel from './CommandLine/Cancel';
-import Invite from './CommandLine/Invite';
-import Revoke from './CommandLine/Revoke';
-import Quit from './CommandLine/Quit';
-import Join from './CommandLine/Join';
-import Kick from './CommandLine/Kick';
+import Logout from './Logout';
+import Open from './Open';
+import Cancel from './Cancel';
+import Invite from './Invite';
+import Revoke from './Revoke';
+import Quit from './Quit';
+import Join from './Join';
+import Kick from './Kick';
 
 const channelStore = useChannelStore();
 

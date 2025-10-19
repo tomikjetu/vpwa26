@@ -17,6 +17,8 @@ export function createChannel(name: string) {
     color: '#000000',
     infoColor: '#FFFFFF',
     isPublic: false,
+    hasUnreadMsgs: false,
+    members: []
   };
 
   channelStore.addChannel(Channel);

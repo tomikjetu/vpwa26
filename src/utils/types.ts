@@ -10,6 +10,8 @@ export type Channel = {
   color: string;
   infoColor: string;
   isPublic: boolean;
+  hasUnreadMsgs: boolean;
+  members:  Record<number, Member>;
 };
 export type User = {
   id: number;
@@ -18,6 +20,20 @@ export type User = {
   nickName: string;
   email: string;
 };
+
+export type Contact = {
+  id: number;
+  status: string;
+}
+
+export type Member = {
+  id: number;
+  nickname: string;
+  kickVotes: number;
+  isOwner: boolean;
+  currentlyTyping?: string;
+  kickVoters: number[];
+}
 
 export type LoginCredentials = {
   email: string;
@@ -37,4 +53,12 @@ export interface DropdownItem {
   label: string,
   class: string,
   disable: boolean
+}
+
+export interface ChatMessagePayload {
+  user: number,
+  text: string,
+  time: Date,
+  files: (File | string)[],
+  userNickname: string
 }
