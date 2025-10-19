@@ -70,10 +70,43 @@ const channelLeaveCommands = computed(() => {
     });
 })
 
+const channelKickCommands = computed(() => {
+    const cmdInput = command.value.trim();
+    const args = cmdInput.split(' ').slice(1);
+    if (args.length == 1) {
+        const channel = channelStore.channels.find((ch) => ch.name === args[0]);
+        if (channel) {
+            const members = Object.values(channel.members);
+            if (members.length > 0) {
+                return members.map(member => {
+                    return {
+                        id: "kick-" + channel.id + "-" + member.id,
+                        name: `Kick ${member.nickname} from ${channel.name}`,
+                        cmd: 'kick ' + channel.name + ' ' + member.nickname,
+                        description: `Kick member ${member.nickname} from channel ${channel.name}`,
+                        icon: 'block'
+                    };
+                });
+            }
+        }
+    }
+
+    return channelStore.channels.map(channel => {
+        return {
+            id: "kick-" + channel.id,
+            name: `Kick from ${channel.name}`,
+            cmd: 'kick ' + channel.name,
+            description: `Kick a member from channel ${channel.name}`,
+            icon: 'block'
+        };
+    })
+})
+
 const commands = computed(() => [
     { id: "1", name: 'Log Out', cmd: 'logout', description: 'Log out of the application', icon: 'logout' },
     ...channelToggleCommands.value,
-    ...channelLeaveCommands.value
+    ...channelLeaveCommands.value,
+    ...channelKickCommands.value
 ])
 
 const filteredCommands = ref([...commands.value]);
