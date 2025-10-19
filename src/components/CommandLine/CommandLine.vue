@@ -37,8 +37,12 @@ import Revoke from './Revoke';
 import Quit from './Quit';
 import Join from './Join';
 import Kick from './Kick';
+import { useAuthStore } from 'src/stores/auth-store';
+import { storeToRefs } from 'pinia';
 
 const channelStore = useChannelStore();
+const authStore = useAuthStore();
+const { getCurrentUser } = storeToRefs(authStore);
 
 const isOpen = ref(false);
 const command = ref('');
@@ -53,9 +57,23 @@ const channelToggleCommands = computed(() => {
     }));
 })
 
+const channelLeaveCommands = computed(() => {
+    return channelStore.channels.map(channel => {
+        const quit = getCurrentUser.value?.id === channel.ownerId;
+        return {
+            id: "leave-" + channel.id,
+            name: `${quit ? 'Quit ' : 'Leave '} ${channel.name}`,
+            cmd: 'quit ' + channel.name,
+            description: quit ? `Quit channel ${channel.name}` : `Leave channel ${channel.name}`,
+            icon: 'cancel'
+        };
+    });
+})
+
 const commands = computed(() => [
     { id: "1", name: 'Log Out', cmd: 'logout', description: 'Log out of the application', icon: 'logout' },
-    ...channelToggleCommands.value
+    ...channelToggleCommands.value,
+    ...channelLeaveCommands.value
 ])
 
 const filteredCommands = ref([...commands.value]);
@@ -115,14 +133,14 @@ const executors = [
     Revoke()
 ]
 
-function executeCommand() {
+async function executeCommand() {
     const cmdInput = command.value.trim();
     const cmd = cmdInput.split(' ')[0];
     const args = cmdInput.split(' ').slice(1);
     command.value = '';
     isOpen.value = false;
     const executor = executors.find(ex => ex.cmd === cmd);
-    if (executor) executor.execute(args);
+    if (executor) await executor.execute(args);
 }
 
 function onKeydown(e: KeyboardEvent) {
