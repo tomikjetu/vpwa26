@@ -1,10 +1,7 @@
 <template>
   <div class="messages-container">
     <ChatMessage v-for="(m, index) in messages" :payload="m" :key="index" @show-member-info="onShowMemberInfo" />
-    <div
-      v-if="unreadMessages.length > 0"
-      class="unread-separator"
-    >
+    <div v-if="unreadMessages.length > 0" class="unread-separator">
       <div class="unread-line"></div>
       <span class="unread-label">NEW</span>
     </div>
@@ -45,6 +42,10 @@ function onShowMemberInfo(id: number) {
   gap: 0.9rem;
 }
 
+.body--dark .messages-container {
+  background: #1e1e1e;
+}
+
 .unread-separator {
   position: relative;
   display: flex;
@@ -56,7 +57,7 @@ function onShowMemberInfo(id: number) {
 .unread-line {
   flex: 1;
   height: 1px;
-  background-color: #e03e3e; 
+  background-color: #e03e3e;
   opacity: 0.7;
 }
 

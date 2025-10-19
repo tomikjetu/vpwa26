@@ -3,11 +3,8 @@
 
     <template v-if="chatStore.channel">
       <ChatTopBar :channel="chatStore.channel" />
-      <ChatMessageList
-        :channel="chatStore.channel"
-        :messages="chatStore.messages"
-        :unreadMessages="chatStore.unreadMessages"
-      />
+      <ChatMessageList :channel="chatStore.channel" :messages="chatStore.messages"
+        :unreadMessages="chatStore.unreadMessages" />
       <ChatInput @send="chatStore.addMessage" />
     </template>
 
@@ -42,6 +39,10 @@ const chatStore = useChatStore()
   border: 1px solid #ddd;
   overflow: hidden;
   flex: 1;
+}
+
+.body--dark .chat-container {
+  border-color: #444;
 }
 
 .empty-chat {

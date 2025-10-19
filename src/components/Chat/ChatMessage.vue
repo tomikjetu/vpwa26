@@ -3,10 +3,7 @@
     <!-- Header -->
     <div class="row justify-between items-start message-header">
       <!-- Left side: icon + name -->
-      <div
-        class="row items-center clickable-name"
-        @click="$emit('show-member-info', payload.user)"
-      >
+      <div class="row items-center clickable-name" @click="$emit('show-member-info', payload.user)">
         <q-avatar color="primary" text-color="white" size="32px" class="q-mr-sm">
           <q-icon name="person" />
         </q-avatar>
@@ -30,17 +27,10 @@
 
     <!-- 📎 Attached files -->
     <div v-if="payload.files && payload.files.length" class="attachments q-mt-sm">
-      <div
-        v-for="(file, index) in payload.files"
-        :key="'file-' + index"
-        class="file-chip row items-center q-pa-xs q-my-xs"
-      >
+      <div v-for="(file, index) in payload.files" :key="'file-' + index"
+        class="file-chip row items-center q-pa-xs q-my-xs">
         <q-icon name="insert_drive_file" color="grey-8" class="q-mr-xs" />
-        <a
-          :href="getFileURL(file)"
-          target="_blank"
-          class="file-name"
-        >
+        <a :href="getFileURL(file)" target="_blank" class="file-name">
           {{ typeof file === 'string' ? file.split('/').pop() : file.name }}
         </a>
       </div>
@@ -75,6 +65,10 @@ function getFileURL(file: File | string): string {
   box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
 }
 
+.body--dark .message-card {
+  background-color: #2c2c2c;
+}
+
 .message-header {
   padding: 0.4rem;
 }
@@ -83,6 +77,10 @@ function getFileURL(file: File | string): string {
   border-top: 1px solid rgb(204, 204, 204);
   padding: 0.8rem;
   padding-bottom: 0.4rem;
+}
+
+.body--dark .message-body {
+  border-color: #444
 }
 
 .clickable-name {
@@ -109,6 +107,14 @@ function getFileURL(file: File | string): string {
   padding: 4px 8px;
   display: inline-flex;
   max-width: 100%;
+}
+
+.body--dark .attachments {
+  border-color: #444;
+}
+
+.body--dark .file-chip {
+  background-color: #3a3a3a;
 }
 
 .file-name {

@@ -9,7 +9,8 @@
     </div>
 
     <!-- Right side (Private) -->
-    <div class="text-caption text-grey-8 q-mr-lg">{{ props.channel ? props.channel.isPublic ? 'Public' : 'Private' : '' }}</div>
+    <div class="text-caption text-grey-8 q-mr-lg">{{ props.channel ? props.channel.isPublic ? 'Public' : 'Private' : ''
+      }}</div>
   </div>
 </template>
 
@@ -27,5 +28,10 @@ const props = defineProps<{
   width: 100%;
   border-bottom: 1px solid #ddd;
   background: #fff;
+}
+
+.body--dark .info-bar {
+  border-color: #444;
+  background: #2c2c2c;
 }
 </style>

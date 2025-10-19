@@ -20,19 +20,13 @@
           <template v-else>
             <div class="row items-center">
               <span class="text-subtitle2 text-grey-8">
-                {{member && getCurrentUser ? (member.kickVoters.includes(getCurrentUser.id) ? 'Voted: ' : 'Vote to kick: ') + member.kickVotes + '/3' : 'Failed to load member or current user'}}
+                {{ member && getCurrentUser ? (member.kickVoters.includes(getCurrentUser.id)
+                  ? 'Voted: ' : 'Vote to kick:') + member.kickVotes + ' / 3' : 'Failed to load member or current user' }}
               </span>
-              <q-btn
-                :disable="member && getCurrentUser ? member.kickVoters.includes(getCurrentUser.id) : true"
-                flat
-                dense
-                round
-                icon="person_off"
-                color="red"
-                size="sm"
+              <q-btn :disable="member && getCurrentUser ? member.kickVoters.includes(getCurrentUser.id) : true" flat
+                dense round icon="person_off" color="red" size="sm"
                 :class="'q-ml-sm ' + (member && getCurrentUser && member.kickVoters.includes(getCurrentUser.id) ? 'disabled-btn' : '')"
-                @click="confirmKickVote"
-              />
+                @click="confirmKickVote" />
             </div>
           </template>
         </div>
@@ -44,13 +38,10 @@
           Currently being typed by user:
         </div>
 
-        <div
-          class="typing-box"
-          :class="{
-            'text-grey-6':
-              member && (!member.currentlyTyping || member.currentlyTyping.trim() === '')
-          }"
-        >
+        <div class="typing-box" :class="{
+          'text-grey-6':
+            member && (!member.currentlyTyping || member.currentlyTyping.trim() === '')
+        }">
           {{
             member && member.currentlyTyping && member.currentlyTyping.trim() !== ''
               ? member.currentlyTyping
@@ -123,6 +114,11 @@ function confirmKickVote() {
   white-space: pre-wrap;
   word-break: break-word;
   font-size: 15px;
+}
+
+.body--dark .typing-box {
+  background-color: #2a2a2a;
+  border-color: #444;
 }
 
 .text-grey-6 {
