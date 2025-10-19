@@ -44,6 +44,7 @@ const isOpen = ref(false);
 const command = ref('');
 
 const channelToggleCommands = computed(() => {
+    console.log('Generating channel toggle commands');
     return channelStore.channels.map(channel => ({
         id: "channel-" + channel.id,
         name: `${channel.name}`,
@@ -53,18 +54,18 @@ const channelToggleCommands = computed(() => {
     }));
 })
 
-const commands = [
+const commands = computed(() => [
     { id: "1", name: 'Log Out', cmd: 'logout', description: 'Log out of the application', icon: 'logout' },
     ...channelToggleCommands.value
-]
+])
 
-const filteredCommands = ref([...commands]);
+const filteredCommands = ref([...commands.value]);
 
 function filterCommands(e: KeyboardEvent) {
     if (!command.value) {
-        filteredCommands.value = [...commands];
+        filteredCommands.value = [...commands.value];
     } else {
-        filteredCommands.value = commands.filter(c =>
+        filteredCommands.value = commands.value.filter(c =>
             c.cmd.toLowerCase().includes(command.value.toLowerCase())
         );
     }
