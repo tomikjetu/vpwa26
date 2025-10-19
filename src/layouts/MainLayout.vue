@@ -17,12 +17,7 @@
                 <q-toggle v-model="darkMode" label="Dark Mode" class="q-mb-sm" />
 
                 <div class="row items-center">
-                  <q-btn
-                    outline
-                    size="sm"
-                    class="q-mr-sm"
-                    :style="{ color: 'rgb(60, 60, 60)'}"
-                  >
+                  <q-btn outline size="sm" class="q-mr-sm">
                     <q-icon name="circle" :color="stateColor" size="18px" class="q-mr-sm" />
                     <label>{{ userState }}</label>
                     <q-menu ref="stateMenu">
@@ -59,23 +54,11 @@
                 <q-avatar size="72px" icon="person" />
 
                 <div class="row items-center text-subtitle1 q-mb-xs">
-                  <q-icon
-                    name="circle"
-                    size="18px"
-                    class="q-mr-xs"
-                    :color="stateColor"
-                  />
+                  <q-icon name="circle" size="18px" class="q-mr-xs" :color="stateColor" />
                   <span>{{ currentUser.name }}</span>
                 </div>
 
-                <q-btn
-                  color="red"
-                  icon="logout"
-                  label="Logout"
-                  @click="logout"
-                  size="md"
-                  v-close-popup
-                />
+                <q-btn color="red" icon="logout" label="Logout" @click="logout" size="md" v-close-popup />
               </div>
             </div>
           </q-menu>
