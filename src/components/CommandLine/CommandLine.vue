@@ -44,7 +44,6 @@ const isOpen = ref(false);
 const command = ref('');
 
 const channelToggleCommands = computed(() => {
-    console.log('Generating channel toggle commands');
     return channelStore.channels.map(channel => ({
         id: "channel-" + channel.id,
         name: `${channel.name}`,
@@ -117,7 +116,7 @@ const executors = [
 ]
 
 function executeCommand() {
-    const cmdInput = command.value.toLowerCase().trim();
+    const cmdInput = command.value.trim();
     const cmd = cmdInput.split(' ')[0];
     const args = cmdInput.split(' ').slice(1);
     command.value = '';
