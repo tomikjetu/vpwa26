@@ -104,6 +104,10 @@ const channelKickCommands = computed(() => {
 
 const commands = computed(() => [
     { id: "1", name: 'Log Out', cmd: 'logout', description: 'Log out of the application', icon: 'logout' },
+    { id: "2", name: "Join", cmd: "join", description: "Join a channel", icon: "login" },
+    { id: "3", name: "Invite", cmd: "invite", description: "Invite a user to a channel", icon: "person_add" },
+    { id: "4", name: "Revoke", cmd: "revoke", description: "Revoke a user's access to a channel", icon: "person_remove" },
+    { id: "5", name: "Cancel", cmd: "cancel", description: "Cancel the current operation", icon: "close" },
     ...channelToggleCommands.value,
     ...channelLeaveCommands.value,
     ...channelKickCommands.value

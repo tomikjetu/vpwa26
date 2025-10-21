@@ -6,7 +6,7 @@ import type { Contact } from 'src/utils/types.ts';
 export const useContacts = defineStore('contacts', () => {
   // State — dictionary of contacts keyed by ID
   const contacts = ref<Record<number, Contact>>({
-    1760716592343: { id: 1760716592343, status: 'online' },
+    1760811410315: { id: 1760811410315, status: 'online' },
     2: { id: 2, status: 'dnd' },
     3: { id: 3, status: 'online' },
     4: { id: 4, status: 'offline' },

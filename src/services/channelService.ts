@@ -1,6 +1,8 @@
+import { useAuthStore } from 'src/stores/auth-store';
 import { useChannelStore } from 'src/stores/channelStore';
 // import { getSocket } from "./socketService"
 
+const auth = useAuthStore();
 export function createChannel(name: string) {
   const channelStore = useChannelStore();
   //🧦 const socket = getSocket()
@@ -18,10 +20,34 @@ export function createChannel(name: string) {
     infoColor: '#FFFFFF',
     isPublic: false,
     hasUnreadMsgs: false,
-    members: []
+    members: [],
   };
 
   channelStore.addChannel(Channel);
 
   //🧦 socket.emit("channel:create", payload)
+}
+
+/* owner only */
+export function revokeUserFromChannel(channelId: number, userId: number) {
+  console.log(channelId, userId);
+}
+export function quitChannel(channelId: number) {
+  console.log(channelId);
+}
+/* owner only for private */
+export function inviteUserToChannel(channelId: number, userId: number) {
+  console.log(channelId, userId);
+}
+/* public */
+export function joinChannel(channelId: number) {
+  console.log(channelId);
+}
+export function cancelChannel(channelId: number) {
+  console.log(channelId);
+}
+export function kickUserFromChannel(channelId: number, userId: number) {
+  const currentUser = auth.getCurrentUser;
+  console.log(currentUser);
+  console.log(channelId, userId);
 }

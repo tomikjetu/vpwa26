@@ -3,16 +3,8 @@
     <span>{{ headerTitle }}</span>
 
     <!-- Action button for 'owned' or 'joined' -->
-    <q-btn
-      v-if="mode !== 'all'"
-      flat
-      dense
-      color="primary"
-      :icon="mode === 'owned' ? 'add' : 'add'"
-      :label="mode === 'owned' ? 'Create' : 'Join'"
-      size="sm"
-      @click="onAddClick"
-    />
+    <q-btn v-if="mode !== 'all'" flat dense color="primary" :icon="mode === 'owned' ? 'add' : 'add'"
+      :label="mode === 'owned' ? 'Create' : 'Join'" size="sm" @click="onAddClick" />
   </q-item-label>
 
   <!-- Owned / Joined Dialog -->
@@ -28,25 +20,14 @@
       <q-separator />
 
       <q-card-section>
-        <q-input
-          v-model="newChannelName"
-          :label="mode === 'owned' ? 'Channel name' : 'Enter channel name to join'"
-          dense
-          autofocus
-        />
+        <q-input v-model="newChannelName" :label="mode === 'owned' ? 'Channel name' : 'Enter channel name to join'"
+          dense autofocus />
 
         <!-- Only show public/private options for owned channels -->
-        <q-option-group
-          v-if="mode === 'owned'"
-          v-model="isPublic"
-          :options="[
-            { label: 'Public', value: true },
-            { label: 'Private', value: false }
-          ]"
-          type="radio"
-          inline
-          class="q-mt-md"
-        />
+        <q-option-group v-if="mode === 'owned'" v-model="isPublic" :options="[
+          { label: 'Public', value: true },
+          { label: 'Private', value: false }
+        ]" type="radio" inline class="q-mt-md" />
 
         <!-- Info for joined channels -->
         <div v-if="mode === 'joined'" class="text-caption text-grey q-mt-sm">
@@ -59,12 +40,7 @@
 
       <q-card-actions align="right">
         <q-btn flat label="Cancel" color="primary" v-close-popup />
-        <q-btn
-          flat
-          :label="mode === 'owned' ? 'Create' : 'Join'"
-          color="primary"
-          @click="confirmAdd"
-        />
+        <q-btn flat :label="mode === 'owned' ? 'Create' : 'Join'" color="primary" @click="confirmAdd" />
       </q-card-actions>
     </q-card>
   </q-dialog>
@@ -72,26 +48,15 @@
   <!-- Channel List -->
   <q-scroll-area :style="'flex: ' + (mode == 'owned' ? '1' : '2')">
     <q-list padding>
-      <q-item
-        v-for="(channel, index) in channels"
-        :key="'channel-' + index"
-        clickable
-        v-ripple
-        @click="onChannelClick(channel)"
-      >
+      <q-item v-for="(channel, index) in channels" :key="'channel-' + index" clickable v-ripple
+        @click="onChannelClick(channel)">
         <q-item-section avatar top>
           <q-avatar :icon="channel.icon" :color="channel.color" text-color="white" />
         </q-item-section>
 
         <q-item-section>
           <div style="display: flex; flex-direction: row;">
-            <q-icon
-              v-if="channel.hasUnreadMsgs"
-              name="priority_high"
-              color="red"
-              size="16px"
-              class="blink-icon"
-            />
+            <q-icon v-if="channel.hasUnreadMsgs" name="priority_high" color="red" size="16px" class="blink-icon" />
             <q-item-label lines="1">{{ channel.name }}</q-item-label>
           </div>
 
@@ -117,12 +82,8 @@
 
         <q-item-section side>
           <q-btn round dense icon="more_horiz" @click.stop @mousedown.stop>
-            <ChannelDropdown
-              :items="getMenuOptions(channel)"
-              :channels="channels"
-              :channel="channel"
-              @show-members="onShowMembers"
-            />
+            <ChannelDropdown :items="getMenuOptions(channel)" :channels="channels" :channel="channel"
+              @show-members="onShowMembers" />
           </q-btn>
         </q-item-section>
       </q-item>
