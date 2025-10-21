@@ -8,13 +8,7 @@
       </q-card-section>
 
       <q-card-section>
-        <q-input
-          v-model="personName"
-          label="Enter person's name"
-          filled
-          autofocus
-          clearable
-        />
+        <q-input v-model="personName" label="Enter person's name" filled autofocus clearable />
       </q-card-section>
 
       <q-card-actions align="right">
@@ -26,15 +20,8 @@
 
   <q-menu anchor="bottom right" self="top right">
     <q-list style="min-width: 120px">
-      <q-item
-        v-for="(option, oIndex) in props.items"
-        :key="'menu-' + oIndex"
-        clickable
-        v-close-popup
-        :class="option.class"
-        :disable="option.disable"
-        @click="onDropdownSelect(option)"
-      >
+      <q-item v-for="(option, oIndex) in props.items" :key="'menu-' + oIndex" clickable v-close-popup
+        :class="option.class" :disable="option.disable" @click="onDropdownSelect(option)">
         <q-item-section>
           {{ option.label }}
         </q-item-section>
@@ -47,6 +34,8 @@
 import type { DropdownItem, Channel } from 'src/utils/types.ts'
 import { handleDropdownSelect } from 'src/composables/useChannelList';
 import { ref } from 'vue'
+import { inviteUserToChannel } from 'src/services/channelService';
+import { Notify } from 'quasar';
 
 const props = defineProps<{
   items: DropdownItem[],
@@ -63,8 +52,13 @@ const personName = ref('')
 
 function invitePerson() {
   if (!personName.value.trim()) return
-  
-  console.log(`Inviting ${personName.value} to the channel ${props.channel.name}`)
+
+  const user = Object.values(props.channel.members).find(u => u.nickname === personName.value.trim())
+  if (!user) return Notify.create({
+    type: 'negative',
+    message: `User ${personName.value} not found in this channel.`,
+  })
+  inviteUserToChannel(props.channel.id, user.id)
 
   showInviteDialog.value = false
   personName.value = ''

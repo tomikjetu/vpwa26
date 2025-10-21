@@ -97,7 +97,8 @@ import ChannelDropdown from './ChannelDropdown.vue'
 import { useAuthStore } from 'src/stores/auth-store'
 import { storeToRefs } from 'pinia'
 import { toRef, ref, computed } from 'vue'
-import { getMenuOptions, addChannel } from 'src/composables/useChannelList'
+import { getMenuOptions } from 'src/composables/useChannelList'
+import { createChannel, joinChannel } from 'src/services/channelService'
 
 // ---------- Props ----------
 const props = defineProps<{
@@ -129,60 +130,15 @@ function confirmAdd(): void {
   if (!newChannelName.value.trim()) return
   if (!getCurrentUser.value) return
 
-  const currDate = new Date()
-  let newChannel: Channel
 
   if (props.mode === 'owned') {
-    newChannel = {
-      id: Math.floor(Math.random() * 1_000_000_000),
-      name: newChannelName.value.trim(),
-      isPublic: isPublic.value,
-      createdAt: currDate,
-      ownerId: getCurrentUser.value.id,
-      icon: isPublic.value ? 'group' : 'lock',
-      color: 'primary',
-      updatedAt: currDate,
-      joinedAt: currDate,
-      infoColor: 'grey',
-      hasUnreadMsgs: false,
-      members: {
-        [getCurrentUser.value.id]: {
-          id: getCurrentUser.value.id,
-          nickname: getCurrentUser.value.nickName,
-          kickVotes: 0,
-          isOwner: true,
-          kickVoters: []
-        }
-      }
-    }
+    createChannel(newChannelName.value.trim(), isPublic.value)
   } else if (props.mode === 'joined') {
-    newChannel = {
-      id: Math.floor(Math.random() * 1_000_000_000),
-      name: newChannelName.value.trim(),
-      isPublic: true,
-      createdAt: currDate,
-      ownerId: getCurrentUser.value.id + 1, // simulate joining another's channel
-      icon: 'group',
-      color: 'primary',
-      updatedAt: currDate,
-      joinedAt: currDate,
-      infoColor: 'grey',
-      hasUnreadMsgs: false,
-      members: {
-        [getCurrentUser.value.id]: {
-          id: getCurrentUser.value.id,
-          nickname: getCurrentUser.value.nickName,
-          kickVotes: 0,
-          isOwner: true,
-          kickVoters: []
-        }
-      }
-    }
+    joinChannel(newChannelName.value.trim())
   } else {
     return
   }
 
-  addChannel(newChannel, channels.value)
   newChannelName.value = ''
   isPublic.value = true
   showAddDialog.value = false

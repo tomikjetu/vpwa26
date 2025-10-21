@@ -1,12 +1,12 @@
-import { leaveChannel } from 'src/composables/useChannelList';
 import { useChannelStore } from 'src/stores/channelStore';
 import { Notify } from 'quasar';
+import { cancelChannel } from 'src/services/channelService';
 
 export default function Quit() {
   const channelStore = useChannelStore();
   return {
     cmd: 'quit',
-    execute: async (args: string[]) => {
+    execute: (args: string[]) => {
       if (args.length === 0 || !args[0])
         return Notify.create({
           type: 'negative',
@@ -20,7 +20,7 @@ export default function Quit() {
           message: 'Channel not found',
           position: 'top',
         });
-      await leaveChannel(channel, channelStore.channels);
+      cancelChannel(channel.id);
     },
   };
 }

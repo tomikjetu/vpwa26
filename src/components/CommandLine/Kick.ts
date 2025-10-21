@@ -1,7 +1,6 @@
 import { useChannelStore } from 'src/stores/channelStore';
 import { Notify } from 'quasar';
-import { useAuthStore } from 'src/stores/auth-store';
-import { storeToRefs } from 'pinia';
+import { kickUserFromChannel } from 'src/services/channelService';
 
 export default function Kick() {
   /*
@@ -14,8 +13,6 @@ export default function Kick() {
   Korelácia:
   - správca môže zrušiť ban cez /invite
   */
-  const authStore = useAuthStore();
-  const { getCurrentUser } = storeToRefs(authStore);
   const channelStore = useChannelStore();
   return {
     cmd: 'kick',
@@ -38,22 +35,14 @@ export default function Kick() {
         });
       }
 
-      const targetNick = args[1];
-      const filteredMembers = Object.values(channel.members).filter(
-        (member) => member.nickname === targetNick,
-      );
-      if (filteredMembers.length === 0 || !filteredMembers[0])
+      const user = Object.values(channel.members).find((member) => member.nickname === args[1]);
+      if (!user)
         return Notify.create({
           type: 'negative',
-          message: 'User not found in channel',
-          position: 'top',
+          message: `User ${args[1]} not found in channel ${args[0]}`,
         });
 
-      channelStore.incrementKickCounter(
-        filteredMembers[0].id,
-        channel.id,
-        getCurrentUser.value!.id,
-      );
+      kickUserFromChannel(channel.id, user.id);
     },
   };
 }
