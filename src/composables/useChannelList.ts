@@ -5,7 +5,6 @@ import { storeToRefs } from 'pinia';
 import { type Ref } from 'vue';
 import { useChatStore } from 'src/stores/chat-store';
 import { useDialogStore } from 'src/stores/dialog-store';
-import { cancelChannel } from 'src/services/channelService';
 
 export const getMenuOptions = (channel: Channel): DropdownItem[] => {
   const authStore = useAuthStore();
@@ -34,7 +33,17 @@ export function addChannel(newChannel: Channel, channels: Channel[]): void {
   channelStore.addChannel(newChannel);
 }
 
-export async function leaveChannel(channel: Channel): Promise<void> {
+export function removeChannel(channelId: number, channels: Channel[]): void {
+  const index = channels.findIndex((channel) => channel.id === channelId);
+  if (index !== -1) {
+    channels.splice(index, 1);
+  }
+
+  const channelStore = useChannelStore();
+  channelStore.removeChannel(channelId);
+}
+
+export async function leaveChannel(channel: Channel, channels: Channel[]): Promise<void> {
   const dialogStore = useDialogStore();
   const authStore = useAuthStore();
   const { getCurrentUser } = storeToRefs(authStore);
@@ -46,7 +55,7 @@ export async function leaveChannel(channel: Channel): Promise<void> {
 
   const chatStore = useChatStore();
   chatStore.closeChat();
-  cancelChannel(channel.id);
+  removeChannel(channel.id, channels);
 }
 
 /** Handles a dropdown option selection */
@@ -59,7 +68,7 @@ export async function handleDropdownSelect(
 ) {
   const label = option.label.toLowerCase();
   if (label.includes('remove') || label.includes('leave')) {
-    await leaveChannel(channel);
+    await leaveChannel(channel, channels);
   } else if (label.includes('invite')) {
     showInviteDialog.value = true;
   } else if (label.includes('members')) {
