@@ -15,7 +15,7 @@
 </template>
 
 <script setup lang="ts">
-import type { Channel } from 'src/utils/types.ts'
+import type { Channel } from 'src/utils/types'
 
 const props = defineProps<{
   channel: Channel | null

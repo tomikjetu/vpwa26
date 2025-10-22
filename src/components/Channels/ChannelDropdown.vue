@@ -31,7 +31,7 @@
 </template>
 
 <script setup lang="ts">
-import type { DropdownItem, Channel } from 'src/utils/types.ts'
+import type { DropdownItem, Channel } from 'src/utils/types'
 import { handleDropdownSelect } from 'src/composables/useChannelList';
 import { ref } from 'vue'
 import { inviteUserToChannel } from 'src/services/channelService';

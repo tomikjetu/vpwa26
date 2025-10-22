@@ -1,11 +1,8 @@
 import { defineStore } from 'pinia';
 import type { Channel, ChatMessagePayload } from 'src/utils/types';
-import { storeToRefs } from 'pinia';
 import { useAuthStore } from 'src/stores/auth-store';
 import { Notify } from 'quasar';
 
-const authStore = useAuthStore();
-const { getCurrentUser } = storeToRefs(authStore);
 export const useChannelStore = defineStore('channels', {
   state: () => ({
     channels: [
@@ -78,6 +75,7 @@ export const useChannelStore = defineStore('channels', {
         },
       ],
     } as Record<number, ChatMessagePayload[]>,
+    olderPagesLeft: {} as Record<number, number>,
   }),
 
   actions: {
@@ -140,6 +138,58 @@ export const useChannelStore = defineStore('channels', {
         position: 'top',
       });
     },
+
+    fetchOlderMessages(channelId: number, count = 20): { older: ChatMessagePayload[]; remaining: number } {
+      if (!this.messages[channelId]) {
+        this.messages[channelId] = []
+      }
+
+      // Only simulate infinite scroll for channel_1 (id = 1)
+      if (channelId !== 1) {
+        this.olderPagesLeft[channelId] = 0
+        return { older: [] as ChatMessagePayload[], remaining: 0 }
+      }
+
+      const prevRemaining = this.olderPagesLeft[channelId]
+      const remaining = typeof prevRemaining === 'number' ? prevRemaining : 5
+      if (remaining <= 0) {
+        this.olderPagesLeft[channelId] = 0
+        return { older: [] as ChatMessagePayload[], remaining: 0 }
+      }
+
+      const existing = this.messages[channelId]
+      const first = existing[0]?.time ?? new Date()
+      const baseTs = first instanceof Date ? first.getTime() : new Date().getTime()
+
+      const older: ChatMessagePayload[] = []
+      for (let i = count - 1; i >= 0; i--) {
+        const t = new Date(baseTs - (i + 1) * 60_000)
+        older.push({
+          user: 2,
+          text: `Older message at ${t.toLocaleTimeString()}`,
+          time: t,
+          files: [],
+          userNickname: 'Bob'
+        })
+      }
+
+      this.messages[channelId] = [...older, ...existing]
+      this.olderPagesLeft[channelId] = remaining - 1
+
+      return { older, remaining: this.olderPagesLeft[channelId] }
+    },
+
+    /**
+     * Update a member's typing text for a specific channel.
+     * Pass an empty string to clear the indicator.
+     */
+    updateMemberTyping(channelId: number, memberId: number, text: string) {
+      const channel = this.getChannelById(channelId)
+      if (!channel) return
+      const member = channel.members[memberId]
+      if (!member) return
+      member.currentlyTyping = text
+    },
   },
 
   getters: {
@@ -147,10 +197,14 @@ export const useChannelStore = defineStore('channels', {
       return (id: number) => state.channels.find((c) => c.id === id);
     },
     getOwnedChannels: (state) => {
-      return state.channels.filter((c) => c.ownerId === getCurrentUser.value?.id);
+      const auth = useAuthStore();
+      const user = auth.getCurrentUser;
+      return state.channels.filter((c) => c.ownerId === user?.id);
     },
     getJoinedChannels: (state) => {
-      return state.channels.filter((c) => c.ownerId !== getCurrentUser.value?.id);
+      const auth = useAuthStore();
+      const user = auth.getCurrentUser;
+      return state.channels.filter((c) => c.ownerId !== user?.id);
     },
     totalChannels: (state) => state.channels.length,
     getMessagesByChannelId: (state) => {
@@ -158,6 +212,13 @@ export const useChannelStore = defineStore('channels', {
     },
     getUnreadMessagesByChannelId: (state) => {
       return (channelId: number) => state.unreadMessages[channelId] || [];
+    },
+    hasMoreOlder: (state) => {
+      return (channelId: number) => {
+        if (channelId !== 1) return false
+        const left = state.olderPagesLeft[channelId]
+        return (typeof left === 'number' ? left : 5) > 0
+      }
     },
   },
 });

@@ -1,6 +1,6 @@
 import { defineStore } from 'pinia';
 import { ref, computed } from 'vue';
-import type { Contact } from 'src/utils/types.ts';
+import type { Contact } from 'src/utils/types';
 
 /** Pinia store for managing contacts */
 export const useContacts = defineStore('contacts', () => {
