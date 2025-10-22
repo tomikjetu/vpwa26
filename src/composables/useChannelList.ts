@@ -1,5 +1,5 @@
 import { useChannelStore } from 'src/stores/channelStore';
-import type { Channel, DropdownItem } from 'src/utils/types.ts';
+import type { Channel, DropdownItem } from 'src/utils/types';
 import { useAuthStore } from 'src/stores/auth-store';
 import { storeToRefs } from 'pinia';
 import { type Ref } from 'vue';

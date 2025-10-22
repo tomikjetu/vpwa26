@@ -61,7 +61,7 @@
 <script setup lang="ts">
 import { defineProps, defineModel } from 'vue'
 import { useQuasar } from 'quasar'
-import type { Member } from 'src/utils/types.ts'
+import type { Member } from 'src/utils/types'
 import { useChannelStore } from 'src/stores/channelStore';
 import { storeToRefs } from 'pinia'
 import { useAuthStore } from 'src/stores/auth-store'
@@ -107,7 +107,7 @@ function confirmKickVote() {
 <style scoped>
 .typing-box {
   min-height: 80px;
-  border: 1px solid var(--q-color-grey-5);
+  border: 1px solid #bfbfbf;
   border-radius: 6px;
   padding: 8px 10px;
   background-color: #fafafa;
@@ -122,7 +122,7 @@ function confirmKickVote() {
 }
 
 .text-grey-6 {
-  color: var(--q-color-grey-6);
+  color: #9e9e9e;
 }
 
 .disabled-btn {

@@ -15,6 +15,7 @@
       <input ref="fileInput" type="file" multiple style="display: none" @change="handleFileSelection" />
 
       <q-input outlined dense v-model="text" placeholder="Type a message..." class="col q-mx-sm"
+        @update:model-value="onInputUpdate"
         @keyup.enter="sendMessage">
         <template v-slot:append>
           <q-icon name="mood" class="cursor-pointer" />
@@ -29,7 +30,7 @@
 
 <script setup lang="ts">
 import { ref } from 'vue'
-import type { ChatMessagePayload } from 'src/utils/types.js'
+import type { ChatMessagePayload } from 'src/utils/types'
 import { storeToRefs } from 'pinia'
 import { useAuthStore } from 'src/stores/auth-store'
 
@@ -42,6 +43,7 @@ const fileInput = ref<HTMLInputElement | null>(null)
 
 const emit = defineEmits<{
   (e: 'send', msg: ChatMessagePayload): void
+  (e: 'typing', text: string): void
 }>()
 
 function sendMessage() {
@@ -56,7 +58,12 @@ function sendMessage() {
     })
     text.value = ''
     selectedFiles.value = []
+    emit('typing', '') // clear typing indicator after sending
   }
+}
+
+const onInputUpdate = (value: string | number | null) => {
+  text.value = value == null ? '' : String(value)
 }
 
 function attachFile() {
@@ -86,7 +93,7 @@ function removeFile(index: number) {
 }
 
 .file-chip {
-  border: 1px solid var(--q-color-grey-4);
+  border: 1px solid var(#cfcfcf);
   border-radius: 6px;
   background-color: #f9f9f9;
   max-width: 200px;

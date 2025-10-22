@@ -1,6 +1,6 @@
 import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
-import type { ChatMessagePayload, Channel } from 'src/utils/types.ts'
+import type { ChatMessagePayload, Channel } from 'src/utils/types'
 import { useChannelStore } from './channelStore'
 
 export const useChatStore = defineStore('chatContainer', () => {

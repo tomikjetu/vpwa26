@@ -170,14 +170,14 @@ const executors = [
     Revoke()
 ]
 
-async function executeCommand() {
+function executeCommand() {
     const cmdInput = command.value.trim();
     const cmd = cmdInput.split(' ')[0];
     const args = cmdInput.split(' ').slice(1);
     command.value = '';
     isOpen.value = false;
     const executor = executors.find(ex => ex.cmd === cmd);
-    if (executor) await executor.execute(args);
+    if (executor) executor.execute(args);
 }
 
 function onKeydown(e: KeyboardEvent) {

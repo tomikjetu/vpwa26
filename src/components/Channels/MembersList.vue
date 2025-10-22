@@ -46,7 +46,7 @@
 
 <script setup lang="ts">
 import { defineProps } from 'vue'
-import type { Member, Channel } from 'src/utils/types.ts'
+import type { Member, Channel } from 'src/utils/types'
 import { useDialogStore } from 'src/stores/dialog-store'
 import { useContacts } from 'src/stores/contacts-store'
 import { storeToRefs } from 'pinia'
@@ -102,7 +102,7 @@ const props = defineProps<{
   display: flex;
   align-items: center;
   padding: 8px 12px;
-  border-bottom: 1px solid var(--q-color-grey-4);
+  border-bottom: 1px solid #cccccc;
   flex-shrink: 0;
 }
 
@@ -113,7 +113,7 @@ const props = defineProps<{
 .header-title {
   font-weight: 600;
   font-size: 16px;
-  color: var(--q-color-primary);
+  color: #027be3;
 }
 
 .member-item {
