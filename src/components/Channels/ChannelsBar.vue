@@ -82,6 +82,7 @@ import { useChatStore } from 'src/stores/chat-store'
 import { useAuthStore } from 'src/stores/auth-store'
 import { Dark } from 'quasar'
 import type { UserStatus } from 'src/utils/types'
+import { authService } from 'src/services/authService';
 
 const chatStore = useChatStore()
 const auth = useAuthStore()
@@ -150,8 +151,9 @@ function changeStatus(s: UserStatus) {
 }
 
 function logoutAndClose() {
-  auth.clearAuth()
+  authService.logout()
   showProfileDialog.value = false
+  window.location.href = '/auth/login'
 }
 </script>
 
