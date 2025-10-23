@@ -62,6 +62,20 @@ export const useChannelStore = defineStore('channels', {
           files: [],
           userNickname: 'Bob',
         },
+        {
+          user: 2,
+          text: 'Hello @3 aand @4',
+          time: new Date(),
+          files: [],
+          userNickname: 'Bob',
+        },
+        {
+          user: 2,
+          text: 'Hello @1761231791593',
+          time: new Date(),
+          files: [],
+          userNickname: 'Bob',
+        },
       ],
     } as Record<number, ChatMessagePayload[]>,
     unreadMessages: {
@@ -139,44 +153,47 @@ export const useChannelStore = defineStore('channels', {
       });
     },
 
-    fetchOlderMessages(channelId: number, count = 20): { older: ChatMessagePayload[]; remaining: number } {
+    fetchOlderMessages(
+      channelId: number,
+      count = 20,
+    ): { older: ChatMessagePayload[]; remaining: number } {
       if (!this.messages[channelId]) {
-        this.messages[channelId] = []
+        this.messages[channelId] = [];
       }
 
       // Only simulate infinite scroll for channel_1 (id = 1)
       if (channelId !== 1) {
-        this.olderPagesLeft[channelId] = 0
-        return { older: [] as ChatMessagePayload[], remaining: 0 }
+        this.olderPagesLeft[channelId] = 0;
+        return { older: [] as ChatMessagePayload[], remaining: 0 };
       }
 
-      const prevRemaining = this.olderPagesLeft[channelId]
-      const remaining = typeof prevRemaining === 'number' ? prevRemaining : 5
+      const prevRemaining = this.olderPagesLeft[channelId];
+      const remaining = typeof prevRemaining === 'number' ? prevRemaining : 5;
       if (remaining <= 0) {
-        this.olderPagesLeft[channelId] = 0
-        return { older: [] as ChatMessagePayload[], remaining: 0 }
+        this.olderPagesLeft[channelId] = 0;
+        return { older: [] as ChatMessagePayload[], remaining: 0 };
       }
 
-      const existing = this.messages[channelId]
-      const first = existing[0]?.time ?? new Date()
-      const baseTs = first instanceof Date ? first.getTime() : new Date().getTime()
+      const existing = this.messages[channelId];
+      const first = existing[0]?.time ?? new Date();
+      const baseTs = first instanceof Date ? first.getTime() : new Date().getTime();
 
-      const older: ChatMessagePayload[] = []
+      const older: ChatMessagePayload[] = [];
       for (let i = count - 1; i >= 0; i--) {
-        const t = new Date(baseTs - (i + 1) * 60_000)
+        const t = new Date(baseTs - (i + 1) * 60_000);
         older.push({
           user: 2,
           text: `Older message at ${t.toLocaleTimeString()}`,
           time: t,
           files: [],
-          userNickname: 'Bob'
-        })
+          userNickname: 'Bob',
+        });
       }
 
-      this.messages[channelId] = [...older, ...existing]
-      this.olderPagesLeft[channelId] = remaining - 1
+      this.messages[channelId] = [...older, ...existing];
+      this.olderPagesLeft[channelId] = remaining - 1;
 
-      return { older, remaining: this.olderPagesLeft[channelId] }
+      return { older, remaining: this.olderPagesLeft[channelId] };
     },
 
     /**
@@ -184,11 +201,11 @@ export const useChannelStore = defineStore('channels', {
      * Pass an empty string to clear the indicator.
      */
     updateMemberTyping(channelId: number, memberId: number, text: string) {
-      const channel = this.getChannelById(channelId)
-      if (!channel) return
-      const member = channel.members[memberId]
-      if (!member) return
-      member.currentlyTyping = text
+      const channel = this.getChannelById(channelId);
+      if (!channel) return;
+      const member = channel.members[memberId];
+      if (!member) return;
+      member.currentlyTyping = text;
     },
   },
 
@@ -215,10 +232,10 @@ export const useChannelStore = defineStore('channels', {
     },
     hasMoreOlder: (state) => {
       return (channelId: number) => {
-        if (channelId !== 1) return false
-        const left = state.olderPagesLeft[channelId]
-        return (typeof left === 'number' ? left : 5) > 0
-      }
+        if (channelId !== 1) return false;
+        const left = state.olderPagesLeft[channelId];
+        return (typeof left === 'number' ? left : 5) > 0;
+      };
     },
   },
 });
