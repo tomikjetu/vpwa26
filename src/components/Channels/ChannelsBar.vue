@@ -16,14 +16,16 @@
       <template v-else-if="(search ?? '').trim() !== ''">
         <ChannelList
           :channels="filteredAll"
+          :channel-invites="channelStore.channelInvites"
           :mode="'all'"
           @select-channel="handleSelectChannel" 
-          @show-members="handleShowMembers"/>
+          @show-members="handleShowMembers"
+          @select-channel-invite="handleChannelInvite"/>
       </template>
 
       <template v-else>
-        <ChannelList :channels="channelStore.getJoinedChannels" :mode="'joined'" @select-channel="handleSelectChannel" @show-members="handleShowMembers" />
-        <ChannelList :channels="channelStore.getOwnedChannels" :mode="'owned'" @select-channel="handleSelectChannel" @show-members="handleShowMembers" />
+        <ChannelList :channels="channelStore.getJoinedChannels" :channel-invites="channelStore.channelInvites" :mode="'joined'" @select-channel="handleSelectChannel" @show-members="handleShowMembers" @select-channel-invite="handleChannelInvite" />
+        <ChannelList :channels="channelStore.getOwnedChannels" :channel-invites="[]" :mode="'owned'" @select-channel="handleSelectChannel" @show-members="handleShowMembers" @select-channel-invite="handleChannelInvite" />
       </template>
     </div>
   </q-page>
@@ -33,11 +35,12 @@
 import { ref, computed } from 'vue'
 import { useChannelStore } from 'src/stores/channelStore'
 import ChannelList from './ChannelList.vue'
-import type { Channel } from 'src/utils/types.ts'
 import MembersList from './MembersList.vue'
-import type { Member } from 'src/utils/types.ts'
+import type { Channel, Member, ChannelInvite } from 'src/utils/types.ts'
 import { useChatStore } from 'src/stores/chat-store'
+import { useDialogStore } from 'src/stores/dialog-store'
 
+const dialogStore = useDialogStore()
 const chatStore = useChatStore()
 const search = ref('')
 const channelStore = useChannelStore()
@@ -74,6 +77,12 @@ function handleShowMembers(channel: Channel) {
 function handleCancelMembersList() {
   showMembersList.value = false
 }
+
+function handleChannelInvite(channelInvite: ChannelInvite) {
+  dialogStore.openChannelInviteAcceptation(channelInvite)
+  console.log("OPENED")
+}
+
 </script>
 
 

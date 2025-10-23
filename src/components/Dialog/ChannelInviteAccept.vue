@@ -1,0 +1,70 @@
+<template>
+  <q-dialog v-model="show" persistent>
+    <q-card class="q-pa-md q-pt-lg q-pb-lg channel-invite-dialog">
+      <!-- Channel icon and name -->
+      <div class="column items-center q-mb-md">
+        <q-avatar :color="dialogStore.channelInvite?.color" text-color="white" size="70px" class="q-mb-sm">
+          <q-icon :name="dialogStore.channelInvite?.icon || 'group_add'" size="32px" />
+        </q-avatar>
+
+        <div class="text-h6 text-weight-medium text-center">
+          Join channel <span class="text-primary">{{ dialogStore.channelInvite?.name }}</span>?
+        </div>
+
+        <q-item-label caption class="text-grey-7 q-mt-xs">
+          Invited {{ dialogStore.channelInvite?.invitedAt.toDateString() }}
+        </q-item-label>
+      </div>
+
+      <!-- Action buttons -->
+      <div class="row justify-evenly q-mt-md">
+        <q-btn
+          color="primary"
+          label="Accept"
+          icon="check"
+          unelevated
+          @click="onAcceptInvite()"
+        />
+        <q-btn
+          color="negative"
+          label="Decline"
+          icon="close"
+          flat
+          @click="onDeclineInvite()"
+        />
+      </div>
+    </q-card>
+  </q-dialog>
+</template>
+
+<script setup lang="ts">
+import { defineModel } from 'vue';
+import { useDialogStore } from 'src/stores/dialog-store'
+import { acceptChannelInvite, declineChannelInvite } from 'src/services/channelService';
+
+const dialogStore = useDialogStore()
+
+const show = defineModel<boolean>('modelValue', { required: true })
+
+function onAcceptInvite() {
+  if(!dialogStore.channelInvite) return
+  acceptChannelInvite(dialogStore.channelInvite.id)
+  dialogStore.closeChannelInviteAcceptation()
+}
+
+function onDeclineInvite() {
+  if(!dialogStore.channelInvite) return
+  declineChannelInvite(dialogStore.channelInvite.id)
+  dialogStore.closeChannelInviteAcceptation()
+}
+</script>
+
+<style scoped>
+.channel-invite-dialog {
+  min-width: 320px;
+  background-color: #fffbea; /* soft yellowish tone */
+  border-left: 4px solid #fdd835;
+  border-radius: 12px;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.1);
+}
+</style>

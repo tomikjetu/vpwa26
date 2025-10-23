@@ -48,6 +48,41 @@
   <!-- Channel List -->
   <q-scroll-area :style="'flex: ' + (mode == 'owned' ? '1' : '2')">
     <q-list padding>
+      <q-item
+        v-for="(invite, index) in channelInvs"
+        :key="'channel-invs' + index"
+        clickable
+        v-ripple
+        @click="onChannelInviteClick(invite)"
+        class="channel-invite shadow-1 rounded-borders"
+      >
+        <!-- Left icon/avatar -->
+        <q-item-section avatar top>
+          <q-avatar color="amber-6" text-color="white" size="42px">
+            <q-icon name="person_add" size="22px" />
+          </q-avatar>
+        </q-item-section>
+
+        <!-- Main content -->
+        <q-item-section>
+          <div style="display: flex; flex-direction: row;">
+            <q-icon name="priority_high" color="red" size="16px" class="blink-icon" />
+            <q-item-label lines="1" class="text-weight-medium text-dark">
+              {{ 'Invited to ' + invite.name }}
+            </q-item-label>
+          </div>
+
+          <q-item-label caption class="text-grey-8">
+            {{ 'Invitation pending since ' + invite.invitedAt.toDateString() }}
+          </q-item-label>
+        </q-item-section>
+
+        <!-- Right-side indicator -->
+        <q-item-section side>
+          <q-icon name="chevron_right" color="grey-7" />
+        </q-item-section>
+      </q-item>
+
       <q-item v-for="(channel, index) in channels" :key="'channel-' + index" clickable v-ripple
         @click="onChannelClick(channel)">
         <q-item-section avatar top>
@@ -57,7 +92,7 @@
         <q-item-section>
           <div style="display: flex; flex-direction: row;">
             <q-icon v-if="channel.hasUnreadMsgs" name="priority_high" color="red" size="16px" class="blink-icon" />
-            <q-item-label lines="1">{{ channel.name }}</q-item-label>
+            <q-item-label lines="1" class="text-weight-medium">{{ channel.name }}</q-item-label>
           </div>
 
           <q-item-label lines="1" caption>
@@ -92,7 +127,7 @@
 </template>
 
 <script setup lang="ts">
-import type { Channel } from 'src/utils/types'
+import type { Channel, ChannelInvite } from 'src/utils/types'
 import ChannelDropdown from './ChannelDropdown.vue'
 import { useAuthStore } from 'src/stores/auth-store'
 import { storeToRefs } from 'pinia'
@@ -102,11 +137,13 @@ import { createChannel, joinChannel } from 'src/services/channelService'
 
 // ---------- Props ----------
 const props = defineProps<{
+  channelInvites: ChannelInvite[]
   channels: Channel[]
   mode: 'owned' | 'joined' | 'all'
 }>()
 
 // ---------- Setup ----------
+const channelInvs = toRef(props, 'channelInvites')
 const channels = toRef(props, 'channels')
 const authStore = useAuthStore()
 const { getCurrentUser } = storeToRefs(authStore)
@@ -148,13 +185,39 @@ function confirmAdd(): void {
 const emit = defineEmits<{
   (e: 'select-channel', channel: Channel): void
   (e: 'show-members', channel: Channel): void
+  (e: 'select-channel-invite', invite: ChannelInvite): void
 }>()
 
 function onChannelClick(channel: Channel) {
   emit('select-channel', channel)
 }
 
+function onChannelInviteClick(invite: ChannelInvite) {
+  emit('select-channel-invite', invite)
+}
+
 function onShowMembers(channel: Channel) {
   emit('show-members', channel)
 }
 </script>
+
+<style>
+.channel-invite {
+  background-color: rgb(255, 249, 181);
+}
+
+.body--dark .channel-invite {
+  background-color: rgb(41, 40, 29);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+/* Force all text inside to appear light */
+.body--dark .channel-invite .text-dark {
+  color: #f5f5f5 !important;
+}
+
+/* Slightly dim captions */
+.body--dark .channel-invite .text-grey-8 {
+  color: #b0b0b0 !important;
+}
+</style>

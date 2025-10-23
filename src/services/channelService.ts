@@ -1,6 +1,7 @@
 import { useAuthStore } from 'src/stores/auth-store';
 import { useChannelStore } from 'src/stores/channelStore';
 // import { getSocket } from "./socketService"
+import type { Channel } from 'src/utils/types'
 
 const auth = useAuthStore();
 const channelStore = useChannelStore();
@@ -20,8 +21,17 @@ export function createChannel(name: string, isPublic: boolean) {
     infoColor: '#FFFFFF',
     isPublic,
     hasUnreadMsgs: false,
-    members: [],
-  };
+    members: {
+      1760716592343: {
+        id: 1760716592343,
+        nickname: 'Jur',
+        isOwner: false,
+        kickVotes: 0,
+        currentlyTyping: '',
+        kickVoters: [],
+      },
+    },
+  } as Channel;
 
   channelStore.addChannel(Channel);
 
@@ -74,4 +84,60 @@ export function kickUserFromChannel(channelId: number, userId: number) {
   //   channel.id,
   //   getCurrentUser.value!.id,
   // );
+}
+
+export function acceptChannelInvite(channelInviteId: number) {
+  const channelInvite = channelStore.getChannelInviteById(channelInviteId)
+  if(!channelInvite || !channelInvite.name) return
+  
+  channelStore.addChannel({
+    id: 3, // Temporary ID, replace with server-generated ID
+    ownerId: 3, // Replace with actual owner ID or fallback
+    name: "Channel_3",
+    createdAt: new Date(),
+    updatedAt: new Date(),
+    joinedAt: new Date(),
+    description: '',
+    icon: 'lock',
+    color: 'red',
+    infoColor: 'red',
+    isPublic: false,
+    hasUnreadMsgs: false,
+    members: {
+      3: {
+            id: 3,
+            nickname: 'Alice',
+            isOwner: true,
+            kickVotes: 0,
+            currentlyTyping: '',
+            kickVoters: [],
+      },
+      1760716592343: {
+        id: 1760716592343,
+        nickname: 'Jur',
+        isOwner: false,
+        kickVotes: 0,
+        currentlyTyping: '',
+        kickVoters: [],
+      },
+    },
+  });
+
+  channelStore.addMessages([
+    {
+      user: 3,
+      text: 'This is a secret channel which only you have been invited to',
+      time: new Date(),
+      files: [],
+      userNickname: 'Alice',
+    },
+  ], 3)
+
+  channelStore.removeInvite(channelInviteId)
+}
+
+export function declineChannelInvite(channelInviteId: number) {
+  const channelInvite = channelStore.getChannelInviteById(channelInviteId)
+  if(!channelInvite) return
+  channelStore.removeInvite(channelInviteId)
 }

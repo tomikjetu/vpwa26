@@ -1,5 +1,5 @@
 import { defineStore } from 'pinia'
-import type { Member, Channel } from 'src/utils/types'
+import type { Member, Channel, ChannelInvite } from 'src/utils/types'
 import { Dialog } from 'quasar'
 
 export const useDialogStore = defineStore('dialogStore', {
@@ -9,6 +9,8 @@ export const useDialogStore = defineStore('dialogStore', {
     showMemberInfoDialog: false as boolean,
     dialogMember: null as Member | null,
     shownChannel: null as Channel | null,
+    showChannelInviteAcceptation: false as boolean,
+    channelInvite: null as ChannelInvite | null,
   }),
 
   getters: {
@@ -16,6 +18,14 @@ export const useDialogStore = defineStore('dialogStore', {
   },
 
   actions: {
+    openChannelInviteAcceptation(channelInvite: ChannelInvite) {
+      this.showChannelInviteAcceptation = true
+      this.channelInvite = channelInvite
+    },
+    closeChannelInviteAcceptation() {
+      this.showChannelInviteAcceptation = false
+      this.channelInvite = null
+    },
     /** Open the Member Info dialog with the given member and channel */
     openMemberInfo(member: Member, channel: Channel) {
       this.dialogMember = member

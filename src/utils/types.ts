@@ -14,6 +14,15 @@ export type Channel = {
   members: Record<number, Member>;
 };
 
+export type ChannelInvite = {
+  id: number;
+  name: string;
+  invitedAt: Date;
+  description?: string;
+  icon: string;
+  color: string;
+}
+
 /*
   Currently logged in user
 */
