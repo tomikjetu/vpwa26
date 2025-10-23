@@ -161,14 +161,12 @@ function selectMember(member: { id: number; nickname: string }) {
   selectedMemberIndex.value = null
 
   // Focus back on input
-  setTimeout(() => {
-    const input = inputRef.value?.getNativeElement?.() as HTMLInputElement | undefined
-    if (input) {
-      const newPos = before.length + String(member.id).length + 2
-      input.focus()
-      input.setSelectionRange(newPos, newPos)
-    }
-  }, 0)
+  const input = inputRef.value?.getNativeElement?.() as HTMLInputElement | undefined
+  if (input) {
+    const newPos = before.length + String(member.id).length + 2
+    input.focus()
+    input.setSelectionRange(newPos, newPos)
+  }
 }
 
 function handleKeyDown(event: KeyboardEvent) {
