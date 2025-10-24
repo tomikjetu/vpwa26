@@ -2,7 +2,6 @@ import { useAuthStore } from 'src/stores/auth-store';
 import { useChannelStore } from 'src/stores/channelStore';
 import type { Member } from 'src/utils/types';
 // import { getSocket } from "./socketService"
-import type { Channel } from 'src/utils/types'
 import { Notify } from 'quasar';
 
 const auth = useAuthStore();

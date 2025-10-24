@@ -1,8 +1,9 @@
 import { defineStore } from 'pinia';
 import type { Channel, ChatMessagePayload, ChannelInvite } from 'src/utils/types';
-import { storeToRefs } from 'pinia';
 import { useAuthStore } from 'src/stores/auth-store';
 import { Notify } from 'quasar';
+
+const auth = useAuthStore()
 
 export const useChannelStore = defineStore('channels', {
   state: () => ({
@@ -36,9 +37,9 @@ export const useChannelStore = defineStore('channels', {
             kickVotes: 1,
             kickVoters: [3],
           },
-          [getCurrentUser.value ? getCurrentUser.value.id : 7]: {
-            id: getCurrentUser.value ? getCurrentUser.value.id : 7,
-            nickname: 'Jur',
+          [auth.getCurrentUser ? auth.getCurrentUser.id : 7]: {
+            id: auth.getCurrentUser ? auth.getCurrentUser.id : 7,
+            nickname: auth.getCurrentUser ? auth.getCurrentUser.nickName : 'DefaultUser',
             isOwner: false,
             kickVotes: 0,
             currentlyTyping: '',
@@ -49,7 +50,7 @@ export const useChannelStore = defineStore('channels', {
             nickname: 'Cyril',
             isOwner: false,
             kickVotes: 1,
-            kickVoters: [getCurrentUser.value ? getCurrentUser.value.id : 7],
+            kickVoters: [auth.getCurrentUser ? auth.getCurrentUser.id : 7],
           },
         },
       },
@@ -81,7 +82,7 @@ export const useChannelStore = defineStore('channels', {
         },
         {
           user: 2,
-          text: 'Hello @1761231791593',
+          text: 'Hello @' + auth.getCurrentUser?.id,
           time: new Date(),
           files: [],
           userNickname: 'Bob',

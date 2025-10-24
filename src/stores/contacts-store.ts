@@ -28,7 +28,7 @@ export const useContacts = defineStore('contacts', () => {
     delete contacts.value[id];
   }
 
-  function updateStatus(id: number, newStatus: 'online' | 'dnd' | 'offline') {
+  function updateStatus(id: number, newStatus: 'online' | 'dnd' | 'offline' | 'disabled') {
     if (contacts.value[id]) {
       contacts.value[id].status = newStatus;
     }

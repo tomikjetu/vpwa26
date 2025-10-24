@@ -86,10 +86,12 @@ import { useAuthStore } from 'src/stores/auth-store'
 import { Dark } from 'quasar'
 import type { UserStatus } from 'src/utils/types'
 import { authService } from 'src/services/authService';
+import { useContacts } from 'src/stores/contacts-store'
  
 const dialogStore = useDialogStore()
 const chatStore = useChatStore()
 const auth = useAuthStore()
+const contactStore = useContacts()
 
 const search = ref('')
 const channelStore = useChannelStore()
@@ -104,7 +106,7 @@ msgNotif('Alice', 'Hello Bob <3', () => {handleSelectChannel(channel)})
 
 
 // Merge and filter lists when searching 
-const is
+const isDark
 = ref<boolean>(Dark.isActive)
 
 // Unified Profile Settings dialog state
@@ -167,6 +169,8 @@ function setDark(val: boolean) {
 
 function changeStatus(s: UserStatus) {
   auth.setStatus(s)
+  if(!auth.getCurrentUser) return
+  contactStore.updateStatus(auth.getCurrentUser.id, s)
 }
 
 function logoutAndClose() {
