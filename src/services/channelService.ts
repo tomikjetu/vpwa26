@@ -1,5 +1,6 @@
 import { useAuthStore } from 'src/stores/auth-store';
 import { useChannelStore } from 'src/stores/channelStore';
+import type { Member } from 'src/utils/types';
 // import { getSocket } from "./socketService"
 import type { Channel } from 'src/utils/types'
 import { Notify } from 'quasar';
@@ -9,6 +10,20 @@ const channelStore = useChannelStore();
 export function createChannel(name: string, isPublic: boolean) {
   //🧦 const socket = getSocket()
   // const payload = { name }
+  const user = auth.getCurrentUser;
+  if (!user) return;
+
+  // mapping from User to Member
+  const mbs = {
+    [user.id]: {
+      id: user.id,
+      nickname: user.nickName,
+      isOwner: true,
+      kickVotes: 0,
+      kickVoters: [],
+      currentlyTyping: '',
+    },
+  } as Record<number, Member>;
   const Channel = {
     id: Date.now(), // Temporary ID, replace with server-generated ID
     ownerId: auth.getCurrentUser?.id ?? 0, // Replace with actual owner ID or fallback
@@ -22,17 +37,8 @@ export function createChannel(name: string, isPublic: boolean) {
     infoColor: '#FFFFFF',
     isPublic,
     hasUnreadMsgs: false,
-    members: {
-      [auth.getCurrentUser ? auth.getCurrentUser.id : 7]: {
-        id: auth.getCurrentUser ? auth.getCurrentUser.id : 7,
-        nickname: 'Jur',
-        isOwner: false,
-        kickVotes: 0,
-        currentlyTyping: '',
-        kickVoters: [],
-      },
-    },
-  } as Channel;
+    members: mbs,
+  };
 
   channelStore.addChannel(Channel);
 
