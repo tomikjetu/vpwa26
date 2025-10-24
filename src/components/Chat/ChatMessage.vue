@@ -1,5 +1,5 @@
 <template>
-  <div class="message-card q-mb-sm">
+  <div class='message-card q-mb-sm' :class="messageContainsMention(payload.text) ? 'mention' : null">
     <!-- Header -->
     <div class="row justify-between items-start message-header">
       <!-- Left side: icon + name -->
@@ -21,8 +21,7 @@
     </div>
 
     <!-- Message text -->
-    <div v-if="payload.text != ''" class="q-mt-xs text-body2 message-body">
-      {{ payload.text }}
+    <div v-if="payload.text != ''" class="q-mt-xs text-body2 message-body" v-html="replaceMentions(payload.text)">
     </div>
 
     <!-- 📎 Attached files -->
@@ -39,7 +38,12 @@
 </template>
 
 <script setup lang="ts">
+import { useAuthStore } from 'src/stores/auth-store';
+import { useChatStore } from 'src/stores/chat-store';
 import type { ChatMessagePayload } from 'src/utils/types'
+
+const auth = useAuthStore()
+const chatStore = useChatStore()
 
 defineProps<{
   payload: ChatMessagePayload
@@ -55,6 +59,34 @@ function getFileURL(file: File | string): string {
   }
   return ''
 }
+
+function messageContainsMention(message: string) {
+  const id = auth.getCurrentUser?.id;
+  return message.includes(`@${id}`)
+}
+
+function replaceMentions(message: string) {
+  if (!message) return ''
+
+  const map: Record<string, string> = { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }
+  const escapeHtml = (s: string) =>
+    s.replace(/[&<>"']/g, c => map[c] ?? '')
+
+  const escaped = escapeHtml(message)
+  const mentionRegex = /@(\d+)/g
+  const formatMention = (id: string) => {
+    const channel = chatStore.channel;
+    if (!channel) return `<span class='mention-part'>@${id}</span>`;
+    const members = channel?.members;
+    const member = members ? Object.values(members).find(m => String(m.id) === id) : null;
+    if (!member) return `<span class='mention-part'>@${id}</span>`;
+
+    return `<span class='mention-part'>@${member.nickname}</span>`
+  }
+
+  return escaped.replace(mentionRegex, (_match, id) => formatMention(id))
+}
+
 </script>
 
 <style scoped>
@@ -69,6 +101,15 @@ function getFileURL(file: File | string): string {
   background-color: #2c2c2c;
 }
 
+.message-card.mention {
+  background-color: #fff494;
+  border-left: 4px solid #ffeb3b;
+}
+
+.body--dark .message-card.mention {
+  color: black;
+}
+
 .message-header {
   padding: 0.4rem;
 }
@@ -77,6 +118,15 @@ function getFileURL(file: File | string): string {
   border-top: 1px solid rgb(204, 204, 204);
   padding: 0.8rem;
   padding-bottom: 0.4rem;
+}
+
+/* v-html inserts raw HTML which isn't affected by scoped styles by default.
+     Use the deep selector so the injected .mention-part is styled when <style scoped> is used. */
+:deep(.message-body .mention-part) {
+  background-color: #ffebee;
+  color: #b71c1c;
+  padding: 0 4px;
+  border-radius: 4px;
 }
 
 .body--dark .message-body {
