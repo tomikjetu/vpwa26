@@ -120,7 +120,7 @@ export function acceptChannelInvite(channelInviteId: number) {
       },
       [auth.getCurrentUser ? auth.getCurrentUser.id : 7]: {
         id: auth.getCurrentUser ? auth.getCurrentUser.id : 7,
-        nickname: 'Jur',
+        nickname: auth.getCurrentUser ? auth.getCurrentUser.nickName : '',
         isOwner: false,
         kickVotes: 0,
         currentlyTyping: '',
