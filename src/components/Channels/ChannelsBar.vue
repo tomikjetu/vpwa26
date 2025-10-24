@@ -16,14 +16,16 @@
       <template v-else-if="(search ?? '').trim() !== ''">
         <ChannelList
           :channels="filteredAll"
+          :channel-invites="channelStore.channelInvites"
           :mode="'all'"
-          @select-channel="handleSelectChannel"
-          @show-members="handleShowMembers"/>
+          @select-channel="handleSelectChannel" 
+          @show-members="handleShowMembers"
+          @select-channel-invite="handleChannelInvite"/>
       </template>
 
       <template v-else>
-        <ChannelList :channels="channelStore.getJoinedChannels" :mode="'joined'" @select-channel="handleSelectChannel" @show-members="handleShowMembers" />
-        <ChannelList :channels="channelStore.getOwnedChannels" :mode="'owned'" @select-channel="handleSelectChannel" @show-members="handleShowMembers" />
+        <ChannelList :channels="channelStore.getJoinedChannels" :channel-invites="channelStore.channelInvites" :mode="'joined'" @select-channel="handleSelectChannel" @show-members="handleShowMembers" @select-channel-invite="handleChannelInvite" />
+        <ChannelList :channels="channelStore.getOwnedChannels" :channel-invites="[]" :mode="'owned'" @select-channel="handleSelectChannel" @show-members="handleShowMembers" @select-channel-invite="handleChannelInvite" />
       </template>
     </div>
     <div class="profile-footer">
@@ -75,24 +77,37 @@
 import { ref, computed } from 'vue'
 import { useChannelStore } from 'src/stores/channelStore'
 import ChannelList from './ChannelList.vue'
-import type { Channel } from 'src/utils/types'
 import MembersList from './MembersList.vue'
-import type { Member } from 'src/utils/types'
+import type { Channel, Member, ChannelInvite } from 'src/utils/types.ts'
 import { useChatStore } from 'src/stores/chat-store'
+import { useDialogStore } from 'src/stores/dialog-store'
+import { msgNotif } from 'src/services/channelService'
 import { useAuthStore } from 'src/stores/auth-store'
 import { Dark } from 'quasar'
 import type { UserStatus } from 'src/utils/types'
 import { authService } from 'src/services/authService';
-
+import { useContacts } from 'src/stores/contacts-store'
+ 
+const dialogStore = useDialogStore()
 const chatStore = useChatStore()
 const auth = useAuthStore()
+const contactStore = useContacts()
 
 const search = ref('')
 const channelStore = useChannelStore()
 const showMembersList = ref(false)
 const memberListChannel = ref<Channel | undefined>()
 
-const isDark = ref<boolean>(Dark.isActive)
+
+// STATIC NOTIFICATION ================================================
+const channel = channelStore.getChannelById(1)
+msgNotif('Alice', 'Hello Bob <3', () => {handleSelectChannel(channel)})
+// ====================================================================
+
+
+// Merge and filter lists when searching 
+const isDark
+= ref<boolean>(Dark.isActive)
 
 // Unified Profile Settings dialog state
 const showProfileDialog = ref(false)
@@ -118,7 +133,8 @@ const filteredAll = computed(() => {
   )
 })
 
-function handleSelectChannel(channel: Channel) {
+function handleSelectChannel(channel: Channel | undefined) {
+  if(!channel) return
   if(chatStore.channel) {
     channelStore.markAsRead(chatStore.channel.id)
   }
@@ -137,6 +153,11 @@ function handleCancelMembersList() {
   showMembersList.value = false
 }
 
+function handleChannelInvite(channelInvite: ChannelInvite) {
+  dialogStore.openChannelInviteAcceptation(channelInvite)
+}
+
+
 function openProfileSettings() {
   showProfileDialog.value = true
 }
@@ -148,6 +169,8 @@ function setDark(val: boolean) {
 
 function changeStatus(s: UserStatus) {
   auth.setStatus(s)
+  if(!auth.getCurrentUser) return
+  contactStore.updateStatus(auth.getCurrentUser.id, s)
 }
 
 function logoutAndClose() {

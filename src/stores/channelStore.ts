@@ -1,7 +1,9 @@
 import { defineStore } from 'pinia';
-import type { Channel, ChatMessagePayload } from 'src/utils/types';
+import type { Channel, ChatMessagePayload, ChannelInvite } from 'src/utils/types';
 import { useAuthStore } from 'src/stores/auth-store';
 import { Notify } from 'quasar';
+
+const auth = useAuthStore()
 
 export const useChannelStore = defineStore('channels', {
   state: () => ({
@@ -35,9 +37,9 @@ export const useChannelStore = defineStore('channels', {
             kickVotes: 1,
             kickVoters: [3],
           },
-          1760716592343: {
-            id: 1760716592343,
-            nickname: 'dada',
+          [auth.getCurrentUser ? auth.getCurrentUser.id : 7]: {
+            id: auth.getCurrentUser ? auth.getCurrentUser.id : 7,
+            nickname: auth.getCurrentUser ? auth.getCurrentUser.nickName : 'DefaultUser',
             isOwner: false,
             kickVotes: 0,
             currentlyTyping: '',
@@ -48,11 +50,20 @@ export const useChannelStore = defineStore('channels', {
             nickname: 'Cyril',
             isOwner: false,
             kickVotes: 1,
-            kickVoters: [1760716592343],
+            kickVoters: [auth.getCurrentUser ? auth.getCurrentUser.id : 7],
           },
         },
       },
     ] as Channel[],
+    channelInvites: [
+      {
+        id: 2,
+        name: "Channel_2",
+        invitedAt: new Date(),
+        icon: "lock",
+        color: "red",
+      }
+    ] as ChannelInvite[],
     messages: {
       1: [
         {
@@ -71,7 +82,7 @@ export const useChannelStore = defineStore('channels', {
         },
         {
           user: 2,
-          text: 'Hello @1761231791593',
+          text: 'Hello @' + auth.getCurrentUser?.id,
           time: new Date(),
           files: [],
           userNickname: 'Bob',
@@ -93,6 +104,11 @@ export const useChannelStore = defineStore('channels', {
   }),
 
   actions: {
+
+    removeInvite(channelId: number) {
+      this.channelInvites = this.channelInvites.filter(invite => invite.id !== channelId);;
+    },
+
     addChannel(channel: Channel) {
       if (!this.channels.find((c) => c.id === channel.id)) {
         this.channels.push(channel);
@@ -114,8 +130,15 @@ export const useChannelStore = defineStore('channels', {
       if (!this.messages[channelId]) {
         this.messages[channelId] = [];
       }
-      this.markAsRead(channelId);
+      this.markAsRead(channelId)
       this.messages[channelId].push(msg);
+    },
+
+    addMessages(msgs: ChatMessagePayload[], channelId: number) {
+      if (!this.messages[channelId]) {
+        this.messages[channelId] = [];
+      }
+      this.messages[channelId].push(...msgs)
     },
 
     markAsRead(channelId: number) {
@@ -229,6 +252,9 @@ export const useChannelStore = defineStore('channels', {
     },
     getUnreadMessagesByChannelId: (state) => {
       return (channelId: number) => state.unreadMessages[channelId] || [];
+    },
+    getChannelInviteById: (state) => {
+      return (id: number) => state.channelInvites.find((c) => c.id === id);
     },
     hasMoreOlder: (state) => {
       return (channelId: number) => {
