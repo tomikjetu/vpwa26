@@ -5,7 +5,7 @@
       <ChatTopBar :channel="chatStore.channel" />
       <ChatMessageList :channel="chatStore.channel" :messages="chatStore.messages"
         :unreadMessages="chatStore.unreadMessages" />
-      <ChatInput @send="chatStore.addMessage" />
+      <ChatInput @send="chatStore.addMessage" @typing="onTyping" />
     </template>
 
     <template v-else>
@@ -25,8 +25,17 @@ import ChatInput from './ChatInput.vue'
 import ChatMessageList from './ChatMessageList.vue'
 import ChatTopBar from './ChatTopBar.vue'
 import { useChatStore } from 'src/stores/chat-store'
+import { useChannelStore } from 'src/stores/channelStore'
+import { useAuthStore } from 'src/stores/auth-store'
 
 const chatStore = useChatStore()
+const channelStore = useChannelStore()
+const authStore = useAuthStore()
+
+function onTyping(text: string) {
+  if (!chatStore.channel || !authStore.getCurrentUser?.id) return
+  channelStore.updateMemberTyping(chatStore.channel.id, authStore.getCurrentUser.id, text)
+}
 
 </script>
 

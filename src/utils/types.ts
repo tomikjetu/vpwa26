@@ -26,12 +26,15 @@ export type ChannelInvite = {
 /*
   Currently logged in user
 */
+export type UserStatus = 'online' | 'dnd' | 'offline'
+
 export type User = {
   id: number /** contact id */;
   name: string;
   surname: string;
   nickName: string;
   email: string;
+  status?: UserStatus;
 };
 
 /*

@@ -2,7 +2,7 @@
     <MemberInfo v-model="dialog.showMemberInfoDialog" :member="dialog.dialogMember" :channel-id="dialog.shownChannel ? dialog.shownChannel.id : null"></MemberInfo>
     <ChannelInviteAccept v-model="dialog.showChannelInviteAcceptation" ></ChannelInviteAccept>
 
-    <div style="display: flex; height: 100%">
+    <div style="display: flex; height: 100vh; min-height: 0">
         <ChannelsBar></ChannelsBar>
         <ChatContainer></ChatContainer>
     </div>

@@ -1,5 +1,5 @@
 import { defineStore } from 'pinia';
-import type { User } from 'src/utils/types';
+import type { User, UserStatus } from 'src/utils/types';
 
 export interface AuthState {
   user: User | null;
@@ -38,6 +38,12 @@ export const useAuthStore = defineStore('auth', {
     updateUser(updatedUser: User) {
       this.user = updatedUser;
       // No need for manual localStorage - persistence plugin handles it automatically
+    },
+
+    setStatus(status: UserStatus) {
+      if (!this.user) return;
+      this.user = { ...this.user, status };
+      // persistence plugin will store updated user automatically
     },
 
     updateToken(newToken: string) {
