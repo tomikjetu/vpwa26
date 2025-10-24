@@ -2,6 +2,7 @@ import { useAuthStore } from 'src/stores/auth-store';
 import { useChannelStore } from 'src/stores/channelStore';
 // import { getSocket } from "./socketService"
 import type { Channel } from 'src/utils/types'
+import { Notify } from 'quasar';
 
 const auth = useAuthStore();
 const channelStore = useChannelStore();
@@ -17,13 +18,13 @@ export function createChannel(name: string, isPublic: boolean) {
     joinedAt: new Date(),
     description: '',
     icon: isPublic ? 'group' : 'lock',
-    color: '#000000',
+    color: 'blue',
     infoColor: '#FFFFFF',
     isPublic,
     hasUnreadMsgs: false,
     members: {
-      1760716592343: {
-        id: 1760716592343,
+      [auth.getCurrentUser ? auth.getCurrentUser.id : 7]: {
+        id: auth.getCurrentUser ? auth.getCurrentUser.id : 7,
         nickname: 'Jur',
         isOwner: false,
         kickVotes: 0,
@@ -61,7 +62,7 @@ export function joinChannel(channelName: string) {
     joinedAt: new Date(),
     description: '',
     icon: 'group',
-    color: '#000000',
+    color: 'blue',
     infoColor: '#FFFFFF',
     isPublic: false,
     hasUnreadMsgs: false,
@@ -112,8 +113,8 @@ export function acceptChannelInvite(channelInviteId: number) {
             currentlyTyping: '',
             kickVoters: [],
       },
-      1760716592343: {
-        id: 1760716592343,
+      [auth.getCurrentUser ? auth.getCurrentUser.id : 7]: {
+        id: auth.getCurrentUser ? auth.getCurrentUser.id : 7,
         nickname: 'Jur',
         isOwner: false,
         kickVotes: 0,
@@ -140,4 +141,50 @@ export function declineChannelInvite(channelInviteId: number) {
   const channelInvite = channelStore.getChannelInviteById(channelInviteId)
   if(!channelInvite) return
   channelStore.removeInvite(channelInviteId)
+}
+
+export function msgNotif(name: string, text: string, onClick: () => void) {
+  const maxLength = 30
+  const shortText = text.length > maxLength
+    ? text.slice(0, maxLength).trimEnd() + '...'
+    : text
+
+  const shortName = name.length > maxLength
+    ? name.slice(0, maxLength).trimEnd() + '...'
+    : name
+
+  const closeNotify = Notify.create({
+    message: `<strong style="font-size: 18px; display: block; margin-bottom: 4px;">${shortName}</strong>`,
+    caption: `<span style="font-size: 16px; line-height: 1.4;">${shortText}</span>`,
+    color: 'white',
+    textColor: 'black',
+    position: 'bottom-right',
+    timeout: 6000,
+    progress: false,
+    html: true,
+    classes:
+      'q-pa-lg q-ma-md shadow-4 rounded-2xl border cursor-pointer transition-all hover:bg-grey-2 messenger-notify',
+    icon: 'account_circle',
+    iconColor: 'blue-6',
+    actions: [
+      {
+        icon: 'close',
+        color: 'grey-8',
+        handler: () => {
+          event?.stopPropagation?.()
+          closeNotify()
+        }
+      }
+    ]
+  })
+
+  setTimeout(() => {
+    const el = document.querySelector('.messenger-notify')
+    if (el) {
+      el.addEventListener('click', () => {
+        onClick()
+        closeNotify()
+      })
+    }
+  }, 0)
 }

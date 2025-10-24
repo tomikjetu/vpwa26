@@ -39,13 +39,21 @@ import MembersList from './MembersList.vue'
 import type { Channel, Member, ChannelInvite } from 'src/utils/types.ts'
 import { useChatStore } from 'src/stores/chat-store'
 import { useDialogStore } from 'src/stores/dialog-store'
-
+import { msgNotif } from 'src/services/channelService'
+ 
 const dialogStore = useDialogStore()
 const chatStore = useChatStore()
 const search = ref('')
 const channelStore = useChannelStore()
 const showMembersList = ref(false)
 const memberListChannel = ref<Channel | undefined>()
+
+
+// STATIC NOTIFICATION ================================================
+const channel = channelStore.getChannelById(1)
+msgNotif('Alice', 'Hello Bob <3', () => {handleSelectChannel(channel)})
+// ====================================================================
+
 
 // Merge and filter lists when searching 
 const filteredAll = computed(() => {
@@ -59,7 +67,8 @@ const filteredAll = computed(() => {
   )
 })
 
-function handleSelectChannel(channel: Channel) {
+function handleSelectChannel(channel: Channel | undefined) {
+  if(!channel) return
   if(chatStore.channel) {
     channelStore.markAsRead(chatStore.channel.id)
   }
@@ -80,8 +89,8 @@ function handleCancelMembersList() {
 
 function handleChannelInvite(channelInvite: ChannelInvite) {
   dialogStore.openChannelInviteAcceptation(channelInvite)
-  console.log("OPENED")
 }
+
 
 </script>
 

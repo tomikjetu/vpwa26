@@ -17,7 +17,7 @@ export const getMenuOptions = (channel: Channel): DropdownItem[] => {
       disable: channel.ownerId != getCurrentUser.value?.id && !channel.isPublic,
     },
     { label: 'Members', class: '', disable: false },
-    { label: 'Change icon', class: '', disable: false },
+   // { label: 'Change icon', class: '', disable: false },
     {
       label: channel.ownerId != getCurrentUser.value?.id ? 'Leave' : 'Remove',
       class: 'warning',

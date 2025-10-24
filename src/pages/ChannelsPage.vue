@@ -15,6 +15,6 @@
     import { useDialogStore } from 'src/stores/dialog-store'
     import MemberInfo from 'src/components/Dialog/MemberInfo.vue'
     import ChannelInviteAccept from 'src/components/Dialog/ChannelInviteAccept.vue'
-
+    
     const dialog = useDialogStore()
 </script>
