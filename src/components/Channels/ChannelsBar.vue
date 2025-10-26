@@ -1,8 +1,8 @@
 <template>
-  <q-page class="channels-bar-container">
+  <div class="channels-bar-container">
 
     <q-input square filled v-model="search" label="Search" type="text" clearable debounce="300"
-      class="flat-top q-mt-md q-mb-md channels-search-input">
+             class="flat-top q-mt-md q-mb-md channels-search-input">
       <template v-slot:prepend>
         <q-icon name="search" />
       </template>
@@ -18,7 +18,7 @@
           :channels="filteredAll"
           :channel-invites="channelStore.channelInvites"
           :mode="'all'"
-          @select-channel="handleSelectChannel" 
+          @select-channel="handleSelectChannel"
           @show-members="handleShowMembers"
           @select-channel-invite="handleChannelInvite"/>
       </template>
@@ -70,7 +70,7 @@
         </q-card-actions>
       </q-card>
     </q-dialog>
-  </q-page>
+  </div>
 </template>
 
 <script setup lang="ts">
@@ -87,7 +87,7 @@ import { Dark } from 'quasar'
 import type { UserStatus } from 'src/utils/types'
 import { authService } from 'src/services/authService';
 import { useContacts } from 'src/stores/contacts-store'
- 
+
 const dialogStore = useDialogStore()
 const chatStore = useChatStore()
 const auth = useAuthStore()
@@ -105,9 +105,9 @@ msgNotif('Alice', 'Hello Bob <3', () => {handleSelectChannel(channel)})
 // ====================================================================
 
 
-// Merge and filter lists when searching 
+// Merge and filter lists when searching
 const isDark
-= ref<boolean>(Dark.isActive)
+  = ref<boolean>(Dark.isActive)
 
 // Unified Profile Settings dialog state
 const showProfileDialog = ref(false)
@@ -184,26 +184,35 @@ function logoutAndClose() {
 
 <style scoped>
 .channels-bar-container {
-  border-right: 1px solid rgb(195, 195, 195);
   display: flex;
   flex-direction: column;
+  width: 100%;
+  height: 100%;
+  min-width: 0;
+  min-height: 0;
+  border-right: 1px solid rgb(195, 195, 195);
 }
 
 .channels-search-input {
-  width: 350px;
+  width: 100%;
   flex: 0 0 auto;
 }
 
 .channels-list-container {
-  width: 350px;
+  width: 100%;
   flex: 1 1 auto;
   display: flex;
   flex-direction: column;
+  min-height: 0;
+  min-width: 0;
+  overflow: auto;
 }
+
 .profile-footer {
-  width: 350px;
+  width: 100%;
   flex: 0 0 auto;
   display: flex;
   align-items: flex-end;
 }
+
 </style>

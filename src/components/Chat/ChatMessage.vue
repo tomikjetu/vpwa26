@@ -4,12 +4,12 @@
     <div class="row justify-between items-start message-header">
       <!-- Left side: icon + name -->
       <div class="row items-center clickable-name" @click="$emit('show-member-info', payload.user)">
-        <q-avatar color="primary" text-color="white" size="32px" class="q-mr-sm">
-          <q-icon name="person" />
+        <q-avatar size="32px" class="q-mr-sm">
+          <q-icon name="person" color="primary" />
         </q-avatar>
 
         <!-- 🔹 Clickable name -->
-        <div class="text-bold">
+        <div class="text-bold text-primary">
           {{ payload.userNickname }}
         </div>
       </div>
@@ -102,12 +102,15 @@ function replaceMentions(message: string) {
 }
 
 .message-card.mention {
-  background-color: #fff494;
-  border-left: 4px solid #ffeb3b;
+  background-color: #FFF49499;
+  color: #000;
+  border-left: 4px solid #f6e86a;
 }
 
 .body--dark .message-card.mention {
-  color: black;
+  background-color: rgba(84, 75, 26, 0.48);
+  color: #ffffff;
+  border-left: 4px solid #988700;
 }
 
 .message-header {
@@ -120,13 +123,16 @@ function replaceMentions(message: string) {
   padding-bottom: 0.4rem;
 }
 
-/* v-html inserts raw HTML which isn't affected by scoped styles by default.
-     Use the deep selector so the injected .mention-part is styled when <style scoped> is used. */
 :deep(.message-body .mention-part) {
-  background-color: #ffebee;
-  color: #b71c1c;
+  background-color: rgba(252, 209, 52, 0.6);
+  color: #000;
   padding: 0 4px;
   border-radius: 4px;
+}
+
+.body--dark .message-card :deep(.message-body .mention-part) {
+  background-color: rgba(204, 161, 5, 0.6) !important; /* neviem ako inak by som to spravil okrem !important */
+  color: #fff !important;
 }
 
 .body--dark .message-body {
@@ -135,12 +141,10 @@ function replaceMentions(message: string) {
 
 .clickable-name {
   cursor: pointer;
-  color: var(--q-color-primary);
   transition: color 0.2s ease;
 }
 
 .clickable-name:hover {
-  color: var(--q-color-primary-light);
   text-decoration: underline;
 }
 
@@ -169,12 +173,16 @@ function replaceMentions(message: string) {
 
 .file-name {
   font-size: 14px;
-  color: var(--q-color-primary);
+  color: var(--q-primary);
   text-decoration: none;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
   max-width: 180px;
+}
+
+.body--dark .file-name {
+  color: #7DDFE4;
 }
 
 .file-name:hover {

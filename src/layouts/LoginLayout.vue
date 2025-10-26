@@ -1,7 +1,7 @@
 <template>
-    <q-layout view="lHh Lpr lFf" class="bg-grey-1">
+    <q-layout view="lHh Lpr lFf">
         <q-page-container>
-            <q-page class="flex flex-center">
+            <q-page class="flex flex-center bg-surface">
                 <div class="auth-container">
                     <div class="text-center q-mb-lg">
                         <q-avatar size="80px" class="q-mb-md">
