@@ -1,6 +1,7 @@
 # Quasar App (vpwa26)
 
 FIIT VPWA
+[Github](https://github.com/tomikjetu/vpwa26)
 
 ## Install the dependencies
 
