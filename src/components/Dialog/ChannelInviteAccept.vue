@@ -1,6 +1,6 @@
 <template>
   <q-dialog v-model="show" persistent>
-    <q-card class="q-pa-md q-pt-lg q-pb-lg channel-invite-dialog">
+    <q-card class="q-pa-md q-pt-lg q-pb-lg channel-invite-dialog bg-surface text-app border-left-app">
       <!-- Channel icon and name -->
       <div class="column items-center q-mb-md">
         <q-avatar :color="dialogStore.channelInvite?.color" text-color="white" size="70px" class="q-mb-sm">
@@ -19,10 +19,10 @@
       <!-- Action buttons -->
       <div class="row justify-evenly q-mt-md">
         <q-btn
-          color="primary"
+          flat
+          class="text-primary"
           label="Accept"
           icon="check"
-          unelevated
           @click="onAcceptInvite()"
         />
         <q-btn
@@ -62,8 +62,6 @@ function onDeclineInvite() {
 <style scoped>
 .channel-invite-dialog {
   min-width: 320px;
-  background-color: #fffbea; /* soft yellowish tone */
-  border-left: 4px solid #fdd835;
   border-radius: 12px;
   box-shadow: 0 4px 14px rgba(0, 0, 0, 0.1);
 }

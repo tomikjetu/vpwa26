@@ -1,1 +1,42 @@
 // app global css in SCSS form
+.body--light {
+  --notif-bg: #ffffff;
+  --notif-text: #1a1a1a;
+  --notif-hover: #f5f5f5;
+  --notif-border: rgba(0, 0, 0, 0.08);
+  --notif-icon: #3b82f6;
+}
+
+.body--dark {
+  --q-primary: #7DDFE4;
+  --notif-bg: #1c1c1e;
+  --notif-text: #e6e6e6;
+  --notif-hover: #2a2a2d;
+  --notif-border: rgba(255, 255, 255, 0.12);
+  --notif-icon: #60a5fa;
+}
+
+.body--dark .text-primary {
+  color: #7DDFE4 !important;
+}
+
+.messenger-notify {
+  background: var(--notif-bg) !important;
+  color: var(--notif-text) !important;
+  border: 1px solid var(--notif-border) !important;
+
+  max-width: 420px !important;
+  min-width: 320px;
+  padding: 10px 14px !important;
+  border-radius: 14px !important;
+  background: var(--notif-bg) !important;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.messenger-notify:hover {
+  background: var(--notif-hover) !important;
+}
+.messenger-notify .q-icon {
+  color: var(--notif-icon) !important;
+}

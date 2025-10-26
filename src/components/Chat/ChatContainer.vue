@@ -45,9 +45,12 @@ function onTyping(text: string) {
   display: flex;
   flex-direction: column;
   width: 100%;
-  border: 1px solid #ddd;
+  height: 100%;
+  min-width: 0;
+  min-height: 0;
   overflow: hidden;
-  flex: 1;
+  flex: 1 1 auto;
+  border: 1px solid #ddd;
 }
 
 .body--dark .chat-container {

@@ -95,7 +95,7 @@ export function kickUserFromChannel(channelId: number, userId: number) {
 export function acceptChannelInvite(channelInviteId: number) {
   const channelInvite = channelStore.getChannelInviteById(channelInviteId)
   if(!channelInvite || !channelInvite.name) return
-  
+
   channelStore.addChannel({
     id: 3, // Temporary ID, replace with server-generated ID
     ownerId: 3, // Replace with actual owner ID or fallback
@@ -111,12 +111,12 @@ export function acceptChannelInvite(channelInviteId: number) {
     hasUnreadMsgs: false,
     members: {
       3: {
-            id: 3,
-            nickname: 'Alice',
-            isOwner: true,
-            kickVotes: 0,
-            currentlyTyping: '',
-            kickVoters: [],
+        id: 3,
+        nickname: 'Alice',
+        isOwner: true,
+        kickVotes: 0,
+        currentlyTyping: '',
+        kickVoters: [],
       },
       [auth.getCurrentUser ? auth.getCurrentUser.id : 7]: {
         id: auth.getCurrentUser ? auth.getCurrentUser.id : 7,
@@ -161,7 +161,6 @@ export function msgNotif(name: string, text: string, onClick: () => void) {
   const closeNotify = Notify.create({
     message: `<strong style="font-size: 18px; display: block; margin-bottom: 4px;">${shortName}</strong>`,
     caption: `<span style="font-size: 16px; line-height: 1.4;">${shortText}</span>`,
-    color: 'white',
     textColor: 'black',
     position: 'bottom-right',
     timeout: 6000,
@@ -174,7 +173,6 @@ export function msgNotif(name: string, text: string, onClick: () => void) {
     actions: [
       {
         icon: 'close',
-        color: 'grey-8',
         handler: () => {
           event?.stopPropagation?.()
           closeNotify()

@@ -1,6 +1,6 @@
 <template>
   <q-item-label header class="row items-center justify-between">
-    <span>{{ headerTitle }}</span>
+    <span class="section-title">{{ headerTitle }}</span>
 
     <!-- Action button for 'owned' or 'joined' -->
     <q-btn v-if="mode !== 'all'" flat dense color="primary" :icon="mode === 'owned' ? 'add' : 'add'"
@@ -202,6 +202,10 @@ function onShowMembers(channel: Channel) {
 </script>
 
 <style>
+.body--dark .section-title {
+  color: rgba(255, 255, 255, 0.92) !important;
+}
+
 .channel-invite {
   background-color: rgb(255, 249, 181);
 }
@@ -211,12 +215,10 @@ function onShowMembers(channel: Channel) {
   border: 1px solid rgba(255, 255, 255, 0.1);
 }
 
-/* Force all text inside to appear light */
 .body--dark .channel-invite .text-dark {
   color: #f5f5f5 !important;
 }
 
-/* Slightly dim captions */
 .body--dark .channel-invite .text-grey-8 {
   color: #b0b0b0 !important;
 }
