@@ -27,7 +27,7 @@ export const useChannelStore = defineStore('channels', {
             nickname: 'Alice',
             isOwner: true,
             kickVotes: 0,
-            currentlyTyping: 'Ahoj, ako s',
+            currentlyTyping: 'Ahoj, ako sa',
             kickVoters: [],
           },
           2: {
@@ -35,6 +35,7 @@ export const useChannelStore = defineStore('channels', {
             nickname: 'Bob',
             isOwner: false,
             kickVotes: 1,
+            currentlyTyping: 'asdaa',
             kickVoters: [3],
           },
           [auth.getCurrentUser ? auth.getCurrentUser.id : 7]: {

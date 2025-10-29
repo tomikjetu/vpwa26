@@ -57,8 +57,9 @@ const typingMembers: ComputedRef<Member[]> = computed(() => {
 const typingLabel = computed(() => {
   const list = typingMembers.value
   const n = list.length
+  const names = list.map(m => m.nickname)
   if (n === 1 && list[0]) return `${list[0].nickname} is typing`
-  return `${n} people are typing`
+  return `${names.join(', ')} are typing`
 })
 
 const hasMoreOlder = computed(() => {
@@ -121,7 +122,7 @@ watch(
 
 <style scoped>
 .messages-container {
-  flex: 1;
+  flex: 1 1 700px;
   display: flex;
   flex-direction: column;
   width: 100%;
@@ -131,6 +132,12 @@ watch(
   min-height: 0;
   gap: 0.9rem;
   scrollbar-gutter: stable both-edges;
+}
+
+@media (max-width: 1024px) {
+  .messages-container {
+    flex: 1 1 640px;
+  }
 }
 
 .body--dark .messages-container {
