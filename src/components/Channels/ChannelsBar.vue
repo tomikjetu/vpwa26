@@ -53,7 +53,7 @@
           <div class="text-subtitle2 q-mb-sm">Status</div>
           <div class="column q-gutter-sm">
             <q-btn :outline="currentStatus !== 'online'" :color="currentStatus === 'online' ? 'positive' : 'grey-7'" icon="circle" label="Online" @click="changeStatus('online')" />
-            <q-btn :outline="currentStatus !== 'dnd'" :color="currentStatus === 'dnd' ? 'negative' : 'grey-7'" icon="do_not_disturb_on" label="Do Not Disturb" @click="changeStatus('dnd')" />
+            <q-btn :outline="currentStatus !== 'dnd'" :color="currentStatus === 'dnd' ? 'negative' : 'grey-7'" icon="do_not_disturb_on" label="Dnd" @click="changeStatus('dnd')" />
             <q-btn :outline="currentStatus !== 'offline'" :color="currentStatus === 'offline' ? 'grey' : 'grey-7'" icon="radio_button_unchecked" label="Offline" @click="changeStatus('offline')" />
           </div>
         </q-card-section>

@@ -45,11 +45,9 @@ function onTyping(text: string) {
   display: flex;
   flex-direction: column;
   width: 100%;
-  height: 100%;
-  min-width: 0;
+  height: 100dvh;
   min-height: 0;
   overflow: hidden;
-  flex: 1 1 auto;
   border: 1px solid #ddd;
 }
 
@@ -66,4 +64,5 @@ function onTyping(text: string) {
   text-align: center;
   opacity: 0.8;
 }
+
 </style>

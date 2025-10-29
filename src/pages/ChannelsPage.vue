@@ -1,7 +1,7 @@
 <template>
   <MemberInfo v-model="dialog.showMemberInfoDialog" :member="dialog.dialogMember" :channel-id="dialog.shownChannel ? dialog.shownChannel.id : null" />
   <ChannelInviteAccept v-model="dialog.showChannelInviteAcceptation" />
-  <ChatContainer class="pane-fill with-padding-top" />
+  <ChatContainer class="pane-fill" />
 </template>
 
 <script setup lang="ts">
@@ -34,12 +34,6 @@ const dialog = useDialogStore()
   height: 100%;
   min-width: 0;
   min-height: 0;
-}
-
-@media (max-width: 1023px) {
-  .with-padding-top {
-    padding-top: 60px;
-  }
 }
 
 </style>

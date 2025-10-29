@@ -122,7 +122,7 @@ watch(
 
 <style scoped>
 .messages-container {
-  flex: 1 1 700px;
+  flex: 1 1 600px;
   display: flex;
   flex-direction: column;
   width: 100%;
@@ -132,12 +132,6 @@ watch(
   min-height: 0;
   gap: 0.9rem;
   scrollbar-gutter: stable both-edges;
-}
-
-@media (max-width: 1024px) {
-  .messages-container {
-    flex: 1 1 640px;
-  }
 }
 
 .body--dark .messages-container {
