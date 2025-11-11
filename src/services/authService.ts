@@ -1,5 +1,7 @@
 import type { User, LoginCredentials, RegisterCredentials } from 'src/utils/types';
 import { useAuthStore } from 'src/stores/auth-store';
+import { api } from '../boot/axios';
+import { type RegisterData, type LoginData } from 'src/utils/apiTypes';
 
 class AuthService {
   private getAuthStore() {
@@ -32,26 +34,21 @@ class AuthService {
    */
   async login(credentials: LoginCredentials): Promise<User> {
     try {
-      // TODO: Replace this with actual API call
-      // For now, simulate API call with mock data
-      await this.simulateApiDelay();
+      const response = await api.post<LoginData>('/user/login', {
+        email: credentials.email,
+        password: credentials.password,
+      });
 
-      // Mock authentication - in real app, this would be an API call
-      if (credentials.email === 'test@example.com' && credentials.password === 'password') {
-        const user: User = {
-          id: 1,
-          name: 'John',
-          surname: 'Doe',
-          nickName: 'johndoe',
-          email: credentials.email,
-        };
+      const user: User = {
+        id: response.data.user.id,
+        name: response.data.user.first_name,
+        surname: response.data.user.last_name,
+        nickName: response.data.user.nick,
+        email: response.data.user.email,
+      };
 
-        const token = 'mock-jwt-token-' + Date.now();
-        this.getAuthStore().setAuth(token, user);
-        return user;
-      } else {
-        throw new Error('Invalid email or password');
-      }
+      this.getAuthStore().setAuth(response.data.sessionToken, user);
+      return user;
     } catch (error) {
       throw error instanceof Error ? error : new Error('Login failed');
     }
@@ -62,25 +59,27 @@ class AuthService {
    */
   async register(credentials: RegisterCredentials): Promise<User> {
     try {
-      // Validate passwords match
       if (credentials.password !== credentials.confirmPassword) {
         throw new Error('Passwords do not match');
       }
 
-      // TODO: Replace this with actual API call
-      await this.simulateApiDelay();
-
-      // Mock registration - in real app, this would be an API call
-      const user: User = {
-        id: Number(Date.now().toString()),
-        name: credentials.name,
-        surname: credentials.surname,
-        nickName: credentials.nickName,
+      const response = await api.post<RegisterData>('/user/register', {
+        first_name: credentials.name,
+        last_name: credentials.surname,
+        nick: credentials.nickName,
         email: credentials.email,
+        password: credentials.password,
+      });
+
+      const user: User = {
+        id: response.data.user.id,
+        name: response.data.user.first_name,
+        surname: response.data.user.last_name,
+        nickName: response.data.user.nick,
+        email: response.data.user.email,
       };
 
-      const token = 'mock-jwt-token-' + Date.now();
-      this.getAuthStore().setAuth(token, user);
+      this.getAuthStore().setAuth(response.data.sessionToken, user);
       return user;
     } catch (error) {
       throw error instanceof Error ? error : new Error('Registration failed');
@@ -97,18 +96,8 @@ class AuthService {
   /**
    * Refresh authentication token
    */
-  async refreshToken(): Promise<string> {
-    try {
-      // TODO: Replace this with actual API call
-      await this.simulateApiDelay();
-
-      const newToken = 'refreshed-mock-jwt-token-' + Date.now();
-      this.getAuthStore().updateToken(newToken);
-      return newToken;
-    } catch {
-      this.getAuthStore().clearAuth();
-      throw new Error('Token refresh failed');
-    }
+  refreshToken(): string {
+    return '';
   }
 
   /**
