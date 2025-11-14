@@ -1,5 +1,4 @@
 import { Notify } from 'quasar';
-import { inviteUserToChannel } from 'src/services/channelService';
 import { useChannelStore } from 'src/stores/channelStore';
 
 export default function Invite() {
@@ -36,7 +35,7 @@ export default function Invite() {
           message: `User ${args[1]} not found in channel ${args[0]}`,
         });
 
-      inviteUserToChannel(channel?.id, user.id);
+      channelStore.inviteUserAction(channel?.id, user.id);
     },
   };
 }

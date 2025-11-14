@@ -1,9 +1,10 @@
-import { authService } from 'src/services/authService';
+import { useAuthStore } from 'src/stores/auth-store';
 export default function logout() {
+  const auth = useAuthStore();
   return {
     cmd: 'logout',
-    execute: () => {
-      authService.logout();
+    execute: async () => {
+      await auth.logout();
       window.location.href = '/auth/login';
     },
   };

@@ -2,7 +2,7 @@
   <div class="channels-bar-container">
 
     <q-input square filled v-model="search" label="Search" type="text" clearable debounce="300"
-             class="flat-top q-mt-md q-mb-md channels-search-input">
+      class="flat-top q-mt-md q-mb-md channels-search-input">
       <template v-slot:prepend>
         <q-icon name="search" />
       </template>
@@ -10,26 +10,28 @@
 
     <div class="channels-list-container">
       <template v-if="showMembersList">
-        <MembersList :channel="memberListChannel" :members="membersListContent" @cancel="handleCancelMembersList"></MembersList>
+        <MembersList :channel="memberListChannel" :members="membersListContent" @cancel="handleCancelMembersList">
+        </MembersList>
       </template>
 
       <template v-else-if="(search ?? '').trim() !== ''">
-        <ChannelList
-          :channels="filteredAll"
-          :channel-invites="channelStore.channelInvites"
-          :mode="'all'"
-          @select-channel="handleSelectChannel"
-          @show-members="handleShowMembers"
-          @select-channel-invite="handleChannelInvite"/>
+        <ChannelList :channels="filteredAll" :channel-invites="channelStore.channelInvites" :mode="'all'"
+          @select-channel="handleSelectChannel" @show-members="handleShowMembers"
+          @select-channel-invite="handleChannelInvite" />
       </template>
 
       <template v-else>
-        <ChannelList :channels="channelStore.getJoinedChannels" :channel-invites="channelStore.channelInvites" :mode="'joined'" @select-channel="handleSelectChannel" @show-members="handleShowMembers" @select-channel-invite="handleChannelInvite" />
-        <ChannelList :channels="channelStore.getOwnedChannels" :channel-invites="[]" :mode="'owned'" @select-channel="handleSelectChannel" @show-members="handleShowMembers" @select-channel-invite="handleChannelInvite" />
+        <ChannelList :channels="channelStore.getJoinedChannels" :channel-invites="channelStore.channelInvites"
+          :mode="'joined'" @select-channel="handleSelectChannel" @show-members="handleShowMembers"
+          @select-channel-invite="handleChannelInvite" />
+        <ChannelList :channels="channelStore.getOwnedChannels" :channel-invites="[]" :mode="'owned'"
+          @select-channel="handleSelectChannel" @show-members="handleShowMembers"
+          @select-channel-invite="handleChannelInvite" />
       </template>
     </div>
     <div class="profile-footer">
-      <q-btn icon="person" round flat size="lg" class="q-ml-sm q-mb-sm" aria-label="Profile" @click="openProfileSettings" />
+      <q-btn icon="person" round flat size="lg" class="q-ml-sm q-mb-sm" aria-label="Profile"
+        @click="openProfileSettings" />
     </div>
 
     <!-- Unified Profile Settings Dialog -->
@@ -52,9 +54,12 @@
         <q-card-section>
           <div class="text-subtitle2 q-mb-sm">Status</div>
           <div class="column q-gutter-sm">
-            <q-btn :outline="currentStatus !== 'online'" :color="currentStatus === 'online' ? 'positive' : 'grey-7'" icon="circle" label="Online" @click="changeStatus('online')" />
-            <q-btn :outline="currentStatus !== 'dnd'" :color="currentStatus === 'dnd' ? 'negative' : 'grey-7'" icon="do_not_disturb_on" label="Do Not Disturb" @click="changeStatus('dnd')" />
-            <q-btn :outline="currentStatus !== 'offline'" :color="currentStatus === 'offline' ? 'grey' : 'grey-7'" icon="radio_button_unchecked" label="Offline" @click="changeStatus('offline')" />
+            <q-btn :outline="currentStatus !== 'online'" :color="currentStatus === 'online' ? 'positive' : 'grey-7'"
+              icon="circle" label="Online" @click="changeStatus('online')" />
+            <q-btn :outline="currentStatus !== 'dnd'" :color="currentStatus === 'dnd' ? 'negative' : 'grey-7'"
+              icon="do_not_disturb_on" label="Do Not Disturb" @click="changeStatus('dnd')" />
+            <q-btn :outline="currentStatus !== 'offline'" :color="currentStatus === 'offline' ? 'grey' : 'grey-7'"
+              icon="radio_button_unchecked" label="Offline" @click="changeStatus('offline')" />
           </div>
         </q-card-section>
 
@@ -85,7 +90,6 @@ import { msgNotif } from 'src/services/channelService'
 import { useAuthStore } from 'src/stores/auth-store'
 import { Dark } from 'quasar'
 import type { UserStatus } from 'src/utils/types'
-import { authService } from 'src/services/authService';
 import { useContacts } from 'src/stores/contacts-store'
 
 const dialogStore = useDialogStore()
@@ -101,7 +105,7 @@ const memberListChannel = ref<Channel | undefined>()
 
 // STATIC NOTIFICATION ================================================
 const channel = channelStore.getChannelById(1)
-msgNotif('Alice', 'Hello Bob <3', () => {handleSelectChannel(channel)})
+msgNotif('Alice', 'Hello Bob <3', () => { handleSelectChannel(channel) })
 // ====================================================================
 
 
@@ -134,8 +138,8 @@ const filteredAll = computed(() => {
 })
 
 function handleSelectChannel(channel: Channel | undefined) {
-  if(!channel) return
-  if(chatStore.channel) {
+  if (!channel) return
+  if (chatStore.channel) {
     channelStore.markAsRead(chatStore.channel.id)
   }
   chatStore.openChat(channel)
@@ -169,12 +173,13 @@ function setDark(val: boolean) {
 
 function changeStatus(s: UserStatus) {
   auth.setStatus(s)
-  if(!auth.getCurrentUser) return
+  if (!auth.getCurrentUser) return
   contactStore.updateStatus(auth.getCurrentUser.id, s)
 }
 
-function logoutAndClose() {
-  authService.logout()
+async function logoutAndClose() {
+  const auth = useAuthStore();
+  await auth.logout();
   showProfileDialog.value = false
   window.location.href = '/auth/login'
 }
@@ -214,5 +219,4 @@ function logoutAndClose() {
   display: flex;
   align-items: flex-end;
 }
-
 </style>

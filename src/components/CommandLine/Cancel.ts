@@ -1,6 +1,5 @@
 import { useChannelStore } from 'src/stores/channelStore';
 import { Notify } from 'quasar';
-import { cancelChannel } from 'src/services/channelService';
 
 export default function Cancel() {
   /*
@@ -26,7 +25,7 @@ export default function Cancel() {
           type: 'negative',
           message: `Channel ${args[0]} not found`,
         });
-      cancelChannel(channel.id);
+      channelStore.cancelChannelAction(channel.id);
     },
   };
 }

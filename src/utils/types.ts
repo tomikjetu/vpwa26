@@ -21,12 +21,12 @@ export type ChannelInvite = {
   description?: string;
   icon: string;
   color: string;
-}
+};
 
 /*
   Currently logged in user
 */
-export type UserStatus = 'online' | 'dnd' | 'offline'
+export type UserStatus = 'online' | 'dnd' | 'offline';
 
 export type User = {
   id: number /** contact id */;
@@ -75,6 +75,7 @@ export interface DropdownItem {
 }
 
 export interface ChatMessagePayload {
+  id?: number;
   user: number;
   text: string;
   time: Date;

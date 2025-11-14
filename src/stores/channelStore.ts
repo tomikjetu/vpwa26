@@ -2,111 +2,126 @@ import { defineStore } from 'pinia';
 import type { Channel, ChatMessagePayload, ChannelInvite } from 'src/utils/types';
 import { useAuthStore } from 'src/stores/auth-store';
 import { Notify } from 'quasar';
+import { channelService } from 'src/services/channelService';
 
-const auth = useAuthStore()
+interface ChannelState {
+  channels: Channel[];
+  channelInvites: ChannelInvite[];
+  messages: Record<number, ChatMessagePayload[]>;
+  unreadMessages: Record<number, ChatMessagePayload[]>;
+  olderPagesLeft: Record<number, number>;
+  isLoading: boolean;
+  error: string | null;
+}
 
 export const useChannelStore = defineStore('channels', {
-  state: () => ({
-    channels: [
-      {
-        id: 1,
-        ownerId: 3,
-        name: 'Channel_1',
-        createdAt: new Date(),
-        updatedAt: new Date(),
-        joinedAt: new Date(),
-        description: 'The default channel',
-        icon: 'group',
-        color: 'grey',
-        infoColor: 'red',
-        isPublic: true,
-        hasUnreadMsgs: true,
-        members: {
-          3: {
-            id: 3,
-            nickname: 'Alice',
-            isOwner: true,
-            kickVotes: 0,
-            currentlyTyping: 'Ahoj, ako s',
-            kickVoters: [],
-          },
-          2: {
-            id: 2,
-            nickname: 'Bob',
-            isOwner: false,
-            kickVotes: 1,
-            kickVoters: [3],
-          },
-          [auth.getCurrentUser ? auth.getCurrentUser.id : 7]: {
-            id: auth.getCurrentUser ? auth.getCurrentUser.id : 7,
-            nickname: auth.getCurrentUser ? auth.getCurrentUser.nickName : 'DefaultUser',
-            isOwner: false,
-            kickVotes: 0,
-            currentlyTyping: '',
-            kickVoters: [],
-          },
-          4: {
-            id: 4,
-            nickname: 'Cyril',
-            isOwner: false,
-            kickVotes: 1,
-            kickVoters: [auth.getCurrentUser ? auth.getCurrentUser.id : 7],
-          },
-        },
-      },
-    ] as Channel[],
-    channelInvites: [
-      {
-        id: 2,
-        name: "Channel_2",
-        invitedAt: new Date(),
-        icon: "lock",
-        color: "red",
-      }
-    ] as ChannelInvite[],
-    messages: {
-      1: [
+  state: (): ChannelState => {
+    // Get auth store inside state function to avoid initialization issues
+    const auth = useAuthStore();
+
+    return {
+      channels: [
         {
-          user: 2,
-          text: 'Hello Alice :3',
-          time: new Date(),
-          files: [],
-          userNickname: 'Bob',
+          id: 1,
+          ownerId: 3,
+          name: 'Channel_1',
+          createdAt: new Date(),
+          updatedAt: new Date(),
+          joinedAt: new Date(),
+          description: 'The default channel',
+          icon: 'group',
+          color: 'grey',
+          infoColor: 'red',
+          isPublic: true,
+          hasUnreadMsgs: true,
+          members: {
+            3: {
+              id: 3,
+              nickname: 'Alice',
+              isOwner: true,
+              kickVotes: 0,
+              currentlyTyping: 'Ahoj, ako s',
+              kickVoters: [],
+            },
+            2: {
+              id: 2,
+              nickname: 'Bob',
+              isOwner: false,
+              kickVotes: 1,
+              kickVoters: [3],
+            },
+            [auth.getCurrentUser ? auth.getCurrentUser.id : 7]: {
+              id: auth.getCurrentUser ? auth.getCurrentUser.id : 7,
+              nickname: auth.getCurrentUser ? auth.getCurrentUser.nickName : 'DefaultUser',
+              isOwner: false,
+              kickVotes: 0,
+              currentlyTyping: '',
+              kickVoters: [],
+            },
+            4: {
+              id: 4,
+              nickname: 'Cyril',
+              isOwner: false,
+              kickVotes: 1,
+              kickVoters: [auth.getCurrentUser ? auth.getCurrentUser.id : 7],
+            },
+          },
         },
+      ] as Channel[],
+      channelInvites: [
         {
-          user: 2,
-          text: 'Hello @3 aand @4',
-          time: new Date(),
-          files: [],
-          userNickname: 'Bob',
+          id: 2,
+          name: 'Channel_2',
+          invitedAt: new Date(),
+          icon: 'lock',
+          color: 'red',
         },
-        {
-          user: 2,
-          text: 'Hello @' + auth.getCurrentUser?.id,
-          time: new Date(),
-          files: [],
-          userNickname: 'Bob',
-        },
-      ],
-    } as Record<number, ChatMessagePayload[]>,
-    unreadMessages: {
-      1: [
-        {
-          user: 3,
-          text: 'Hello Bob <3',
-          time: new Date(),
-          files: [],
-          userNickname: 'Alice',
-        },
-      ],
-    } as Record<number, ChatMessagePayload[]>,
-    olderPagesLeft: {} as Record<number, number>,
-  }),
+      ] as ChannelInvite[],
+      messages: {
+        1: [
+          {
+            user: 2,
+            text: 'Hello Alice :3',
+            time: new Date(),
+            files: [],
+            userNickname: 'Bob',
+          },
+          {
+            user: 2,
+            text: 'Hello @3 aand @4',
+            time: new Date(),
+            files: [],
+            userNickname: 'Bob',
+          },
+          {
+            user: 2,
+            text: 'Hello @' + auth.getCurrentUser?.id,
+            time: new Date(),
+            files: [],
+            userNickname: 'Bob',
+          },
+        ],
+      } as Record<number, ChatMessagePayload[]>,
+      unreadMessages: {
+        1: [
+          {
+            user: 3,
+            text: 'Hello Bob <3',
+            time: new Date(),
+            files: [],
+            userNickname: 'Alice',
+          },
+        ],
+      } as Record<number, ChatMessagePayload[]>,
+      olderPagesLeft: {} as Record<number, number>,
+      isLoading: false,
+      error: null,
+    };
+  },
 
   actions: {
-
     removeInvite(channelId: number) {
-      this.channelInvites = this.channelInvites.filter(invite => invite.id !== channelId);;
+      this.channelInvites = this.channelInvites.filter((invite) => invite.id !== channelId);
     },
 
     addChannel(channel: Channel) {
@@ -130,7 +145,7 @@ export const useChannelStore = defineStore('channels', {
       if (!this.messages[channelId]) {
         this.messages[channelId] = [];
       }
-      this.markAsRead(channelId)
+      this.markAsRead(channelId);
       this.messages[channelId].push(msg);
     },
 
@@ -138,7 +153,7 @@ export const useChannelStore = defineStore('channels', {
       if (!this.messages[channelId]) {
         this.messages[channelId] = [];
       }
-      this.messages[channelId].push(...msgs)
+      this.messages[channelId].push(...msgs);
     },
 
     markAsRead(channelId: number) {
@@ -230,6 +245,156 @@ export const useChannelStore = defineStore('channels', {
       if (!member) return;
       member.currentlyTyping = text;
     },
+
+    // === Async Actions coordinating with channelService ===
+    // Note: Socket operations don't return data immediately - they trigger socket events
+    // that are handled by socketService listeners which update the store reactively
+
+    createChannelAction(name: string, isPublic: boolean) {
+      this.isLoading = true;
+      this.error = null;
+      try {
+        channelService.createChannel(name, isPublic);
+        // Channel will be added via socket event 'channel:created'
+      } catch (err) {
+        this.error = err instanceof Error ? err.message : String(err);
+        throw err;
+      } finally {
+        this.isLoading = false;
+      }
+    },
+
+    async fetchChannelsAction() {
+      this.isLoading = true;
+      this.error = null;
+      try {
+        const channels = await channelService.fetchChannels();
+        this.setChannels(channels);
+        return channels;
+      } catch (err) {
+        this.error = err instanceof Error ? err.message : String(err);
+        throw err;
+      } finally {
+        this.isLoading = false;
+      }
+    },
+
+    joinChannelAction(channelName: string) {
+      this.isLoading = true;
+      this.error = null;
+      try {
+        channelService.joinChannel(channelName);
+        // Channel will be added via socket event 'channel:joined'
+      } catch (err) {
+        this.error = err instanceof Error ? err.message : String(err);
+        throw err;
+      } finally {
+        this.isLoading = false;
+      }
+    },
+
+    quitChannelAction(channelId: number) {
+      this.isLoading = true;
+      this.error = null;
+      try {
+        channelService.quitChannel(channelId);
+        // Channel will be removed via socket event 'channel:left'
+      } catch (err) {
+        this.error = err instanceof Error ? err.message : String(err);
+        throw err;
+      } finally {
+        this.isLoading = false;
+      }
+    },
+
+    revokeUserAction(channelId: number, userId: number) {
+      this.isLoading = true;
+      this.error = null;
+      try {
+        channelService.revokeUserFromChannel(channelId, userId);
+        // User will be removed via socket event 'member:left'
+      } catch (err) {
+        this.error = err instanceof Error ? err.message : String(err);
+        throw err;
+      } finally {
+        this.isLoading = false;
+      }
+    },
+
+    inviteUserAction(channelId: number, userId: number) {
+      this.isLoading = true;
+      this.error = null;
+      try {
+        channelService.inviteUserToChannel(channelId, userId);
+        // Invite will be sent via socket event
+      } catch (err) {
+        this.error = err instanceof Error ? err.message : String(err);
+        throw err;
+      } finally {
+        this.isLoading = false;
+      }
+    },
+
+    cancelChannelAction(channelId: number) {
+      this.isLoading = true;
+      this.error = null;
+      try {
+        channelService.cancelChannel(channelId);
+        // Channel will be removed via socket event 'channel:deleted'
+      } catch (err) {
+        this.error = err instanceof Error ? err.message : String(err);
+        throw err;
+      } finally {
+        this.isLoading = false;
+      }
+    },
+
+    kickUserAction(channelId: number, userId: number) {
+      this.isLoading = true;
+      this.error = null;
+      try {
+        channelService.kickUserFromChannel(channelId, userId);
+        // Increment kick counter locally
+        const auth = useAuthStore();
+        const currentUser = auth.getCurrentUser;
+        if (currentUser) {
+          this.incrementKickCounter(userId, channelId, currentUser.id);
+        }
+      } catch (err) {
+        this.error = err instanceof Error ? err.message : String(err);
+        throw err;
+      } finally {
+        this.isLoading = false;
+      }
+    },
+
+    acceptChannelInviteAction(channelInviteId: number) {
+      this.isLoading = true;
+      this.error = null;
+      try {
+        channelService.acceptChannelInvite(channelInviteId);
+        // Channel will be added and invite removed via socket event 'channel:invite:accepted'
+      } catch (err) {
+        this.error = err instanceof Error ? err.message : String(err);
+        throw err;
+      } finally {
+        this.isLoading = false;
+      }
+    },
+
+    declineChannelInviteAction(channelInviteId: number) {
+      this.isLoading = true;
+      this.error = null;
+      try {
+        channelService.declineChannelInvite(channelInviteId);
+        // Invite will be removed via socket event 'channel:invite:declined'
+      } catch (err) {
+        this.error = err instanceof Error ? err.message : String(err);
+        throw err;
+      } finally {
+        this.isLoading = false;
+      }
+    },
   },
 
   getters: {
@@ -263,5 +428,7 @@ export const useChannelStore = defineStore('channels', {
         return (typeof left === 'number' ? left : 5) > 0;
       };
     },
+    getLoading: (state) => state.isLoading,
+    getError: (state) => state.error,
   },
 });

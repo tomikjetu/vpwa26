@@ -3,13 +3,17 @@ import { ref, computed } from 'vue';
 import type { Contact } from 'src/utils/types.ts';
 import { useAuthStore } from 'src/stores/auth-store';
 
-const auth = useAuthStore()
 /** Pinia store for managing contacts */
 export const useContacts = defineStore('contacts', () => {
-  // State — dictionary of contacts keyed by ID
+  // Get auth store inside the factory function to avoid initialization issues
+  const auth = useAuthStore();
 
+  // State — dictionary of contacts keyed by ID
   const contacts = ref<Record<number, Contact>>({
-    [auth.getCurrentUser ? auth.getCurrentUser.id : 7]: { id: auth.getCurrentUser ? auth.getCurrentUser.id : 7, status: 'online' },
+    [auth.getCurrentUser ? auth.getCurrentUser.id : 7]: {
+      id: auth.getCurrentUser ? auth.getCurrentUser.id : 7,
+      status: 'online',
+    },
     2: { id: 2, status: 'dnd' },
     3: { id: 3, status: 'online' },
     4: { id: 4, status: 'offline' },

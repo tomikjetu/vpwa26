@@ -103,7 +103,7 @@
 import { ref } from 'vue';
 import { useRouter } from 'vue-router';
 import { Notify } from 'quasar';
-import { authService } from 'src/services/authService';
+import { useAuthStore } from 'src/stores/auth-store';
 import type { RegisterCredentials } from 'src/utils/types';
 
 const router = useRouter();
@@ -120,13 +120,14 @@ const form = ref<RegisterCredentials>({
 const showPassword = ref(false);
 const showConfirmPassword = ref(false);
 const agreeToTerms = ref(false);
+const auth = useAuthStore();
 const loading = ref(false);
 
 async function onSubmit() {
     loading.value = true;
 
     try {
-        const user = await authService.register(form.value);
+        const user = await auth.register(form.value);
 
         Notify.create({
             type: 'positive',

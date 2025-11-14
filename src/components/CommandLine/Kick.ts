@@ -1,6 +1,5 @@
 import { useChannelStore } from 'src/stores/channelStore';
 import { Notify } from 'quasar';
-import { kickUserFromChannel } from 'src/services/channelService';
 
 export default function Kick() {
   /*
@@ -42,7 +41,7 @@ export default function Kick() {
           message: `User ${args[1]} not found in channel ${args[0]}`,
         });
 
-      kickUserFromChannel(channel.id, user.id);
+      channelStore.kickUserAction(channel.id, user.id);
     },
   };
 }
