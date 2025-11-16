@@ -86,7 +86,6 @@ import MembersList from './MembersList.vue'
 import type { Channel, Member, ChannelInvite } from 'src/utils/types.ts'
 import { useChatStore } from 'src/stores/chat-store'
 import { useDialogStore } from 'src/stores/dialog-store'
-import { msgNotif } from 'src/services/channelService'
 import { useAuthStore } from 'src/stores/auth-store'
 import { Dark } from 'quasar'
 import type { UserStatus } from 'src/utils/types'
@@ -101,13 +100,6 @@ const search = ref('')
 const channelStore = useChannelStore()
 const showMembersList = ref(false)
 const memberListChannel = ref<Channel | undefined>()
-
-
-// STATIC NOTIFICATION ================================================
-const channel = channelStore.getChannelById(1)
-msgNotif('Alice', 'Hello Bob <3', () => { handleSelectChannel(channel) })
-// ====================================================================
-
 
 // Merge and filter lists when searching
 const isDark

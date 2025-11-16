@@ -1,12 +1,9 @@
-import { api } from 'src/boot/axios';
-import type { Channel } from 'src/utils/types';
 import { Notify } from 'quasar';
 import { socketEmit } from './socketService';
 
 /**
- * ChannelService - Hybrid service using sockets for real-time ops and HTTP for queries
- * Socket operations: create, join, leave, invite, kick, revoke, messages
- * HTTP operations: fetch initial data, file uploads
+ * ChannelService - Socket-based service for real-time channel operations
+ * All channel data comes from socket events pushed by the server
  */
 class ChannelService {
   /**
@@ -15,18 +12,6 @@ class ChannelService {
   createChannel(name: string, isPublic: boolean): void {
     socketEmit.createChannel(name, isPublic);
     // Response will come via socket event 'channel:created'
-  }
-
-  /**
-   * Fetch all channels (HTTP - initial load)
-   */
-  async fetchChannels(): Promise<Channel[]> {
-    try {
-      const response = await api.get<Channel[]>('/channel/list');
-      return response.data;
-    } catch (error) {
-      throw error instanceof Error ? error : new Error('Failed to fetch channels');
-    }
   }
 
   /**
