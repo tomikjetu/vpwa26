@@ -3,14 +3,16 @@
     <div v-if="loadingTop" class="top-loader">Loading older messages...</div>
     <div v-else-if="!hasMoreOlder" class="top-info">No older messages</div>
 
-    <ChatMessage v-for="(m, index) in messages" :payload="m" :key="`old-${index}`" @show-member-info="onShowMemberInfo" />
+    <ChatMessage v-for="(m, index) in messages" :payload="m" :key="`old-${index}`"
+      @show-member-info="onShowMemberInfo" />
 
     <div v-if="unreadMessages.length > 0" class="unread-separator">
       <div class="unread-line"></div>
       <span class="unread-label">NEW</span>
     </div>
 
-    <ChatMessage v-for="(m, index) in unreadMessages" :payload="m" :key="`new-${index}`" @show-member-info="onShowMemberInfo" />
+    <ChatMessage v-for="(m, index) in unreadMessages" :payload="m" :key="`new-${index}`"
+      @show-member-info="onShowMemberInfo" />
 
     <div v-if="typingMembers.length > 0" class="typing-indicator">
       <q-avatar size="24px" icon="more_horiz" color="grey-5" text-color="white" class="q-mr-sm" />
@@ -85,7 +87,7 @@ async function loadOlder() {
   const prevScrollHeight = el.scrollHeight
   const prevScrollTop = el.scrollTop
 
-  channelStore.fetchOlderMessages(props.channel.id, 20)
+  channelStore.fetchOlderMessages(props.channel.id)
   await nextTick()
 
   const newScrollHeight = el.scrollHeight
@@ -202,7 +204,17 @@ watch(
 }
 
 @keyframes typing-blink {
-  0%, 80%, 100% { opacity: 0.2; transform: translateY(0); }
-  40% { opacity: 0.9; transform: translateY(-1px); }
+
+  0%,
+  80%,
+  100% {
+    opacity: 0.2;
+    transform: translateY(0);
+  }
+
+  40% {
+    opacity: 0.9;
+    transform: translateY(-1px);
+  }
 }
 </style>

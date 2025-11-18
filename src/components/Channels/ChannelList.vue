@@ -48,14 +48,8 @@
   <!-- Channel List -->
   <q-scroll-area :style="'flex: ' + (mode == 'owned' ? '1' : '2')">
     <q-list padding>
-      <q-item
-        v-for="(invite, index) in channelInvs"
-        :key="'channel-invs' + index"
-        clickable
-        v-ripple
-        @click="onChannelInviteClick(invite)"
-        class="channel-invite shadow-1 rounded-borders"
-      >
+      <q-item v-for="(invite, index) in channelInvs" :key="'channel-invs' + index" clickable v-ripple
+        @click="onChannelInviteClick(invite)" class="channel-invite shadow-1 rounded-borders">
         <!-- Left icon/avatar -->
         <q-item-section avatar top>
           <q-avatar color="amber-6" text-color="white" size="42px">
@@ -130,10 +124,10 @@
 import type { Channel, ChannelInvite } from 'src/utils/types'
 import ChannelDropdown from './ChannelDropdown.vue'
 import { useAuthStore } from 'src/stores/auth-store'
+import { useChannelStore } from 'src/stores/channelStore'
 import { storeToRefs } from 'pinia'
 import { toRef, ref, computed } from 'vue'
 import { getMenuOptions } from 'src/composables/useChannelList'
-import { createChannel, joinChannel } from 'src/services/channelService'
 
 // ---------- Props ----------
 const props = defineProps<{
@@ -146,6 +140,7 @@ const props = defineProps<{
 const channelInvs = toRef(props, 'channelInvites')
 const channels = toRef(props, 'channels')
 const authStore = useAuthStore()
+const channelStore = useChannelStore()
 const { getCurrentUser } = storeToRefs(authStore)
 
 const showAddDialog = ref(false)
@@ -169,9 +164,9 @@ function confirmAdd(): void {
 
 
   if (props.mode === 'owned') {
-    createChannel(newChannelName.value.trim(), isPublic.value)
+    channelStore.createChannelAction(newChannelName.value.trim(), isPublic.value)
   } else if (props.mode === 'joined') {
-    joinChannel(newChannelName.value.trim())
+    channelStore.joinChannelAction(newChannelName.value.trim())
   } else {
     return
   }

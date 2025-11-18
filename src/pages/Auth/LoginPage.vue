@@ -53,7 +53,7 @@
 import { ref } from 'vue';
 import { useRouter } from 'vue-router';
 import { Notify } from 'quasar';
-import { authService } from 'src/services/authService';
+import { useAuthStore } from 'src/stores/auth-store';
 import type { LoginCredentials } from 'src/utils/types';
 
 const router = useRouter();
@@ -65,13 +65,14 @@ const form = ref<LoginCredentials>({
 
 const showPassword = ref(false);
 const rememberMe = ref(false);
+const auth = useAuthStore();
 const loading = ref(false);
 
 async function onSubmit() {
     loading.value = true;
 
     try {
-        const user = await authService.login(form.value);
+        const user = await auth.login(form.value);
 
         Notify.create({
             type: 'positive',
