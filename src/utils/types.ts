@@ -9,7 +9,7 @@ export type Channel = {
   icon: string;
   color: string;
   infoColor: string;
-  isPublic: boolean;
+  isPrivate: boolean;
   hasUnreadMsgs: boolean;
   members: Record<number, Member>;
 };
@@ -47,11 +47,13 @@ export type Contact = {
 
 export type Member = {
   id: number /** contact id */;
+  userId: number;
   nickname: string;
   kickVotes: number;
   isOwner: boolean;
   currentlyTyping?: string;
-  kickVoters: number[];
+  receivedKickVotes: number[];
+  status: UserStatus;
 };
 
 export type LoginCredentials = {
@@ -79,6 +81,34 @@ export interface ChatMessagePayload {
   user: number;
   text: string;
   time: Date;
-  files: (File | string)[];
-  userNickname: string;
+  files: string[];
+  userNickname: string | undefined;
+}
+
+export interface ServerReplyMsg {
+    id: number;
+    content: string;
+    createdAt: Date;
+    channelId: number;
+    memberId: number;
+    files: {
+        name: string;
+        mime: string;
+        size: number;
+        id: number;
+    }[];
+    user: {
+        id: number;
+        nick: string;
+    };
+}
+
+export interface ServerReplyMember {
+  id: number;
+  channel_id: number;
+  is_owner: boolean;
+  user_id: number;
+  user: {
+    nick: string;
+  }
 }

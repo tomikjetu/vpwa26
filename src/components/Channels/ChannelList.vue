@@ -18,15 +18,15 @@
       </q-card-section>
 
       <q-separator />
-
+      
       <q-card-section>
         <q-input v-model="newChannelName" :label="mode === 'owned' ? 'Channel name' : 'Enter channel name to join'"
           dense autofocus />
 
         <!-- Only show public/private options for owned channels -->
-        <q-option-group v-if="mode === 'owned'" v-model="isPublic" :options="[
-          { label: 'Public', value: true },
-          { label: 'Private', value: false }
+        <q-option-group v-if="mode === 'owned'" v-model="isPrivate" :options="[
+          { label: 'Public', value: false },
+          { label: 'Private', value: true }
         ]" type="radio" inline class="q-mt-md" />
 
         <!-- Info for joined channels -->
@@ -145,7 +145,7 @@ const { getCurrentUser } = storeToRefs(authStore)
 
 const showAddDialog = ref(false)
 const newChannelName = ref('')
-const isPublic = ref(true)
+const isPrivate = ref(true)
 
 const headerTitle = computed(() => {
   if (props.mode === 'owned') return 'Owned channels'
@@ -164,7 +164,7 @@ function confirmAdd(): void {
 
 
   if (props.mode === 'owned') {
-    channelStore.createChannelAction(newChannelName.value.trim(), isPublic.value)
+    channelStore.createChannelAction(newChannelName.value.trim(), isPrivate.value)
   } else if (props.mode === 'joined') {
     channelStore.joinChannelAction(newChannelName.value.trim())
   } else {
@@ -172,7 +172,7 @@ function confirmAdd(): void {
   }
 
   newChannelName.value = ''
-  isPublic.value = true
+  isPrivate.value = false
   showAddDialog.value = false
 }
 

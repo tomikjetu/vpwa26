@@ -33,10 +33,10 @@ export class ConnectionSocketController implements ISocketController {
       updatedAt: new Date(channel.updatedAt),
       joinedAt: new Date(channel.joinedAt || channel.createdAt),
       description: channel.description || '',
-      icon: channel.isPublic ? 'tag' : 'lock',
-      color: channel.isPublic ? 'primary' : 'purple',
+      icon: channel.isPrivate ? 'lock' : 'tag',
+      color: channel.isPrivate ? 'purple' : 'primary',
       infoColor: 'grey',
-      isPublic: channel.isPublic,
+      isPrivate: channel.isPrivate,
       hasUnreadMsgs: false,
       members: channel.members || {},
     }));

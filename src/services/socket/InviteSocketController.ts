@@ -67,7 +67,7 @@ export class InviteSocketController implements ISocketController {
         icon: 'lock',
         color: 'purple',
         infoColor: 'grey',
-        isPublic: data.channel.isPublic,
+        isPrivate: data.channel.isPrivate,
         hasUnreadMsgs: false,
         members: data.channel.members || {},
       };

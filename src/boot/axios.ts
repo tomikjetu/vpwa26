@@ -15,7 +15,7 @@ declare module 'vue' {
 // good idea to move this instance creation inside of the
 // "export default () => {}" function below (which runs individually
 // for each client)
-const api = axios.create({ baseURL: 'http://localhost:3333/' });
+const api = axios.create({ baseURL: 'http://127.0.0.1:3333' });
 
 // Add request interceptor to attach Bearer token
 api.interceptors.request.use(
@@ -41,7 +41,8 @@ api.interceptors.response.use(
     if (error.response?.status === 401) {
       const authStore = useAuthStore();
       authStore.clearAuth();
-      window.location.href = '/auth/login';
+      //window.location.href = '/auth/login';
+      console.warn("401 detected");
     }
     return Promise.reject(error instanceof Error ? error : new Error(String(error)));
   },

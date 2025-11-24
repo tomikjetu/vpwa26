@@ -140,6 +140,7 @@ function handleSelectChannel(channel: Channel | undefined) {
 const membersListContent = ref<Member[]>([])
 
 function handleShowMembers(channel: Channel) {
+
   showMembersList.value = true
   membersListContent.value = Object.values(channel.members)
   memberListChannel.value = channel

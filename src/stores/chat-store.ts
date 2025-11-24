@@ -5,27 +5,27 @@ import { useChannelStore } from './channelStore'
 
 export const useChatStore = defineStore('chatContainer', () => {
   const channel = ref<Channel | null>(null)
+  const channelStore = useChannelStore()
 
   const messages = computed(() => {
     if (!channel.value) return []
-    const channelStore = useChannelStore()
-    return channelStore.getMessagesByChannelId(channel.value.id)
+    return channelStore.getMessages()
   })
 
   const unreadMessages = computed(() => {
     if (!channel.value) return []
-    const channelStore = useChannelStore()
-    return channelStore.getUnreadMessagesByChannelId(channel.value.id)
+    return channelStore.getUnreadMessages()
   })
 
-  function addMessage(msg: ChatMessagePayload) {
+  function sendMessage(msg: ChatMessagePayload, files: File[]) {
     if (!channel.value) return
-    const channelStore = useChannelStore()
-    channelStore.addMessage(msg, channel.value.id)
+    channelStore.sendMessage(msg, channel.value.id, files)
   }
 
-  function openChat(newChannel: Channel | null) {
+  async function openChat(newChannel: Channel | null) {
     channel.value = newChannel
+    if(!newChannel) return
+    await channelStore.loadMessages(newChannel.id)
   }
 
   function closeChat() {
@@ -41,7 +41,7 @@ export const useChatStore = defineStore('chatContainer', () => {
     unreadMessages,
 
     // actions
-    addMessage,
+    sendMessage,
     openChat,
     closeChat
   }

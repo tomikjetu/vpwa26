@@ -24,7 +24,7 @@ export class MemberSocketController implements ISocketController {
     socket.on('member:typing', this.handleMemberTyping.bind(this));
 
     // Member kick vote received
-    socket.on('member:kick-vote', this.handleMemberKickVote.bind(this));
+    socket.on('member:kick-voted', this.handleMemberKickVote.bind(this));
   }
 
   cleanup(socket: Socket): void {
@@ -32,7 +32,7 @@ export class MemberSocketController implements ISocketController {
     socket.off('member:left');
     socket.off('member:kicked');
     socket.off('member:typing');
-    socket.off('member:kick-vote');
+    socket.off('member:kick-voted');
   }
 
   private handleMemberJoined(data: { channelId: number; member: Member }): void {
@@ -43,11 +43,13 @@ export class MemberSocketController implements ISocketController {
       // Transform backend member data
       channel.members[data.member.id] = {
         id: data.member.id,
+        userId: data.member.userId,
         nickname: data.member.nickname,
         isOwner: data.member.isOwner,
         kickVotes: data.member.kickVotes || 0,
         currentlyTyping: '',
-        kickVoters: data.member.kickVoters || [],
+        receivedKickVotes: data.member.receivedKickVotes || [],
+        status: data.member.status || 'offline',
       };
 
       Notify.create({
@@ -75,7 +77,7 @@ export class MemberSocketController implements ISocketController {
     }
   }
 
-  private handleMemberKicked(data: { channelId: number; userId: number; kickedBy: number }): void {
+  private handleMemberKicked(data: { channelId: number;  memberId : number, userId : number; kickedBy: number }): void {
     const channelStore = useChannelStore();
     const authStore = useAuthStore();
     const chatStore = useChatStore();
@@ -97,9 +99,10 @@ export class MemberSocketController implements ISocketController {
         position: 'top',
       });
     } else if (channel.members[data.userId]) {
-      const member = channel.members[data.userId];
-      const memberName = member?.nickname || 'User';
-      delete channel.members[data.userId];
+      const member = channel.members[data.memberId];
+      if(!member) return
+      const memberName = member.nickname || 'User';
+      delete channel.members[data.memberId];
 
       Notify.create({
         type: 'info',
@@ -125,24 +128,26 @@ export class MemberSocketController implements ISocketController {
 
   private handleMemberKickVote(data: {
     channelId: number;
-    targetUserId: number;
+    targetMemberId: number;
     voterId: number;
     voteCount: number;
   }): void {
     const channelStore = useChannelStore();
     const channel = channelStore.getChannelById(data.channelId);
 
-    if (channel && channel.members[data.targetUserId]) {
-      const member = channel.members[data.targetUserId];
+    console.log(data)
+
+    if (channel && channel.members[data.targetMemberId]) {
+      const member = channel.members[data.targetMemberId];
       if (member) {
         member.kickVotes = data.voteCount;
 
-        if (!member.kickVoters) {
-          member.kickVoters = [];
+        if (!member.receivedKickVotes) {
+          member.receivedKickVotes = [];
         }
 
-        if (!member.kickVoters.includes(data.voterId)) {
-          member.kickVoters.push(data.voterId);
+        if (!member.receivedKickVotes.includes(data.voterId)) {
+          member.receivedKickVotes.push(data.voterId);
         }
       }
     }

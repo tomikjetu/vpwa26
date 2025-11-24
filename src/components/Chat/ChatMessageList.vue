@@ -29,6 +29,7 @@ import type { ChatMessagePayload, Channel, Member } from 'src/utils/types'
 import { useDialogStore } from 'src/stores/dialog-store'
 import { useChannelStore } from 'src/stores/channelStore'
 import { useAuthStore } from 'src/stores/auth-store'
+import { useChatStore } from 'src/stores/chat-store'
 
 const props = defineProps<{
   messages: ChatMessagePayload[],
@@ -81,20 +82,27 @@ async function loadOlder() {
   loadingTop.value = true
   isPrepending = true
 
-  // Simulate network delay for loading older messages
-  await new Promise((resolve) => setTimeout(resolve, 600))
+  // // Simulate network delay for loading older messages
+  // await new Promise((resolve) => setTimeout(resolve, 600))
 
   const prevScrollHeight = el.scrollHeight
   const prevScrollTop = el.scrollTop
 
-  channelStore.fetchOlderMessages(props.channel.id)
+  // channelStore.fetchOlderMessages(props.channel.id)
+  // await nextTick()
+  const chatStore = useChatStore()
+
+  if (!chatStore.channel) return
+  await channelStore.loadNextMessages(chatStore.channel.id, channelStore.messages.length)
+
   await nextTick()
 
   const newScrollHeight = el.scrollHeight
   el.scrollTop = prevScrollTop + (newScrollHeight - prevScrollHeight)
-  loadingTop.value = false
 
-  requestAnimationFrame(() => { isPrepending = false })
+  await nextTick()
+  isPrepending = false
+  loadingTop.value = false
 }
 
 function handleScroll(e: Event) {

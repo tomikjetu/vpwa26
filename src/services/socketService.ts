@@ -117,20 +117,36 @@ function registerSocketListeners(socket: Socket): void {
 
 export const socketEmit = {
   // Channel operations
-  createChannel: (name: string, isPublic: boolean) => {
-    getSocket().emit('channel:create', { name, isPublic });
+  listChannels: () => {
+    getSocket().emit('channel:list');
+    console.log("channel:list emited")
   },
 
-  joinChannel: (channelName: string) => {
-    getSocket().emit('channel:join', { channelName });
+  listMembers: (channelId: number) => {
+    getSocket().emit('channel:listMembers', { channelId });
+    console.log("members:list emited")
+  },
+
+  listMessages: (channelId: number, offset: number) => {
+    getSocket().emit('msg:list', { channelId, offset });
+    console.log('msg:list emitted')
+  },
+
+  createChannel: (name: string, isPrivate: boolean) => {
+    getSocket().emit('channel:create', { name, isPrivate });
+  },
+
+  joinChannel: (name: string) => {
+    getSocket().emit('channel:join', { name });
   },
 
   leaveChannel: (channelId: number) => {
-    getSocket().emit('channel:leave', { channelId });
+    getSocket().emit('channel:cancel', { channelId });
   },
 
   deleteChannel: (channelId: number) => {
-    getSocket().emit('channel:delete', { channelId });
+    getSocket().emit('channel:quit', { channelId });
+    console.log('channel:quit emitted')
   },
 
   // Invitations
@@ -151,16 +167,16 @@ export const socketEmit = {
   },
 
   // Messages
-  sendMessage: (channelId: number, text: string, files?: string[]) => {
-    getSocket().emit('message:send', { channelId, text, files });
+  sendMessage: (channelId: number, content: string, files: File[] ) => {
+    getSocket().emit('msg:send', { channelId, content, files });
   },
 
   deleteMessage: (channelId: number, messageId: number) => {
-    getSocket().emit('message:delete', { channelId, messageId });
+    getSocket().emit('msg:delete', { channelId, messageId });
   },
 
   editMessage: (channelId: number, messageId: number, text: string) => {
-    getSocket().emit('message:edit', { channelId, messageId, text });
+    getSocket().emit('msg:edit', { channelId, messageId, text });
   },
 
   // Typing indicator
@@ -173,8 +189,8 @@ export const socketEmit = {
   },
 
   // Kick voting
-  voteKick: (channelId: number, userId: number) => {
-    getSocket().emit('member:kick-vote', { channelId, userId });
+  voteKick: (channelId: number, targetMemberId: number) => {
+    getSocket().emit('member:kick-vote', { channelId, targetMemberId });
   },
 
   kickUser: (channelId: number, userId: number) => {

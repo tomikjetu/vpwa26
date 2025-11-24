@@ -5,7 +5,7 @@
       <ChatTopBar :channel="chatStore.channel" />
       <ChatMessageList :channel="chatStore.channel" :messages="chatStore.messages"
         :unreadMessages="chatStore.unreadMessages" />
-      <ChatInput @send="chatStore.addMessage" @typing="onTyping" />
+      <ChatInput @send="(msg: ChatMessagePayload, files: File[]) => chatStore.sendMessage(msg, files)" @typing="onTyping" />
     </template>
 
     <template v-else>
@@ -27,6 +27,7 @@ import ChatTopBar from './ChatTopBar.vue'
 import { useChatStore } from 'src/stores/chat-store'
 import { useChannelStore } from 'src/stores/channelStore'
 import { useAuthStore } from 'src/stores/auth-store'
+import type { ChatMessagePayload } from 'src/utils/types'
 
 const chatStore = useChatStore()
 const channelStore = useChannelStore()

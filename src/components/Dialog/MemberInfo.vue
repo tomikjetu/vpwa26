@@ -20,12 +20,11 @@
           <template v-else>
             <div class="row items-center">
               <span class="text-subtitle2 text-grey-8">
-                {{ member && getCurrentUser ? (member.kickVoters.includes(getCurrentUser.id)
-                  ? 'Voted: ' : 'Vote to kick:') + member.kickVotes + ' / 3' : 'Failed to load member or current user' }}
+                {{ (hasVoted ? 'Voted: ' : 'Vote to kick: ') + (props.member?.kickVotes ?? 0) + ' / 3' }}
               </span>
-              <q-btn :disable="member && getCurrentUser ? member.kickVoters.includes(getCurrentUser.id) : true" flat
+              <q-btn :disable="hasVoted" flat
                 dense round icon="person_off" color="red" size="sm"
-                :class="'q-ml-sm ' + (member && getCurrentUser && member.kickVoters.includes(getCurrentUser.id) ? 'disabled-btn' : '')"
+                :class="'q-ml-sm ' + (hasVoted ? 'disabled-btn' : '')"
                 @click="confirmKickVote" />
             </div>
           </template>
@@ -59,7 +58,7 @@
 </template>
 
 <script setup lang="ts">
-import { defineProps, defineModel } from 'vue'
+import { defineProps, defineModel, computed } from 'vue'
 import { useQuasar } from 'quasar'
 import type { Member } from 'src/utils/types'
 import { useChannelStore } from 'src/stores/channelStore';
@@ -73,6 +72,23 @@ const $q = useQuasar()
 const show = defineModel<boolean>('modelValue', { required: true })
 
 const channelStore = useChannelStore()
+
+const hasVoted = computed(() => {
+  const user = getCurrentUser.value
+  const channelId = props.channelId
+  const m = props.member
+
+  if (!user || !channelId || !m) {
+    return false
+  }
+
+  const actingMember = channelStore.getMemberByUserId(user.id, channelId)
+  if (!actingMember) {
+    return false
+  }
+
+  return m.receivedKickVotes?.includes(actingMember.id)
+})
 
 const props = defineProps<{
   member: Member | null
@@ -99,7 +115,8 @@ function confirmKickVote() {
     }
   }).onOk(() => {
     if (!props.member || !props.channelId || !getCurrentUser.value) return
-    channelStore.incrementKickCounter(props.member.id, props.channelId, getCurrentUser.value.id)
+    //channelStore.incrementKickCounter(props.member.id, props.channelId, getCurrentUser.value.id)
+    channelStore.kickMemberAction(props.channelId, props.member.id)
   })
 }
 </script>

@@ -11,7 +11,6 @@ class AuthService {
         email: credentials.email,
         password: credentials.password,
       });
-
       return response.data;
     } catch (error) {
       throw error instanceof Error ? error : new Error('Login failed');

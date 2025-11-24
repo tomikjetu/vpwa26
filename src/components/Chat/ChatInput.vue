@@ -64,7 +64,7 @@ const mentionQuery = ref('')
 const selectedMemberIndex = ref<number | null>(null)
 
 const emit = defineEmits<{
-  (e: 'send', msg: ChatMessagePayload): void
+  (e: 'send', msg: ChatMessagePayload, files: File[]): void
   (e: 'typing', text: string): void
 }>()
 
@@ -86,13 +86,20 @@ const filteredMembers = computed(() => {
 function sendMessage() {
   if (!getCurrentUser.value?.id) return
   if (text.value.trim() || selectedFiles.value.length > 0) {
+
+    // Extract file names
+    const file_names : string[] = []
+    for (const file of selectedFiles.value) {
+      file_names.push(file.name)
+    }
+
     emit('send', {
       user: getCurrentUser.value.id,
       text: text.value,
       time: new Date(),
-      files: selectedFiles.value,
+      files: file_names,
       userNickname: getCurrentUser.value.nickName
-    })
+    }, selectedFiles.value)
     text.value = ''
     selectedFiles.value = []
     showMentionDropdown.value = false

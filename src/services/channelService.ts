@@ -7,10 +7,22 @@ import { socketEmit } from './socketService';
  */
 class ChannelService {
   /**
+   * List channels relevant to the user (via socket)
+   */
+  listChannels() : void {
+    socketEmit.listChannels();
+  }
+  /**
+   * List members relevant to a channel (for when a channel is being inspected) (via socket)
+   */
+  listMembers(channelId: number) : void {
+    socketEmit.listMembers(channelId);
+  }
+  /**
    * Create a new channel (via socket)
    */
-  createChannel(name: string, isPublic: boolean): void {
-    socketEmit.createChannel(name, isPublic);
+  createChannel(name: string, isPrivate: boolean): void {
+    socketEmit.createChannel(name, isPrivate);
     // Response will come via socket event 'channel:created'
   }
 
@@ -26,7 +38,7 @@ class ChannelService {
    * Leave/quit a channel (via socket)
    */
   quitChannel(channelId: number): void {
-    socketEmit.leaveChannel(channelId);
+    socketEmit.deleteChannel(channelId);
     // Response will come via socket event 'channel:left'
   }
 
@@ -50,15 +62,15 @@ class ChannelService {
    * Delete/cancel a channel (via socket - owner only)
    */
   cancelChannel(channelId: number): void {
-    socketEmit.deleteChannel(channelId);
+    socketEmit.leaveChannel(channelId);
     // Response will come via socket event 'channel:deleted'
   }
 
   /**
    * Vote to kick a user from a channel (via socket)
    */
-  kickUserFromChannel(channelId: number, userId: number): void {
-    socketEmit.voteKick(channelId, userId);
+  kickMemberFromChannel(channelId: number, memberId: number): void {
+    socketEmit.voteKick(channelId, memberId);
     // Response will come via socket event 'member:kick-vote' or 'member:kicked'
   }
 
@@ -78,11 +90,15 @@ class ChannelService {
     // Response will come via socket event 'channel:invite:declined'
   }
 
+  listMessages(channelId: number, offset: number) : void {
+    socketEmit.listMessages(channelId, offset);
+  }
+
   /**
    * Send a message to a channel (via socket)
    */
-  sendMessage(channelId: number, text: string, files?: string[]): void {
-    socketEmit.sendMessage(channelId, text, files);
+  sendMessage(channelId: number, content: string, files: File[]): void {
+    socketEmit.sendMessage(channelId, content, files);
     // Response will come via socket event 'message:new'
   }
 

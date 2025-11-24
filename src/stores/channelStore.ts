@@ -3,15 +3,17 @@ import type { Channel, ChatMessagePayload, ChannelInvite } from 'src/utils/types
 import { useAuthStore } from 'src/stores/auth-store';
 import { Notify } from 'quasar';
 import { channelService } from 'src/services/channelService';
+import { useChatStore } from './chat-store';
 
 interface ChannelState {
   channels: Channel[];
   channelInvites: ChannelInvite[];
-  messages: Record<number, ChatMessagePayload[]>;
-  unreadMessages: Record<number, ChatMessagePayload[]>;
+  messages: ChatMessagePayload[];
+  unreadMessages: ChatMessagePayload[];
   olderPagesLeft: Record<number, number>;
   isLoading: boolean;
   error: string | null;
+  _pendingResolve: null | (() => void),
 }
 
 export const useChannelStore = defineStore('channels', {
@@ -19,15 +21,34 @@ export const useChannelStore = defineStore('channels', {
     return {
       channels: [] as Channel[],
       channelInvites: [] as ChannelInvite[],
-      messages: {} as Record<number, ChatMessagePayload[]>,
-      unreadMessages: {} as Record<number, ChatMessagePayload[]>,
+      messages: [] as ChatMessagePayload[],
+      unreadMessages: [] as ChatMessagePayload[],
       olderPagesLeft: {} as Record<number, number>,
       isLoading: false,
       error: null,
+      _pendingResolve: null as null | (() => void),
     };
   },
 
   actions: {
+    loadChannels() {
+      channelService.listChannels()
+    },
+
+    async loadNextMessages(channelId: number, offset: number) {
+      // So the scrollbar works
+      return new Promise<void>((resolve) => {
+        this._pendingResolve = resolve
+        channelService.listMessages(channelId, offset)
+      })
+    },
+
+    async loadMessages(channelId: number) {
+      this.setMessages([])
+      await this.loadNextMessages(channelId, 0)
+      console.log("msg:list:load")
+    },
+
     removeInvite(channelId: number) {
       this.channelInvites = this.channelInvites.filter((invite) => invite.id !== channelId);
     },
@@ -35,7 +56,6 @@ export const useChannelStore = defineStore('channels', {
     addChannel(channel: Channel) {
       if (!this.channels.find((c) => c.id === channel.id)) {
         this.channels.push(channel);
-        this.messages[channel.id] = [];
       }
     },
 
@@ -43,30 +63,39 @@ export const useChannelStore = defineStore('channels', {
       this.channels = channelList;
     },
 
+    setMessages(messagesList: ChatMessagePayload[]) {
+      this.messages = messagesList;
+    },
+
     removeChannel(channelId: number) {
       this.channels = this.channels.filter((c) => c.id !== channelId);
-      delete this.messages[channelId];
-      delete this.unreadMessages[channelId];
+      console.log(this.channels)
+    },
+
+    cancelChannel(channelId: number) {
+      const chatStore = useChatStore()
+      if(chatStore.channel && chatStore.channel.id == channelId) 
+        chatStore.closeChat()
+      this.channels = this.channels.filter((c) => c.id !== channelId);
+    },
+
+    sendMessage(msg: ChatMessagePayload, channelId: number, files: File[]) {
+
+      channelService.sendMessage(channelId, msg.text, files)
     },
 
     addMessage(msg: ChatMessagePayload, channelId: number) {
-      if (!this.messages[channelId]) {
-        this.messages[channelId] = [];
-      }
       this.markAsRead(channelId);
-      this.messages[channelId].push(msg);
+      this.messages.push(msg);
     },
 
-    addMessages(msgs: ChatMessagePayload[], channelId: number) {
-      if (!this.messages[channelId]) {
-        this.messages[channelId] = [];
-      }
-      this.messages[channelId].push(...msgs);
+    addMessages(msgs: ChatMessagePayload[]) {
+      this.messages.push(...msgs);
     },
 
     markAsRead(channelId: number) {
-      const msgs = this.getMessagesByChannelId(channelId);
-      const unreadMsgs = this.getUnreadMessagesByChannelId(channelId);
+      const msgs = this.getMessages();
+      const unreadMsgs = this.getUnreadMessages();
       if (!msgs || !unreadMsgs) return;
 
       msgs.push(...unreadMsgs);
@@ -91,7 +120,7 @@ export const useChannelStore = defineStore('channels', {
         });
       targetMember.kickVotes += 1;
 
-      targetMember.kickVoters.push(voterId);
+      targetMember.receivedKickVotes.push(voterId);
       Notify.create({
         type: 'info',
         message: `You have voted to kick ${targetMember.nickname} from ${channel.name}. Total votes: ${targetMember.kickVotes}`,
@@ -100,9 +129,8 @@ export const useChannelStore = defineStore('channels', {
     },
 
     fetchOlderMessages(channelId: number): { older: ChatMessagePayload[]; remaining: number } {
-      if (!this.messages[channelId]) {
-        this.messages[channelId] = [];
-      }
+
+      this.messages = [];
 
       // For now, return empty - backend should provide pagination
       // This can be implemented when backend supports message history pagination
@@ -127,11 +155,11 @@ export const useChannelStore = defineStore('channels', {
     // that are handled by socketService listeners which update the store reactively
     // Server pushes all channel data via socket events - no HTTP polling needed
 
-    createChannelAction(name: string, isPublic: boolean) {
+    createChannelAction(name: string, isPrivate: boolean) {
       this.isLoading = true;
       this.error = null;
       try {
-        channelService.createChannel(name, isPublic);
+        channelService.createChannel(name, isPrivate);
         // Channel will be added via socket event 'channel:created'
       } catch (err) {
         this.error = err instanceof Error ? err.message : String(err);
@@ -158,6 +186,7 @@ export const useChannelStore = defineStore('channels', {
     quitChannelAction(channelId: number) {
       this.isLoading = true;
       this.error = null;
+      console.log("QUIT CHANNEL ACTION")
       try {
         channelService.quitChannel(channelId);
         // Channel will be removed via socket event 'channel:left'
@@ -211,17 +240,12 @@ export const useChannelStore = defineStore('channels', {
       }
     },
 
-    kickUserAction(channelId: number, userId: number) {
+    kickMemberAction(channelId: number, memberId: number) {
       this.isLoading = true;
       this.error = null;
       try {
-        channelService.kickUserFromChannel(channelId, userId);
-        // Increment kick counter locally
-        const auth = useAuthStore();
-        const currentUser = auth.getCurrentUser;
-        if (currentUser) {
-          this.incrementKickCounter(userId, channelId, currentUser.id);
-        }
+        channelService.kickMemberFromChannel(channelId, memberId);
+        // Increment kick counter via socket event
       } catch (err) {
         this.error = err instanceof Error ? err.message : String(err);
         throw err;
@@ -260,6 +284,7 @@ export const useChannelStore = defineStore('channels', {
   },
 
   getters: {
+
     getChannelById: (state) => {
       return (id: number) => state.channels.find((c) => c.id === id);
     },
@@ -274,11 +299,22 @@ export const useChannelStore = defineStore('channels', {
       return state.channels.filter((c) => c.ownerId !== user?.id);
     },
     totalChannels: (state) => state.channels.length,
-    getMessagesByChannelId: (state) => {
-      return (channelId: number) => state.messages[channelId] || [];
+    getMessages: (state) => {
+      return () => state.messages || [];
     },
-    getUnreadMessagesByChannelId: (state) => {
-      return (channelId: number) => state.unreadMessages[channelId] || [];
+    getUnreadMessages: (state) => {
+      return () => state.unreadMessages || [];
+    },
+    getMemberById: (state) => {
+      return (id: number, channelId: number) => { return state.channels.find((c) => c.id === channelId)?.members[id] }
+    },
+    getMemberByUserId: (state) => {
+      return (userId: number, channelId: number) => {
+        const channel = state.channels.find((c) => c.id === channelId)
+        if (!channel) return undefined
+
+        return Object.values(channel.members).find(m => m.userId === userId)
+      }
     },
     getChannelInviteById: (state) => {
       return (id: number) => state.channelInvites.find((c) => c.id === id);

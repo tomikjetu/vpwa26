@@ -5,3 +5,4 @@ import { defineBoot } from '#q-app/wrappers';
 export default defineBoot(() => {
   console.log('Socket boot file loaded - initialization handled in App.vue');
 });
+

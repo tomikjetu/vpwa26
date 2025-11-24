@@ -33,7 +33,7 @@
               name="circle"
               size="10px"
               class="q-mr-sm"
-              :color="getStatusColor(member.id)"
+              :color="getStatusColor(member.userId)"
             />
             {{ member.nickname }}
           </q-item-label>
@@ -48,15 +48,15 @@
 import { defineProps } from 'vue'
 import type { Member, Channel } from 'src/utils/types'
 import { useDialogStore } from 'src/stores/dialog-store'
-import { useContacts } from 'src/stores/contacts-store'
 import { storeToRefs } from 'pinia'
 import { useAuthStore } from 'src/stores/auth-store'
+import { useChannelStore } from 'src/stores/channelStore'
+import { useChatStore } from 'src/stores/chat-store'
 
 const authStore = useAuthStore()
 const { getCurrentUser } = storeToRefs(authStore)
 
 const dialog = useDialogStore()
-const contactsStore = useContacts()
 
 /** Opens the member info dialog */
 function handleShowMemberInfo(member: Member) {
@@ -66,12 +66,19 @@ function handleShowMemberInfo(member: Member) {
 
 /** Returns the color based on contact status */
 function getStatusColor(memberId: number): string {
-  const contact = contactsStore.contacts[memberId]
-  if (!getCurrentUser.value) return 'grey'
-  const currentUserStatus = contactsStore.contacts[getCurrentUser.value.id]?.status
-  if (!contact || (currentUserStatus == 'offline' && contact?.id != getCurrentUser.value.id)) return 'grey'
+  const channelStore = useChannelStore()
+  const chatStore = useChatStore()
 
-  switch (contact.status) {
+  if(!chatStore.channel) return 'grey'
+  
+  const member = channelStore.getMemberById(memberId, chatStore.channel.id)
+
+  if(!member) return 'grey'
+  if (!getCurrentUser.value) return 'grey'
+  const currentMemberStatus = member.status
+  if (!member || (currentMemberStatus == 'offline' && member?.id != getCurrentUser.value.id)) return 'grey'
+
+  switch (member.status) {
     case 'online':
       return 'green'
     case 'dnd':

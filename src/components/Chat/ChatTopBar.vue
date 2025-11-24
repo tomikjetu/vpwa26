@@ -9,7 +9,7 @@
     </div>
 
     <!-- Right side (Private) -->
-    <div class="text-caption text-grey-8 q-mr-lg">{{ props.channel ? props.channel.isPublic ? 'Public' : 'Private' : ''
+    <div class="text-caption text-grey-8 q-mr-lg">{{ props.channel ? props.channel.isPrivate ? 'Private' : 'Public' : ''
       }}</div>
   </div>
 </template>

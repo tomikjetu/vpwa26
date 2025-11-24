@@ -41,7 +41,7 @@ export default function Kick() {
           message: `User ${args[1]} not found in channel ${args[0]}`,
         });
 
-      channelStore.kickUserAction(channel.id, user.id);
+      channelStore.kickMemberAction(channel.id, user.id);
     },
   };
 }
