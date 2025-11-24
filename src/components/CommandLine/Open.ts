@@ -8,7 +8,7 @@ export default function Open() {
 
   return {
     cmd: 'open',
-    execute: (args: string[]) => {
+    execute: async (args: string[]) => {
       if (args.length === 0 || !args[0])
         return Notify.create({
           type: 'negative',
@@ -22,7 +22,7 @@ export default function Open() {
           message: 'Channel not found',
           position: 'top',
         });
-      chatStore.openChat(channel);
+      await chatStore.openChat(channel);
     },
   };
 }

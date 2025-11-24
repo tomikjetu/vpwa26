@@ -5,6 +5,7 @@ import { useAuthStore } from 'src/stores/auth-store';
 import { useChatStore } from 'src/stores/chat-store';
 import { Notify } from 'quasar';
 import type { Member } from 'src/utils/types';
+import { useDialogStore } from 'src/stores/dialog-store';
 
 /**
  * Handles member-related socket events
@@ -52,6 +53,10 @@ export class MemberSocketController implements ISocketController {
         status: data.member.status || 'offline',
       };
 
+      console.log(data)
+
+      console.log(data.member.nickname)
+
       Notify.create({
         type: 'info',
         message: `${data.member.nickname} joined ${channel.name}`,
@@ -60,14 +65,14 @@ export class MemberSocketController implements ISocketController {
     }
   }
 
-  private handleMemberLeft(data: { channelId: number; userId: number }): void {
+  private handleMemberLeft(data: { channelId: number; memberId: number }): void {
     const channelStore = useChannelStore();
     const channel = channelStore.getChannelById(data.channelId);
 
-    if (channel && channel.members[data.userId]) {
-      const member = channel.members[data.userId];
-      const memberName = member?.nickname || 'User';
-      delete channel.members[data.userId];
+    if (channel && channel.members[data.memberId]) {
+      const member = channelStore.getMemberById(data.memberId, data.channelId)
+      const memberName = member?.nickname
+      channelStore.removeMember(data.channelId, data.memberId)
 
       Notify.create({
         type: 'info',
@@ -82,7 +87,9 @@ export class MemberSocketController implements ISocketController {
     const authStore = useAuthStore();
     const chatStore = useChatStore();
     const channel = channelStore.getChannelById(data.channelId);
+    const dialogStore = useDialogStore()
 
+    console.log(data)
     if (!channel) return;
 
     const isCurrentUser = data.userId === authStore.getCurrentUser?.id;
@@ -92,18 +99,21 @@ export class MemberSocketController implements ISocketController {
       if (chatStore.channel?.id === data.channelId) {
         chatStore.closeChat();
       }
+      if(dialogStore.showMemberInfoDialog) {
+        dialogStore.closeMemberInfo()
+      }
 
       Notify.create({
         type: 'negative',
         message: `You have been kicked from ${channel.name}`,
         position: 'top',
       });
-    } else if (channel.members[data.userId]) {
+    } else if (channel.members[data.memberId]) {
       const member = channel.members[data.memberId];
       if(!member) return
       const memberName = member.nickname || 'User';
-      delete channel.members[data.memberId];
-
+      
+      channelStore.removeMember(data.channelId, data.memberId)
       Notify.create({
         type: 'info',
         message: `${memberName} was kicked from ${channel.name}`,

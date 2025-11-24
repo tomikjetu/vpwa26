@@ -129,12 +129,12 @@ const filteredAll = computed(() => {
   )
 })
 
-function handleSelectChannel(channel: Channel | undefined) {
+async function handleSelectChannel(channel: Channel | undefined) {
   if (!channel) return
   if (chatStore.channel) {
     channelStore.markAsRead(chatStore.channel.id)
   }
-  chatStore.openChat(channel)
+  await chatStore.openChat(channel)
 }
 
 const membersListContent = ref<Member[]>([])

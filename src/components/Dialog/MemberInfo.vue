@@ -10,7 +10,7 @@
 
         <!-- Right side: owner or vote count -->
         <div class="row items-center">
-          <template v-if="member && getCurrentUser && (member.isOwner || getCurrentUser.id === member.id)">
+          <template v-if="member && getCurrentUser && (member.isOwner || getCurrentUser.id === member.userId)">
             <q-icon name="star" color="amber" class="q-mr-xs" />
             <span class="text-subtitle2 text-bold">
               {{ member.isOwner ? 'Owner' : 'You' }}

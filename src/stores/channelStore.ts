@@ -4,6 +4,7 @@ import { useAuthStore } from 'src/stores/auth-store';
 import { Notify } from 'quasar';
 import { channelService } from 'src/services/channelService';
 import { useChatStore } from './chat-store';
+import { useDialogStore } from './dialog-store';
 
 interface ChannelState {
   channels: Channel[];
@@ -77,6 +78,17 @@ export const useChannelStore = defineStore('channels', {
       if(chatStore.channel && chatStore.channel.id == channelId) 
         chatStore.closeChat()
       this.channels = this.channels.filter((c) => c.id !== channelId);
+    },
+
+    removeMember(channelId: number, memberId: number) {
+      const channel = this.getChannelById(channelId)
+      if(!channel) return
+      delete channel.members[memberId]
+
+      const dialogStore = useDialogStore()
+      if(dialogStore.dialogMember && dialogStore.dialogMember.id == memberId) {
+        dialogStore.closeMemberInfo()
+      }
     },
 
     sendMessage(msg: ChatMessagePayload, channelId: number, files: File[]) {

@@ -45,7 +45,7 @@
 </template>
 
 <script setup lang="ts">
-import { defineProps } from 'vue'
+import { computed, defineProps, toRef } from 'vue'
 import type { Member, Channel } from 'src/utils/types'
 import { useDialogStore } from 'src/stores/dialog-store'
 import { storeToRefs } from 'pinia'
@@ -60,8 +60,8 @@ const dialog = useDialogStore()
 
 /** Opens the member info dialog */
 function handleShowMemberInfo(member: Member) {
-  if(!props.channel) return
-  dialog.openMemberInfo(member, props.channel)
+  if(!channel.value) return
+  dialog.openMemberInfo(member, channel.value)
 }
 
 /** Returns the color based on contact status */
@@ -91,9 +91,11 @@ function getStatusColor(memberId: number): string {
 }
 
 const props = defineProps<{
-  members: Member[],
   channel: Channel | undefined
 }>()
+
+const channel = toRef(props, 'channel')
+const members = computed(() => channel.value?.members ?? [])
 </script>
 
 <style scoped>

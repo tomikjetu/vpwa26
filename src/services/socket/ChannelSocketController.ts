@@ -22,9 +22,6 @@ export class ChannelSocketController implements ISocketController {
 
     socket.on('channel:listMembers', this.handleChannelMembersList.bind(this));
 
-    // User left channel - broadcast to channel members
-    socket.on('member:left', this.handleMemberLeft.bind(this));
-
     // Channel deleted - broadcast to channel members
     socket.on('channel:deleted', this.handleChannelDeleted.bind(this));
 
@@ -107,6 +104,8 @@ export class ChannelSocketController implements ISocketController {
     const authStore = useAuthStore();
     const existingChannel = channelStore.getChannelById(data.channel.id);
 
+    console.log(data)
+
     if (!existingChannel) {
       // Transform backend data to frontend format
       const transformedChannel: Channel = {
@@ -151,24 +150,6 @@ export class ChannelSocketController implements ISocketController {
     // channelStore.setMembers(data.members);
   }
 
-  private handleMemberLeft(data: { channelId: number; userId: number }): void {
-    const channelStore = useChannelStore();
-    const authStore = useAuthStore();
-    const chatStore = useChatStore();
-    const channel = channelStore.getChannelById(data.channelId);
-
-    if (channel && channel.members[data.userId]) {
-      delete channel.members[data.userId];
-    }
-
-    const isCurrentUser = data.userId === authStore.getCurrentUser?.id;
-    if (isCurrentUser) {
-      channelStore.removeChannel(data.channelId);
-      if (chatStore.channel?.id === data.channelId) {
-        chatStore.closeChat();
-      }
-    }
-  }
 
   private handleChannelDeleted(data: { channelId: number }): void {
     const channelStore = useChannelStore();
