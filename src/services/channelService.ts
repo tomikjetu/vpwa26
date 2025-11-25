@@ -53,8 +53,8 @@ class ChannelService {
   /**
    * Invite a user to a channel (via socket - owner only for private channels)
    */
-  inviteUserToChannel(channelId: number, userId: number): void {
-    socketEmit.inviteUser(channelId, userId);
+  inviteUserToChannel(channelId: number, nickname: string): void {
+    socketEmit.inviteUser(channelId, nickname);
     // Response will come via socket event 'channel:invite:received' (for target user)
   }
 
@@ -74,19 +74,23 @@ class ChannelService {
     // Response will come via socket event 'member:kick-vote' or 'member:kicked'
   }
 
+  listChannelInvites() : void {
+    socketEmit.listInvites()
+  }
+
   /**
    * Accept a channel invitation (via socket)
    */
-  acceptChannelInvite(channelInviteId: number): void {
-    socketEmit.acceptInvite(channelInviteId);
+  acceptChannelInvite(channelId: number): void {
+    socketEmit.acceptInvite(channelId);
     // Response will come via socket event 'channel:invite:accepted'
   }
 
   /**
    * Decline a channel invitation (via socket)
    */
-  declineChannelInvite(channelInviteId: number): void {
-    socketEmit.declineInvite(channelInviteId);
+  declineChannelInvite(channelId: number): void {
+    socketEmit.declineInvite(channelId);
     // Response will come via socket event 'channel:invite:declined'
   }
 

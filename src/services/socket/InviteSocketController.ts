@@ -18,25 +18,47 @@ export class InviteSocketController implements ISocketController {
 
     // Invitation declined
     socket.on('channel:invite:declined', this.handleInviteDeclined.bind(this));
+
+    socket.on('invite:list', this.handleInviteList.bind(this))
   }
 
   cleanup(socket: Socket): void {
     socket.off('channel:invite:received');
     socket.off('channel:invite:accepted');
     socket.off('channel:invite:declined');
+    socket.off('invite:list');
   }
 
-  private handleInviteReceived(data: { invite: ChannelInvite }): void {
+  private handleInviteList(data: { invites: ChannelInvite[] }) : void {
+    const channelStore = useChannelStore();
+    console.log(data)
+    for(const invite of data.invites) {
+      // Transform backend invite data
+      const transformedInvite: ChannelInvite = {
+        id: invite.id,
+        channelId: invite.channelId,
+        name: invite.name,
+        invitedAt: new Date(invite.invitedAt),
+        description: '',
+        icon: 'tag',
+        color: 'primary',
+      };
+      channelStore.channelInvites.push(transformedInvite);
+    }
+  }
+
+  private handleInviteReceived(data: { invitedAt: Date, channelName: string, inviteId: number, channelId: number }): void {
     const channelStore = useChannelStore();
 
     // Transform backend invite data
     const transformedInvite: ChannelInvite = {
-      id: data.invite.id,
-      name: data.invite.name,
-      invitedAt: new Date(data.invite.invitedAt),
-      description: data.invite.description || '',
-      icon: 'lock',
-      color: 'purple',
+      id: data.inviteId,
+      channelId: data.channelId,
+      name: data.channelName,
+      invitedAt: new Date(data.invitedAt),
+      description: '',
+      icon: 'tag',
+      color: 'primary',
     };
 
     channelStore.channelInvites.push(transformedInvite);
@@ -64,14 +86,14 @@ export class InviteSocketController implements ISocketController {
         updatedAt: new Date(data.channel.updatedAt),
         joinedAt: new Date(data.channel.joinedAt || data.channel.createdAt),
         description: data.channel.description || '',
-        icon: 'lock',
-        color: 'purple',
+        icon: 'tag',
+        color: 'primary',
         infoColor: 'grey',
         isPrivate: data.channel.isPrivate,
         hasUnreadMsgs: false,
         members: data.channel.members || {},
       };
-
+      channelStore.removeInvite(transformedChannel.id)
       channelStore.addChannel(transformedChannel);
     } else {
       // Another user accepted invite to our channel
@@ -85,8 +107,11 @@ export class InviteSocketController implements ISocketController {
     }
   }
 
-  private handleInviteDeclined(data: { inviteId: number }): void {
+  private handleInviteDeclined(data: { channelId: number }): void {
+    console.log("DECLINED")
     const channelStore = useChannelStore();
-    channelStore.removeInvite(data.inviteId);
+    console.log(data.channelId)
+    channelStore.removeInvite(data.channelId);
+    console.log(channelStore.channelInvites)
   }
 }

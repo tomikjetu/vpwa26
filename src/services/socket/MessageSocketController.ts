@@ -59,7 +59,7 @@ export class MessageSocketController implements ISocketController {
 
 
 
-  private handleMessageNew(data: { channelId: number; message: ServerReplyMsg }): void {
+  private handleMessageNew(data: { channelId: number; message: ServerReplyMsg, memberId: number }): void {
     const channelStore = useChannelStore();
     const authStore = useAuthStore();
     const channel = channelStore.getChannelById(data.channelId);
@@ -73,7 +73,7 @@ export class MessageSocketController implements ISocketController {
     // Transform backend message data
     const transformedMessage: ChatMessagePayload = {
       ...(data.message.id !== undefined && { id: data.message.id }),
-      user: data.message.user.id,
+      user: data.memberId,
       text: data.message.content,
       time: new Date(data.message.createdAt),
       files: file_names || [],
@@ -82,6 +82,7 @@ export class MessageSocketController implements ISocketController {
 
     // Add message to store
     channelStore.addMessage(transformedMessage, data.channelId);
+    console.log(data.message)
     console.log("message:new")
     // Mark as unread if not viewing this channel (handled by store)
     // Show notification if message is from another user

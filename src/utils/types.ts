@@ -16,6 +16,7 @@ export type Channel = {
 
 export type ChannelInvite = {
   id: number;
+  channelId: number;
   name: string;
   invitedAt: Date;
   description?: string;

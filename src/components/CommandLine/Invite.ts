@@ -28,14 +28,15 @@ export default function Invite() {
           message: `Channel ${args[0]} not found`,
         });
 
-      const user = Object.values(channel.members).find((member) => member.nickname === args[1]);
-      if (!user)
+      const nickname = args[1]
+      if(!nickname) {
         return Notify.create({
           type: 'negative',
-          message: `User ${args[1]} not found in channel ${args[0]}`,
+          message: `Nickname as second argument is necessary`,
         });
+      }
 
-      channelStore.inviteUserAction(channel?.id, user.id);
+      channelStore.inviteUserAction(channel?.id, nickname);
     },
   };
 }

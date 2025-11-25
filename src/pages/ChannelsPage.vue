@@ -38,7 +38,7 @@ const dialog = useDialogStore()
 const splitter = ref<number>(280)
 
 onMounted(() => {
-  channelStore.loadChannels();
+  channelStore.loadChannelsAndInvites();
 });
 </script>
 

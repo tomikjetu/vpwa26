@@ -32,6 +32,15 @@ export const useChannelStore = defineStore('channels', {
   },
 
   actions: {
+    loadChannelsAndInvites() {
+      this.loadInvites()
+      this.loadChannels()
+    },
+
+    loadInvites() {
+      channelService.listChannelInvites()
+    },
+
     loadChannels() {
       channelService.listChannels()
     },
@@ -51,7 +60,7 @@ export const useChannelStore = defineStore('channels', {
     },
 
     removeInvite(channelId: number) {
-      this.channelInvites = this.channelInvites.filter((invite) => invite.id !== channelId);
+      this.channelInvites = this.channelInvites.filter((invite) => invite.channelId!== channelId);
     },
 
     addChannel(channel: Channel) {
@@ -224,11 +233,11 @@ export const useChannelStore = defineStore('channels', {
       }
     },
 
-    inviteUserAction(channelId: number, userId: number) {
+    inviteUserAction(channelId: number, nickname: string) {
       this.isLoading = true;
       this.error = null;
       try {
-        channelService.inviteUserToChannel(channelId, userId);
+        channelService.inviteUserToChannel(channelId, nickname);
         // Invite will be sent via socket event
       } catch (err) {
         this.error = err instanceof Error ? err.message : String(err);
@@ -266,11 +275,11 @@ export const useChannelStore = defineStore('channels', {
       }
     },
 
-    acceptChannelInviteAction(channelInviteId: number) {
+    acceptChannelInviteAction(channelId: number) {
       this.isLoading = true;
       this.error = null;
       try {
-        channelService.acceptChannelInvite(channelInviteId);
+        channelService.acceptChannelInvite(channelId);
         // Channel will be added and invite removed via socket event 'channel:invite:accepted'
       } catch (err) {
         this.error = err instanceof Error ? err.message : String(err);
@@ -280,11 +289,11 @@ export const useChannelStore = defineStore('channels', {
       }
     },
 
-    declineChannelInviteAction(channelInviteId: number) {
+    declineChannelInviteAction(channelId: number) {
       this.isLoading = true;
       this.error = null;
       try {
-        channelService.declineChannelInvite(channelInviteId);
+        channelService.declineChannelInvite(channelId);
         // Invite will be removed via socket event 'channel:invite:declined'
       } catch (err) {
         this.error = err instanceof Error ? err.message : String(err);

@@ -77,6 +77,8 @@ export function disconnectSocket(): void {
  * Register all socket event listeners using controllers
  */
 function registerSocketListeners(socket: Socket): void {
+
+
   const authStore = useAuthStore();
 
   // ==================== CONNECTION EVENTS ====================
@@ -132,6 +134,11 @@ export const socketEmit = {
     console.log('msg:list emitted')
   },
 
+  listInvites: () => {
+    getSocket().emit('invite:list');
+    console.log("invite:list emited")
+  },
+
   createChannel: (name: string, isPrivate: boolean) => {
     getSocket().emit('channel:create', { name, isPrivate });
   },
@@ -150,16 +157,17 @@ export const socketEmit = {
   },
 
   // Invitations
-  inviteUser: (channelId: number, userId: number) => {
-    getSocket().emit('channel:invite', { channelId, userId });
+  inviteUser: (channelId: number, nickname: string) => {
+    getSocket().emit('invite:create', { channelId, nickname });
+    console.log("invite:create emited")
   },
 
-  acceptInvite: (inviteId: number) => {
-    getSocket().emit('channel:invite:accept', { inviteId });
+  acceptInvite: (channelId: number) => {
+    getSocket().emit('invite:accept', { channelId });
   },
 
-  declineInvite: (inviteId: number) => {
-    getSocket().emit('channel:invite:decline', { inviteId });
+  declineInvite: (channelId: number) => {
+    getSocket().emit('invite:decline', { channelId });
   },
 
   revokeUser: (channelId: number, userId: number) => {
@@ -169,6 +177,7 @@ export const socketEmit = {
   // Messages
   sendMessage: (channelId: number, content: string, files: File[] ) => {
     getSocket().emit('msg:send', { channelId, content, files });
+    console.log("msg:send emitted")
   },
 
   deleteMessage: (channelId: number, messageId: number) => {

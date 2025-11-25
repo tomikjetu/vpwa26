@@ -70,8 +70,11 @@ const hasMoreOlder = computed(() => {
 })
 
 function onShowMemberInfo(id: number) {
+  console.log(props.messages)
+  console.log(props.channel)
   if (!props.channel) return
   const member = props.channel.members[id]
+  console.log(member)
   if (member) Dialog.openMemberInfo(member, props.channel)
 }
 

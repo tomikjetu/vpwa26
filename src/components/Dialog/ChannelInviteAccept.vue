@@ -37,13 +37,13 @@ const show = defineModel<boolean>('modelValue', { required: true })
 
 function onAcceptInvite() {
   if (!dialogStore.channelInvite) return
-  channelStore.acceptChannelInviteAction(dialogStore.channelInvite.id)
+  channelStore.acceptChannelInviteAction(dialogStore.channelInvite.channelId)
   dialogStore.closeChannelInviteAcceptation()
 }
 
 function onDeclineInvite() {
   if (!dialogStore.channelInvite) return
-  channelStore.declineChannelInviteAction(dialogStore.channelInvite.id)
+  channelStore.declineChannelInviteAction(dialogStore.channelInvite.channelId)
   dialogStore.closeChannelInviteAcceptation()
 }
 </script>
