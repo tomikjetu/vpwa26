@@ -15,20 +15,20 @@
       <input ref="fileInput" type="file" multiple style="display: none" @change="handleFileSelection" />
 
       <q-input ref="inputRef" outlined dense v-model="text" placeholder="Type a message..." class="col q-mx-sm"
-               @update:model-value="onInputUpdate" @keydown="handleKeyDown">
+        @update:model-value="onInputUpdate" @keydown="handleKeyDown">
         <template v-slot:append>
           <q-icon name="mood" class="cursor-pointer" />
         </template>
       </q-input>
 
       <q-btn round dense color="primary" icon="send" @click="sendMessage"
-             :disable="!text.trim() && selectedFiles.length === 0" />
+        :disable="!text.trim() && selectedFiles.length === 0" />
 
       <!-- Mention dropdown -->
       <div v-if="showMentionDropdown" class="mention-dropdown">
         <div v-for="member in filteredMembers" :key="member.id" class="mention-item"
-             :class="{ 'mention-item-selected': member.id === selectedMemberIndex }" @click="selectMember(member)"
-             @mouseenter="selectedMemberIndex = member.id">
+          :class="{ 'mention-item-selected': member.id === selectedMemberIndex }" @click="selectMember(member)"
+          @mouseenter="selectedMemberIndex = member.id">
           <q-avatar color="primary" text-color="white" size="24px" class="q-mr-sm">
             <q-icon name="person" size="16px" />
           </q-avatar>
@@ -64,7 +64,7 @@ const mentionQuery = ref('')
 const selectedMemberIndex = ref<number | null>(null)
 
 const emit = defineEmits<{
-  (e: 'send', msg: ChatMessagePayload): void
+  (e: 'send', msg: ChatMessagePayload, files: File[]): void
   (e: 'typing', text: string): void
 }>()
 
@@ -86,13 +86,20 @@ const filteredMembers = computed(() => {
 function sendMessage() {
   if (!getCurrentUser.value?.id) return
   if (text.value.trim() || selectedFiles.value.length > 0) {
+
+    // Extract file names
+    const file_names : string[] = []
+    for (const file of selectedFiles.value) {
+      file_names.push(file.name)
+    }
+
     emit('send', {
       user: getCurrentUser.value.id,
       text: text.value,
       time: new Date(),
-      files: selectedFiles.value,
+      files: file_names,
       userNickname: getCurrentUser.value.nickName
-    })
+    }, selectedFiles.value)
     text.value = ''
     selectedFiles.value = []
     showMentionDropdown.value = false

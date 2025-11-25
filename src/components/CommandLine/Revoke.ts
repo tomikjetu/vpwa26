@@ -1,5 +1,4 @@
 import { Notify } from 'quasar';
-import { revokeUserFromChannel } from 'src/services/channelService';
 import { useChannelStore } from 'src/stores/channelStore';
 
 export default function Revoke() {
@@ -36,7 +35,7 @@ export default function Revoke() {
           message: `User ${args[1]} not found in channel ${args[0]}`,
         });
 
-      revokeUserFromChannel(channel?.id, user.id);
+      channelStore.revokeUserAction(channel?.id, user.id);
     },
   };
 }

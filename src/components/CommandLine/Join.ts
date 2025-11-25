@@ -1,5 +1,5 @@
 import { Notify } from 'quasar';
-import { joinChannel } from 'src/services/channelService';
+import { useChannelStore } from 'src/stores/channelStore';
 
 export default function Join() {
   /*
@@ -12,6 +12,7 @@ export default function Join() {
   Korelácia:
   - súkromný vyžaduje pozvánku (/invite)
   */
+  const channelStore = useChannelStore();
 
   return {
     cmd: 'join',
@@ -21,7 +22,7 @@ export default function Join() {
           type: 'negative',
           message: 'Usage: /join channelName',
         });
-      joinChannel(args[0] as string);
+      channelStore.joinChannelAction(args[0] as string);
     },
   };
 }

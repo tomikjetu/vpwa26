@@ -30,9 +30,16 @@ import ChatContainer from 'src/components/Chat/ChatContainer.vue'
 import { useDialogStore } from 'src/stores/dialog-store'
 import MemberInfo from 'src/components/Dialog/MemberInfo.vue'
 import ChannelInviteAccept from 'src/components/Dialog/ChannelInviteAccept.vue'
+import { onMounted } from 'vue';
+import { useChannelStore } from 'src/stores/channelStore';
 
+const channelStore = useChannelStore();
 const dialog = useDialogStore()
 const splitter = ref<number>(280)
+
+onMounted(() => {
+  channelStore.loadChannels();
+});
 </script>
 
 <style>

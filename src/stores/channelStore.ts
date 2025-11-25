@@ -2,117 +2,61 @@ import { defineStore } from 'pinia';
 import type { Channel, ChatMessagePayload, ChannelInvite } from 'src/utils/types';
 import { useAuthStore } from 'src/stores/auth-store';
 import { Notify } from 'quasar';
+import { channelService } from 'src/services/channelService';
+import { useChatStore } from './chat-store';
+import { useDialogStore } from './dialog-store';
 
-const auth = useAuthStore()
+interface ChannelState {
+  channels: Channel[];
+  channelInvites: ChannelInvite[];
+  messages: ChatMessagePayload[];
+  unreadMessages: ChatMessagePayload[];
+  olderPagesLeft: Record<number, number>;
+  isLoading: boolean;
+  error: string | null;
+  _pendingResolve: null | (() => void),
+}
 
 export const useChannelStore = defineStore('channels', {
-  state: () => ({
-    channels: [
-      {
-        id: 1,
-        ownerId: 3,
-        name: 'Channel_1',
-        createdAt: new Date(),
-        updatedAt: new Date(),
-        joinedAt: new Date(),
-        description: 'The default channel',
-        icon: 'group',
-        color: 'grey',
-        infoColor: 'red',
-        isPublic: true,
-        hasUnreadMsgs: true,
-        members: {
-          3: {
-            id: 3,
-            nickname: 'Alice',
-            isOwner: true,
-            kickVotes: 0,
-            currentlyTyping: 'Ahoj, ako s',
-            kickVoters: [],
-          },
-          2: {
-            id: 2,
-            nickname: 'Bob',
-            isOwner: false,
-            kickVotes: 1,
-            kickVoters: [3],
-          },
-          [auth.getCurrentUser ? auth.getCurrentUser.id : 7]: {
-            id: auth.getCurrentUser ? auth.getCurrentUser.id : 7,
-            nickname: auth.getCurrentUser ? auth.getCurrentUser.nickName : 'DefaultUser',
-            isOwner: false,
-            kickVotes: 0,
-            currentlyTyping: '',
-            kickVoters: [],
-          },
-          4: {
-            id: 4,
-            nickname: 'Cyril',
-            isOwner: false,
-            kickVotes: 1,
-            kickVoters: [auth.getCurrentUser ? auth.getCurrentUser.id : 7],
-          },
-        },
-      },
-    ] as Channel[],
-    channelInvites: [
-      {
-        id: 2,
-        name: "Channel_2",
-        invitedAt: new Date(),
-        icon: "lock",
-        color: "red",
-      }
-    ] as ChannelInvite[],
-    messages: {
-      1: [
-        {
-          user: 2,
-          text: 'Hello Alice :3',
-          time: new Date(),
-          files: [],
-          userNickname: 'Bob',
-        },
-        {
-          user: 2,
-          text: 'Hello @3 aand @4',
-          time: new Date(),
-          files: [],
-          userNickname: 'Bob',
-        },
-        {
-          user: 2,
-          text: 'Hello @' + auth.getCurrentUser?.id,
-          time: new Date(),
-          files: [],
-          userNickname: 'Bob',
-        },
-      ],
-    } as Record<number, ChatMessagePayload[]>,
-    unreadMessages: {
-      1: [
-        {
-          user: 3,
-          text: 'Hello Bob <3',
-          time: new Date(),
-          files: [],
-          userNickname: 'Alice',
-        },
-      ],
-    } as Record<number, ChatMessagePayload[]>,
-    olderPagesLeft: {} as Record<number, number>,
-  }),
+  state: (): ChannelState => {
+    return {
+      channels: [] as Channel[],
+      channelInvites: [] as ChannelInvite[],
+      messages: [] as ChatMessagePayload[],
+      unreadMessages: [] as ChatMessagePayload[],
+      olderPagesLeft: {} as Record<number, number>,
+      isLoading: false,
+      error: null,
+      _pendingResolve: null as null | (() => void),
+    };
+  },
 
   actions: {
+    loadChannels() {
+      channelService.listChannels()
+    },
+
+    async loadNextMessages(channelId: number, offset: number) {
+      // So the scrollbar works
+      return new Promise<void>((resolve) => {
+        this._pendingResolve = resolve
+        channelService.listMessages(channelId, offset)
+      })
+    },
+
+    async loadMessages(channelId: number) {
+      this.setMessages([])
+      await this.loadNextMessages(channelId, 0)
+      console.log("msg:list:load")
+    },
 
     removeInvite(channelId: number) {
-      this.channelInvites = this.channelInvites.filter(invite => invite.id !== channelId);;
+      this.channelInvites = this.channelInvites.filter((invite) => invite.id !== channelId);
     },
 
     addChannel(channel: Channel) {
       if (!this.channels.find((c) => c.id === channel.id)) {
         this.channels.push(channel);
-        this.messages[channel.id] = [];
       }
     },
 
@@ -120,30 +64,50 @@ export const useChannelStore = defineStore('channels', {
       this.channels = channelList;
     },
 
+    setMessages(messagesList: ChatMessagePayload[]) {
+      this.messages = messagesList;
+    },
+
     removeChannel(channelId: number) {
       this.channels = this.channels.filter((c) => c.id !== channelId);
-      delete this.messages[channelId];
-      delete this.unreadMessages[channelId];
+      console.log(this.channels)
+    },
+
+    cancelChannel(channelId: number) {
+      const chatStore = useChatStore()
+      if(chatStore.channel && chatStore.channel.id == channelId) 
+        chatStore.closeChat()
+      this.channels = this.channels.filter((c) => c.id !== channelId);
+    },
+
+    removeMember(channelId: number, memberId: number) {
+      const channel = this.getChannelById(channelId)
+      if(!channel) return
+      delete channel.members[memberId]
+
+      const dialogStore = useDialogStore()
+      if(dialogStore.dialogMember && dialogStore.dialogMember.id == memberId) {
+        dialogStore.closeMemberInfo()
+      }
+    },
+
+    sendMessage(msg: ChatMessagePayload, channelId: number, files: File[]) {
+
+      channelService.sendMessage(channelId, msg.text, files)
     },
 
     addMessage(msg: ChatMessagePayload, channelId: number) {
-      if (!this.messages[channelId]) {
-        this.messages[channelId] = [];
-      }
-      this.markAsRead(channelId)
-      this.messages[channelId].push(msg);
+      this.markAsRead(channelId);
+      this.messages.push(msg);
     },
 
-    addMessages(msgs: ChatMessagePayload[], channelId: number) {
-      if (!this.messages[channelId]) {
-        this.messages[channelId] = [];
-      }
-      this.messages[channelId].push(...msgs)
+    addMessages(msgs: ChatMessagePayload[]) {
+      this.messages.push(...msgs);
     },
 
     markAsRead(channelId: number) {
-      const msgs = this.getMessagesByChannelId(channelId);
-      const unreadMsgs = this.getUnreadMessagesByChannelId(channelId);
+      const msgs = this.getMessages();
+      const unreadMsgs = this.getUnreadMessages();
       if (!msgs || !unreadMsgs) return;
 
       msgs.push(...unreadMsgs);
@@ -168,7 +132,7 @@ export const useChannelStore = defineStore('channels', {
         });
       targetMember.kickVotes += 1;
 
-      targetMember.kickVoters.push(voterId);
+      targetMember.receivedKickVotes.push(voterId);
       Notify.create({
         type: 'info',
         message: `You have voted to kick ${targetMember.nickname} from ${channel.name}. Total votes: ${targetMember.kickVotes}`,
@@ -176,47 +140,14 @@ export const useChannelStore = defineStore('channels', {
       });
     },
 
-    fetchOlderMessages(
-      channelId: number,
-      count = 20,
-    ): { older: ChatMessagePayload[]; remaining: number } {
-      if (!this.messages[channelId]) {
-        this.messages[channelId] = [];
-      }
+    fetchOlderMessages(channelId: number): { older: ChatMessagePayload[]; remaining: number } {
 
-      // Only simulate infinite scroll for channel_1 (id = 1)
-      if (channelId !== 1) {
-        this.olderPagesLeft[channelId] = 0;
-        return { older: [] as ChatMessagePayload[], remaining: 0 };
-      }
+      this.messages = [];
 
-      const prevRemaining = this.olderPagesLeft[channelId];
-      const remaining = typeof prevRemaining === 'number' ? prevRemaining : 5;
-      if (remaining <= 0) {
-        this.olderPagesLeft[channelId] = 0;
-        return { older: [] as ChatMessagePayload[], remaining: 0 };
-      }
-
-      const existing = this.messages[channelId];
-      const first = existing[0]?.time ?? new Date();
-      const baseTs = first instanceof Date ? first.getTime() : new Date().getTime();
-
-      const older: ChatMessagePayload[] = [];
-      for (let i = count - 1; i >= 0; i--) {
-        const t = new Date(baseTs - (i + 1) * 60_000);
-        older.push({
-          user: 2,
-          text: `Older message at ${t.toLocaleTimeString()}`,
-          time: t,
-          files: [],
-          userNickname: 'Bob',
-        });
-      }
-
-      this.messages[channelId] = [...older, ...existing];
-      this.olderPagesLeft[channelId] = remaining - 1;
-
-      return { older, remaining: this.olderPagesLeft[channelId] };
+      // For now, return empty - backend should provide pagination
+      // This can be implemented when backend supports message history pagination
+      this.olderPagesLeft[channelId] = 0;
+      return { older: [] as ChatMessagePayload[], remaining: 0 };
     },
 
     /**
@@ -230,9 +161,142 @@ export const useChannelStore = defineStore('channels', {
       if (!member) return;
       member.currentlyTyping = text;
     },
+
+    // === Async Actions coordinating with channelService ===
+    // Note: Socket operations don't return data immediately - they trigger socket events
+    // that are handled by socketService listeners which update the store reactively
+    // Server pushes all channel data via socket events - no HTTP polling needed
+
+    createChannelAction(name: string, isPrivate: boolean) {
+      this.isLoading = true;
+      this.error = null;
+      try {
+        channelService.createChannel(name, isPrivate);
+        // Channel will be added via socket event 'channel:created'
+      } catch (err) {
+        this.error = err instanceof Error ? err.message : String(err);
+        throw err;
+      } finally {
+        this.isLoading = false;
+      }
+    },
+
+    joinChannelAction(channelName: string) {
+      this.isLoading = true;
+      this.error = null;
+      try {
+        channelService.joinChannel(channelName);
+        // Channel will be added via socket event 'channel:joined'
+      } catch (err) {
+        this.error = err instanceof Error ? err.message : String(err);
+        throw err;
+      } finally {
+        this.isLoading = false;
+      }
+    },
+
+    quitChannelAction(channelId: number) {
+      this.isLoading = true;
+      this.error = null;
+      console.log("QUIT CHANNEL ACTION")
+      try {
+        channelService.quitChannel(channelId);
+        // Channel will be removed via socket event 'channel:left'
+      } catch (err) {
+        this.error = err instanceof Error ? err.message : String(err);
+        throw err;
+      } finally {
+        this.isLoading = false;
+      }
+    },
+
+    revokeUserAction(channelId: number, userId: number) {
+      this.isLoading = true;
+      this.error = null;
+      try {
+        channelService.revokeUserFromChannel(channelId, userId);
+        // User will be removed via socket event 'member:left'
+      } catch (err) {
+        this.error = err instanceof Error ? err.message : String(err);
+        throw err;
+      } finally {
+        this.isLoading = false;
+      }
+    },
+
+    inviteUserAction(channelId: number, userId: number) {
+      this.isLoading = true;
+      this.error = null;
+      try {
+        channelService.inviteUserToChannel(channelId, userId);
+        // Invite will be sent via socket event
+      } catch (err) {
+        this.error = err instanceof Error ? err.message : String(err);
+        throw err;
+      } finally {
+        this.isLoading = false;
+      }
+    },
+
+    cancelChannelAction(channelId: number) {
+      this.isLoading = true;
+      this.error = null;
+      try {
+        channelService.cancelChannel(channelId);
+        // Channel will be removed via socket event 'channel:deleted'
+      } catch (err) {
+        this.error = err instanceof Error ? err.message : String(err);
+        throw err;
+      } finally {
+        this.isLoading = false;
+      }
+    },
+
+    kickMemberAction(channelId: number, memberId: number) {
+      this.isLoading = true;
+      this.error = null;
+      try {
+        channelService.kickMemberFromChannel(channelId, memberId);
+        // Increment kick counter via socket event
+      } catch (err) {
+        this.error = err instanceof Error ? err.message : String(err);
+        throw err;
+      } finally {
+        this.isLoading = false;
+      }
+    },
+
+    acceptChannelInviteAction(channelInviteId: number) {
+      this.isLoading = true;
+      this.error = null;
+      try {
+        channelService.acceptChannelInvite(channelInviteId);
+        // Channel will be added and invite removed via socket event 'channel:invite:accepted'
+      } catch (err) {
+        this.error = err instanceof Error ? err.message : String(err);
+        throw err;
+      } finally {
+        this.isLoading = false;
+      }
+    },
+
+    declineChannelInviteAction(channelInviteId: number) {
+      this.isLoading = true;
+      this.error = null;
+      try {
+        channelService.declineChannelInvite(channelInviteId);
+        // Invite will be removed via socket event 'channel:invite:declined'
+      } catch (err) {
+        this.error = err instanceof Error ? err.message : String(err);
+        throw err;
+      } finally {
+        this.isLoading = false;
+      }
+    },
   },
 
   getters: {
+
     getChannelById: (state) => {
       return (id: number) => state.channels.find((c) => c.id === id);
     },
@@ -247,21 +311,34 @@ export const useChannelStore = defineStore('channels', {
       return state.channels.filter((c) => c.ownerId !== user?.id);
     },
     totalChannels: (state) => state.channels.length,
-    getMessagesByChannelId: (state) => {
-      return (channelId: number) => state.messages[channelId] || [];
+    getMessages: (state) => {
+      return () => state.messages || [];
     },
-    getUnreadMessagesByChannelId: (state) => {
-      return (channelId: number) => state.unreadMessages[channelId] || [];
+    getUnreadMessages: (state) => {
+      return () => state.unreadMessages || [];
+    },
+    getMemberById: (state) => {
+      return (id: number, channelId: number) => { return state.channels.find((c) => c.id === channelId)?.members[id] }
+    },
+    getMemberByUserId: (state) => {
+      return (userId: number, channelId: number) => {
+        const channel = state.channels.find((c) => c.id === channelId)
+        if (!channel) return undefined
+
+        return Object.values(channel.members).find(m => m.userId === userId)
+      }
     },
     getChannelInviteById: (state) => {
       return (id: number) => state.channelInvites.find((c) => c.id === id);
     },
     hasMoreOlder: (state) => {
       return (channelId: number) => {
-        if (channelId !== 1) return false;
+        // Backend pagination not implemented yet
         const left = state.olderPagesLeft[channelId];
-        return (typeof left === 'number' ? left : 5) > 0;
+        return (typeof left === 'number' ? left : 0) > 0;
       };
     },
+    getLoading: (state) => state.isLoading,
+    getError: (state) => state.error,
   },
 });

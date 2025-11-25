@@ -30,7 +30,7 @@
         class="file-chip row items-center q-pa-xs q-my-xs">
         <q-icon name="insert_drive_file" color="grey-8" class="q-mr-xs" />
         <a :href="getFileURL(file)" target="_blank" class="file-name">
-          {{ typeof file === 'string' ? file.split('/').pop() : file.name }}
+          {{ file.split('/').pop() }}
         </a>
       </div>
     </div>

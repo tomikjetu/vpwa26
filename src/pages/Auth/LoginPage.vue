@@ -4,7 +4,7 @@
             <h5 class="text-weight-medium q-my-md">Sign In</h5>
         </div>
 
-        <q-form @submit="onSubmit" class="q-gutter-md">
+        <q-form @submit.prevent="onSubmit" class="q-gutter-md">
             <q-input v-model="form.email" type="email" label="Email" outlined :rules="[
                 val => !!val || 'Email is required',
                 val => /.+@.+\..+/.test(val) || 'Please enter a valid email'
@@ -53,7 +53,7 @@
 import { ref } from 'vue';
 import { useRouter } from 'vue-router';
 import { Notify } from 'quasar';
-import { authService } from 'src/services/authService';
+import { useAuthStore } from 'src/stores/auth-store';
 import type { LoginCredentials } from 'src/utils/types';
 
 const router = useRouter();
@@ -65,15 +65,18 @@ const form = ref<LoginCredentials>({
 
 const showPassword = ref(false);
 const rememberMe = ref(false);
+const auth = useAuthStore();
 const loading = ref(false);
 
-async function onSubmit() {
+async function onSubmit() : Promise<void> {
+    
     loading.value = true;
 
     try {
-        const user = await authService.login(form.value);
+        const user = await auth.login(form.value);
 
         Notify.create({
+
             type: 'positive',
             message: `Welcome back, ${user.name}!`,
             position: 'top'
