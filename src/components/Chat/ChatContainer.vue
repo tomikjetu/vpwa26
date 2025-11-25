@@ -5,7 +5,8 @@
       <ChatTopBar :channel="chatStore.channel" />
       <ChatMessageList :channel="chatStore.channel" :messages="chatStore.messages"
         :unreadMessages="chatStore.unreadMessages" />
-      <ChatInput @send="(msg: ChatMessagePayload, files: File[]) => chatStore.sendMessage(msg, files)" @typing="onTyping" />
+      <ChatInput @send="(msg: ChatMessagePayload, files: File[]) => chatStore.sendMessage(msg, files)"
+        @typing="onTyping" />
     </template>
 
     <template v-else>

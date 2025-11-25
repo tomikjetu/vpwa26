@@ -18,7 +18,7 @@ export default function Invite() {
       if (args.length !== 2)
         return Notify.create({
           type: 'negative',
-          message: 'Usage: /revoke channelName userName',
+          message: 'Usage: /invite channelName nickName',
         });
 
       const channel = channelStore.channels.find((ch) => ch.name === args[0]);
@@ -28,8 +28,8 @@ export default function Invite() {
           message: `Channel ${args[0]} not found`,
         });
 
-      const nickname = args[1]
-      if(!nickname) {
+      const nickname = args[1];
+      if (!nickname) {
         return Notify.create({
           type: 'negative',
           message: `Nickname as second argument is necessary`,
