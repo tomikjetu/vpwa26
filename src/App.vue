@@ -3,8 +3,8 @@
 </template>
 
 <script setup lang="ts">
-import { onMounted, watch } from 'vue'
-import { initSocket, disconnectSocket } from 'src/services/socketService'
+import { onMounted, onUnmounted, watch } from 'vue'
+import { initSocket, disconnectSocket, cleanupSocketListeners } from 'src/services/socketService'
 import { useAuthStore } from 'src/stores/auth-store'
 
 const authStore = useAuthStore()
@@ -28,6 +28,10 @@ onMounted(async () => {
       }
     }
   }
+})
+
+onUnmounted(() => {
+  cleanupSocketListeners()
 })
 
 // Watch for authentication changes

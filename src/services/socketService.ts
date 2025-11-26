@@ -79,6 +79,12 @@ export function disconnectSocket(): void {
 function registerSocketListeners(socket: Socket): void {
   const authStore = useAuthStore();
 
+  // ==================== CLEANUP FIRST ====================
+  // Prevent duplicate listeners
+  controllers.forEach((controller) => {
+    controller.cleanup(socket);
+  });
+
   // ==================== CONNECTION EVENTS ====================
 
   socket.on('connect', () => {
@@ -110,6 +116,14 @@ function registerSocketListeners(socket: Socket): void {
 
   controllers.forEach((controller) => {
     controller.registerListeners(socket);
+  });
+}
+
+export function cleanupSocketListeners(): void {
+  const socket = getSocket()
+
+  controllers.forEach((controller) => {
+    controller.cleanup(socket);
   });
 }
 
