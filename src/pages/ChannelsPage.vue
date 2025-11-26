@@ -2,6 +2,7 @@
   <MemberInfo v-model="dialog.showMemberInfoDialog" :member="dialog.dialogMember"
     :channel-id="dialog.shownChannel ? dialog.shownChannel.id : null" />
   <ChannelInviteAccept v-model="dialog.showChannelInviteAcceptation" />
+  <MemberNamesList v-model="dialog.showMemberListDialog" :members="dialog.memberList" />
 
   <q-layout view="hHh lpR FfF" class="channels-layout">
     <!-- Header with burger menu (only visible on mobile) -->
@@ -37,6 +38,7 @@ import ChannelInviteAccept from 'src/components/Dialog/ChannelInviteAccept.vue'
 import { onMounted } from 'vue';
 import { useChannelStore } from 'src/stores/channelStore';
 import { useQuasar } from 'quasar'
+import MemberNamesList from 'src/components/Dialog/MemberNamesList.vue'
 
 const $q = useQuasar()
 const channelStore = useChannelStore();

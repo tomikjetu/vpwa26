@@ -11,6 +11,8 @@ export const useDialogStore = defineStore('dialogStore', {
     shownChannel: null as Channel | null,
     showChannelInviteAcceptation: false as boolean,
     channelInvite: null as ChannelInvite | null,
+    showMemberListDialog: false as boolean,
+    memberList: null as Member[] | null,
   }),
 
   getters: {
@@ -38,6 +40,17 @@ export const useDialogStore = defineStore('dialogStore', {
       this.showMemberInfoDialog = false
       this.dialogMember = null
       this.shownChannel = null
+    },
+
+    openMemberList(members: Member[]) {
+      console.log("ADAD")
+      this.showMemberListDialog = true
+      this.memberList = members
+    },
+
+    closeMemberList() {
+      this.showMemberListDialog = false
+      this.memberList = null
     },
 
     confirmLeaveChannel(isOwner: boolean): Promise<boolean> {

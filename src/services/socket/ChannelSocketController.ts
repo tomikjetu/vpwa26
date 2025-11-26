@@ -5,6 +5,7 @@ import { useAuthStore } from 'src/stores/auth-store';
 import { useChatStore } from 'src/stores/chat-store';
 import { Notify } from 'quasar';
 import type { Channel, Member } from 'src/utils/types';
+import { useDialogStore } from 'src/stores/dialog-store';
 
 /**
  * Handles channel-related socket events
@@ -146,11 +147,9 @@ export class ChannelSocketController implements ISocketController {
   }
 
   private handleChannelMembersList(data: { channelId: number, members: Member[] }) : void {
-    // const channelStore = useChannelStore();
+    const dialogStore = useDialogStore();
     console.log(data)
-
-    // console.log(data.members)
-    // channelStore.setMembers(data.members);
+    dialogStore.openMemberList(data.members);
   }
 
 
