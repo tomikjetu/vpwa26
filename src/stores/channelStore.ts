@@ -1,5 +1,5 @@
 import { defineStore } from 'pinia';
-import type { Channel, ChatMessagePayload, ChannelInvite } from 'src/utils/types';
+import type { Channel, ChatMessagePayload, ChannelInvite, NotifStatus } from 'src/utils/types';
 import { useAuthStore } from 'src/stores/auth-store';
 import { Notify } from 'quasar';
 import { channelService } from 'src/services/channelService';
@@ -98,6 +98,12 @@ export const useChannelStore = defineStore('channels', {
       if(dialogStore.dialogMember && dialogStore.dialogMember.id == memberId) {
         dialogStore.closeMemberInfo()
       }
+    },
+
+    setUpdateStatus(channelId: number, notifStatus: NotifStatus) {
+      const channel = this.getChannelById(channelId)
+      if(!channel) return
+      channel.notifStatus = notifStatus
     },
 
     sendMessage(msg: ChatMessagePayload, channelId: number, files: File[]) {
@@ -302,6 +308,10 @@ export const useChannelStore = defineStore('channels', {
         this.isLoading = false;
       }
     },
+
+    updateNotifStatusAction(channelId: number, notifStatus: NotifStatus) {
+      channelService.updateNotifStatus(channelId, notifStatus)
+    }
   },
 
   getters: {

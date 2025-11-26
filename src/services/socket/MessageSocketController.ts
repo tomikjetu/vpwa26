@@ -2,8 +2,9 @@ import type { Socket } from 'socket.io-client';
 import type { ISocketController } from './types';
 import { useChannelStore } from 'src/stores/channelStore';
 import { useAuthStore } from 'src/stores/auth-store';
-import { Notify } from 'quasar';
+import { AppVisibility, Notify } from 'quasar';
 import type { ChatMessagePayload, ServerReplyMsg } from 'src/utils/types';
+import { useChatStore } from 'src/stores/chat-store';
 
 
 /**
@@ -63,6 +64,7 @@ export class MessageSocketController implements ISocketController {
     const channelStore = useChannelStore();
     const authStore = useAuthStore();
     const channel = channelStore.getChannelById(data.channelId);
+    const chatStore = useChatStore()
 
     if (!channel) return;
 
@@ -80,19 +82,28 @@ export class MessageSocketController implements ISocketController {
       userNickname: data.message.user.nick,
     };
 
-    // Add message to store
-    channelStore.addMessage(transformedMessage, data.channelId);
     console.log(data.message)
     console.log("message:new")
+
+    const is_chat_open = chatStore.channel && data.channelId == chatStore.channel.id
+    // Add message to store
+    if(is_chat_open)
+      channelStore.addMessage(transformedMessage, data.channelId);
+
     // Mark as unread if not viewing this channel (handled by store)
     // Show notification if message is from another user
-    if (transformedMessage.user !== authStore.getCurrentUser?.id) {
+    if (transformedMessage.user !== authStore.getCurrentUser?.id && !is_chat_open && AppVisibility.appVisible) {
       Notify.create({
         type: 'info',
         message: `New message in ${channel.name}`,
         caption: transformedMessage.text.substring(0, 50),
         position: 'bottom-right',
         timeout: 3000,
+      });
+    } else if (!AppVisibility.appVisible) {
+      console.log("BIG NOTIF")
+      new Notification(`New message in  ${channel.name}`, {
+        body:  transformedMessage.text.substring(0, 50),
       });
     }
   }

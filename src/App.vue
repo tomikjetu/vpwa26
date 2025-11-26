@@ -10,13 +10,22 @@ import { useAuthStore } from 'src/stores/auth-store'
 const authStore = useAuthStore()
 
 // Initialize socket when app mounts if user is authenticated
-onMounted(() => {
+onMounted(async () => {
   if (authStore.checkAuthenticated) {
     try {
       initSocket()
       console.log('✅ Socket initialized on app mount')
     } catch (error) {
       console.error('Failed to initialize socket:', error)
+    }
+
+    if (Notification.permission !== 'granted') {
+      const permission = await Notification.requestPermission();
+      if (permission === 'granted') {
+        console.log('Notification permission granted!');
+      } else {
+        console.log('Notification permission denied');
+      }
     }
   }
 })

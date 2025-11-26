@@ -18,6 +18,7 @@ export const getMenuOptions = (channel: Channel): DropdownItem[] => {
     },
     { label: 'Members', class: '', disable: false },
    // { label: 'Change icon', class: '', disable: false },
+    { label: channel.notifStatus == 'all' ? 'Mentions only notifs' : 'All notifs', class: '', disable: false },
     {
       label: channel.ownerId != getCurrentUser.value?.id ? 'Leave' : 'Remove',
       class: 'warning',
@@ -81,7 +82,6 @@ export async function handleDropdownSelect(
   emit: (event: 'show-members', channel: Channel) => void,
   showInviteDialog: Ref<boolean>,
   channel: Channel,
-  channels: Channel[],
   option: DropdownItem,
 ) {
   const label = option.label.toLowerCase();
@@ -93,5 +93,9 @@ export async function handleDropdownSelect(
     emit('show-members', channel);
   } else if (label.includes('remove')) {
     await quitChannel(channel);
+  } else if (label.includes('mentions only notifs')) {
+    useChannelStore().updateNotifStatusAction(channel.id, 'mentions')
+  } else if (label.includes('all notifs')) {
+    useChannelStore().updateNotifStatusAction(channel.id, 'all')
   }
 }

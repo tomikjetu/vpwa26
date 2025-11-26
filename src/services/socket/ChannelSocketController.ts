@@ -62,6 +62,7 @@ export class ChannelSocketController implements ISocketController {
         isPrivate: ch.isPrivate,
         hasUnreadMsgs: false,
         members: ch.members || {},
+        notifStatus: ch.notifStatus
       };
 
       channelStore.addChannel(transformedChannel);
@@ -88,6 +89,7 @@ export class ChannelSocketController implements ISocketController {
       isPrivate: data.channel.isPrivate,
       hasUnreadMsgs: false,
       members: data.channel.members || {},
+      notifStatus: 'all'
     };
 
     channelStore.addChannel(transformedChannel);
@@ -122,6 +124,7 @@ export class ChannelSocketController implements ISocketController {
         isPrivate: data.channel.isPrivate,
         hasUnreadMsgs: false,
         members: data.channel.members || {},
+        notifStatus: 'all'
       };
 
       channelStore.addChannel(transformedChannel);

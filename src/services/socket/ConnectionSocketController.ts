@@ -39,6 +39,7 @@ export class ConnectionSocketController implements ISocketController {
       isPrivate: channel.isPrivate,
       hasUnreadMsgs: false,
       members: channel.members || {},
+      notifStatus: channel.notifStatus
     }));
 
     // Set all channels at once

@@ -44,7 +44,8 @@
             <q-input v-model="form.password" :type="showPassword ? 'text' : 'password'" label="Password" outlined
                 :rules="[
                     val => !!val || 'Password is required',
-                    val => val.length >= 6 || 'Password must be at least 6 characters'
+                    val => val.length >= 8 || 'Password must be at least 8 characters',
+                    val => (/[0-9]/.test(val) && /[A-Za-z]/.test(val)) || 'Password must have letters and numbers'
                 ]" :loading="loading" :disable="loading">
                 <template v-slot:prepend>
                     <q-icon name="lock" />

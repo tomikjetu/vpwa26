@@ -4,7 +4,7 @@ import { useChannelStore } from 'src/stores/channelStore';
 import { useAuthStore } from 'src/stores/auth-store';
 import { useChatStore } from 'src/stores/chat-store';
 import { Notify } from 'quasar';
-import type { Member } from 'src/utils/types';
+import type { Member, NotifStatus } from 'src/utils/types';
 import { useDialogStore } from 'src/stores/dialog-store';
 
 /**
@@ -26,6 +26,8 @@ export class MemberSocketController implements ISocketController {
 
     // Member kick vote received
     socket.on('member:kick-voted', this.handleMemberKickVote.bind(this));
+
+    socket.on('member:notif-status:updated', this.handleNotifStatusUpdated.bind(this))
   }
 
   cleanup(socket: Socket): void {
@@ -34,11 +36,16 @@ export class MemberSocketController implements ISocketController {
     socket.off('member:kicked');
     socket.off('member:typing');
     socket.off('member:kick-voted');
+    socket.off('member:notif-status:updated')
   }
 
   private handleMemberJoined(data: { channelId: number; member: Member }): void {
     const channelStore = useChannelStore();
     const channel = channelStore.getChannelById(data.channelId);
+    
+    console.log(`member: `)
+    console.log(data.member)
+    console.log(`id: ${data.channelId}`)
 
     if (channel) {
       // Transform backend member data
@@ -161,5 +168,16 @@ export class MemberSocketController implements ISocketController {
         }
       }
     }
+  }
+
+  private handleNotifStatusUpdated(data: { channelId: number, notifStatus: NotifStatus }) : void {
+    console.log("Notif status updated")
+    console.log(data.notifStatus)
+    const channelStore = useChannelStore()
+    const channel = channelStore.getChannelById(data.channelId)
+
+    if(!channel) return
+    
+    channel.notifStatus = data.notifStatus
   }
 }

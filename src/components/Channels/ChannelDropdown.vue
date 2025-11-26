@@ -60,7 +60,7 @@ function invitePerson() {
 }
 
 async function onDropdownSelect(option: DropdownItem) {
-  await handleDropdownSelect(emit, showInviteDialog, props.channel, props.channels, option)
+  await handleDropdownSelect(emit, showInviteDialog, props.channel, option)
 }
 </script>
 

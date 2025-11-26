@@ -1,5 +1,6 @@
 import { Notify } from 'quasar';
 import { socketEmit } from './socketService';
+import type { NotifStatus } from 'src/utils/types';
 
 /**
  * ChannelService - Socket-based service for real-time channel operations
@@ -112,6 +113,10 @@ class ChannelService {
   deleteMessage(channelId: number, messageId: number): void {
     socketEmit.deleteMessage(channelId, messageId);
     // Response will come via socket event 'message:deleted'
+  }
+
+  updateNotifStatus(channelId: number, notifStatus: NotifStatus) {
+    socketEmit.updateNotifStatus(channelId, notifStatus)
   }
 
   /**

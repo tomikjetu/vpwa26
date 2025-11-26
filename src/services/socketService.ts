@@ -1,7 +1,7 @@
 import { io, type Socket } from 'socket.io-client';
 import { useAuthStore } from 'src/stores/auth-store';
 import { Notify } from 'quasar';
-import type { UserStatus } from 'src/utils/types';
+import type { NotifStatus, UserStatus } from 'src/utils/types';
 import {
   ConnectionSocketController,
   ChannelSocketController,
@@ -216,4 +216,9 @@ export const socketEmit = {
     // Typically files are uploaded via HTTP, but we can notify via socket
     getSocket().emit('file:upload', { channelId, fileName: file.name, fileSize: file.size });
   },
+
+  updateNotifStatus: (channelId: number, notifStatus: NotifStatus) => {
+    getSocket().emit('member:notif-status:update', { channelId, status: notifStatus })
+    console.log('member:notif-status:update emitted')
+  }
 };

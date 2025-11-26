@@ -92,6 +92,7 @@ export class InviteSocketController implements ISocketController {
         isPrivate: data.channel.isPrivate,
         hasUnreadMsgs: false,
         members: data.channel.members || {},
+        notifStatus: 'all'
       };
       channelStore.removeInvite(transformedChannel.id)
       channelStore.addChannel(transformedChannel);

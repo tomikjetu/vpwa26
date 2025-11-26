@@ -12,7 +12,10 @@ export type Channel = {
   isPrivate: boolean;
   hasUnreadMsgs: boolean;
   members: Record<number, Member>;
+  notifStatus: NotifStatus;
 };
+
+export type NotifStatus = 'mentions' | 'all'
 
 export type ChannelInvite = {
   id: number;
