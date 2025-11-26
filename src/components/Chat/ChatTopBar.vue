@@ -28,6 +28,7 @@ const props = defineProps<{
   width: 100%;
   border-bottom: 1px solid #ddd;
   background: #fff;
+  flex: 0 0 auto;
 }
 
 .body--dark .info-bar {

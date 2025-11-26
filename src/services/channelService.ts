@@ -11,6 +11,7 @@ class ChannelService {
    * List channels relevant to the user (via socket)
    */
   listChannels() : void {
+    console.log("OGA BOGA")
     socketEmit.listChannels();
   }
   /**

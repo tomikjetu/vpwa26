@@ -134,7 +134,7 @@ watch(
 
 <style scoped>
 .messages-container {
-  flex: 1;
+  flex: 1 1 auto;
   display: flex;
   flex-direction: column;
   width: 100%;
@@ -143,7 +143,6 @@ watch(
   background: #e7e7e7;
   min-height: 0;
   gap: 0.9rem;
-  scrollbar-gutter: stable both-edges;
 }
 
 .body--dark .messages-container {

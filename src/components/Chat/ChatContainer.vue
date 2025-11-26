@@ -51,7 +51,6 @@ function onTyping(text: string) {
   min-width: 0;
   min-height: 0;
   overflow: hidden;
-  flex: 1 1 auto;
   border: 1px solid #ddd;
 }
 
@@ -64,7 +63,8 @@ function onTyping(text: string) {
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  height: 100%;
+  flex: 1;
+  min-height: 0; 
   text-align: center;
   opacity: 0.8;
 }

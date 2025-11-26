@@ -5,7 +5,7 @@
 
   <q-layout view="hHh lpR FfF" class="channels-layout">
     <!-- Header with burger menu (only visible on mobile) -->
-    <q-header elevated class="bg-primary text-white mobile-only-header">
+    <q-header elevated class="bg-primary text-white">
       <q-toolbar>
         <q-btn flat dense round icon="menu" aria-label="Menu" @click="leftDrawerOpen = !leftDrawerOpen" />
         <q-toolbar-title>Channels</q-toolbar-title>
@@ -19,7 +19,7 @@
 
     <!-- Main content area -->
     <q-page-container>
-      <q-page class="chat-page">
+      <q-page class="chat-page column no-wrap">
         <ChatContainer class="pane-fill" />
       </q-page>
     </q-page-container>
@@ -44,21 +44,25 @@ const leftDrawerOpen = ref<boolean>(false)
 
 const onChannelSelected = () => {
   // Close drawer on mobile when channel is selected
-  if ($q.screen.lt.lg) {
+  if ($q.screen.lt.sm) {
     leftDrawerOpen.value = false
   }
 }
 
+
 onMounted(() => {
   channelStore.loadChannelsAndInvites();
+  
+  // For correct burger menu
+  document.documentElement.style.setProperty('--sm-width', `${$q.screen.sizes.sm}px`)
 });
 </script>
 
 <style scoped>
 .channels-layout {
-  height: 100vh;
   min-height: 0;
-}
+  max-height: 100vh;
+} 
 
 .mobile-only-header {
   display: none;
@@ -69,7 +73,8 @@ onMounted(() => {
   width: 100%;
   min-width: 0;
   min-height: 0;
-  display: grid;
+  display: flex;
+  flex-direction: column;
   overflow: hidden;
 }
 
@@ -78,6 +83,7 @@ onMounted(() => {
   height: 100%;
   min-width: 0;
   min-height: 0;
+  flex: 1;
 }
 
 .channels-drawer {
@@ -85,7 +91,7 @@ onMounted(() => {
 }
 
 /* Mobile styles - show header with burger menu */
-@media (max-width: 1023px) {
+@media (max-width: var(--sm-width)) {
   .mobile-only-header {
     display: block;
   }
