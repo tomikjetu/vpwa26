@@ -20,7 +20,7 @@ export class ChannelSocketController implements ISocketController {
     // User joined channel - broadcast to channel members
     socket.on('channel:joined', this.handleChannelJoined.bind(this));
 
-    socket.on('channel:listMembers', this.handleChannelMembersList.bind(this));
+    socket.on('channel:list-members', this.handleChannelMembersList.bind(this));
 
     // Channel deleted - broadcast to channel members
     socket.on('channel:deleted', this.handleChannelDeleted.bind(this));

@@ -13,6 +13,8 @@ export class InviteSocketController implements ISocketController {
     // Invitation received
     socket.on('channel:invite:received', this.handleInviteReceived.bind(this));
 
+    socket.on('invite:sent', this.handleInviteSent.bind(this));
+
     // Invitation accepted
     socket.on('channel:invite:accepted', this.handleInviteAccepted.bind(this));
 
@@ -27,6 +29,7 @@ export class InviteSocketController implements ISocketController {
     socket.off('channel:invite:accepted');
     socket.off('channel:invite:declined');
     socket.off('invite:list');
+    socket.off('invite:sent');
   }
 
   private handleInviteList(data: { invites: ChannelInvite[] }) : void {
@@ -45,6 +48,15 @@ export class InviteSocketController implements ISocketController {
       };
       channelStore.channelInvites.push(transformedInvite);
     }
+  }
+
+  private handleInviteSent(data: {invitedAt: Date, channelName: string, inviteId: number, nickname: string}) : void {
+    Notify.create({
+      type: 'info',
+      message: `You've successfully invited ${data.nickname} to the channel ${data.channelName}`,
+      position: 'top',
+      timeout: 5000,
+    });
   }
 
   private handleInviteReceived(data: { invitedAt: Date, channelName: string, inviteId: number, channelId: number }): void {

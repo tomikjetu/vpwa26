@@ -140,9 +140,22 @@ async function onSubmit() {
         const redirect = router.currentRoute.value.query.redirect as string;
         await router.push(redirect || '/');
     } catch (error) {
+        let errorMessage = 'Login failed'; // Default message
+        console.log(error)
+        // If the error has a 'response' property (e.g., from Axios)
+        // If the error is an instance of Error (generic JavaScript Error)
+        if (error instanceof Error) {
+            errorMessage = error.message;
+        }
+        // If the error has a 'response' property (e.g., from Axios)
+        if (error && typeof error === 'object' && 'response' in error) {
+            const axiosError = error as { response?: { data?: { error?: string } } };
+            errorMessage = axiosError.response?.data?.error || 'Unknown error';
+        }
+        
         Notify.create({
             type: 'negative',
-            message: error instanceof Error ? error.message : 'Registration failed',
+            message: errorMessage,
             position: 'top'
         });
     } finally {

@@ -101,6 +101,7 @@ export const useAuthStore = defineStore('auth', {
         this.setAuth(data.sessionToken, user);
         return user;
       } catch (err) {
+        console.log(err)
         this.error = err instanceof Error ? err.message : String(err);
         throw err;
       } finally {

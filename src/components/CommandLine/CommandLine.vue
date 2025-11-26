@@ -46,6 +46,7 @@ import Join from './Join';
 import Kick from './Kick';
 import { useAuthStore } from 'src/stores/auth-store';
 import { storeToRefs } from 'pinia';
+import List from './List';
 
 const channelStore = useChannelStore();
 const authStore = useAuthStore();
@@ -113,6 +114,19 @@ const channelKickCommands = computed(() => {
     })
 })
 
+const channelListCommands = computed(() => {
+    return channelStore.channels.map(channel => {
+        return {
+            id: "list-" + channel.id,
+            name: `list ${channel.name}`,
+            cmd: 'list ' + channel.name,
+            description: `List members in ${channel.name}`,
+            icon: 'person',
+            format: `/list ${channel.name}` 
+        };
+    });
+})
+
 const commands = computed(() => [
     { id: "1", name: 'logout', cmd: 'logout', description: 'Log out of the application', icon: 'logout', format: '/logout' },
     { id: "2", name: "join", cmd: "join", description: "Join or create a channel", icon: "login", format: '/join channelName [private]' },
@@ -121,7 +135,8 @@ const commands = computed(() => [
     { id: "5", name: "cancel", cmd: "cancel", description: "Leave a channel", icon: "close", format: '/cancel channelName' },
     ...channelToggleCommands.value,
     ...channelLeaveCommands.value,
-    ...channelKickCommands.value
+    ...channelKickCommands.value,
+    ...channelListCommands.value
 ])
 
 const filteredCommands = ref([...commands.value]);
@@ -189,7 +204,8 @@ const executors = [
     Logout(),
     Open(),
     Quit(),
-    Revoke()
+    Revoke(),
+    List()
 ]
 
 async function executeCommand() {
@@ -198,7 +214,10 @@ async function executeCommand() {
     const args = cmdInput.split(' ').slice(1);
     command.value = '';
     isOpen.value = false;
+    console.log(args)
+    console.log(cmd)
     const executor = executors.find(ex => ex.cmd === cmd);
+    console.log(executor)
     if (executor) await executor.execute(args);
 }
 

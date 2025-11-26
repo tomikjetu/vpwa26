@@ -311,6 +311,10 @@ export const useChannelStore = defineStore('channels', {
 
     updateNotifStatusAction(channelId: number, notifStatus: NotifStatus) {
       channelService.updateNotifStatus(channelId, notifStatus)
+    },
+
+    listMembersAction(channelId: number) {
+      channelService.listMembers(channelId)
     }
   },
 

@@ -16,9 +16,6 @@
 
       <q-input ref="inputRef" outlined dense v-model="text" placeholder="Type a message..." class="col q-mx-sm"
         @update:model-value="onInputUpdate" @keydown="handleKeyDown">
-        <template v-slot:append>
-          <q-icon name="mood" class="cursor-pointer" />
-        </template>
       </q-input>
 
       <q-btn round dense color="primary" icon="send" @click="sendMessage"

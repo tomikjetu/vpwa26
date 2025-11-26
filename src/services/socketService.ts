@@ -137,7 +137,7 @@ export const socketEmit = {
   },
 
   listMembers: (channelId: number) => {
-    getSocket().emit('channel:listMembers', { channelId });
+    getSocket().emit('channel:list-members', { channelId });
     console.log('members:list emited');
   },
 
