@@ -8,6 +8,11 @@
       </template>
     </q-input>
 
+    <div class="console-shortcut-container">
+      <span class="console-label">Console</span>
+      <kbd class="keyboard-shortcut">CTRL+P</kbd>
+    </div>
+
     <div class="channels-list-container">
       <template v-if="showMembersList">
         <MembersList :channel="memberListChannel" :members="membersListContent" @cancel="handleCancelMembersList">
@@ -53,13 +58,15 @@
 
         <q-card-section>
           <div class="text-subtitle2 q-mb-sm">Status</div>
-          <div class="column q-gutter-sm">
+          <div class="column q-gutter-sm status-buttons-container">
             <q-btn :outline="currentStatus !== 'online'" :color="currentStatus === 'online' ? 'positive' : 'grey-7'"
-              icon="circle" label="Online" @click="changeStatus('online')" />
+              icon="circle" label="Online" @click="changeStatus('online')" align="left" class="status-btn" />
             <q-btn :outline="currentStatus !== 'dnd'" :color="currentStatus === 'dnd' ? 'negative' : 'grey-7'"
-              icon="do_not_disturb_on" label="Do Not Disturb" @click="changeStatus('dnd')" />
+              icon="do_not_disturb_on" label="Do Not Disturb" @click="changeStatus('dnd')" align="left"
+              class="status-btn" />
             <q-btn :outline="currentStatus !== 'offline'" :color="currentStatus === 'offline' ? 'grey' : 'grey-7'"
-              icon="radio_button_unchecked" label="Offline" @click="changeStatus('offline')" />
+              icon="radio_button_unchecked" label="Offline" @click="changeStatus('offline')" align="left"
+              class="status-btn" />
           </div>
         </q-card-section>
 
@@ -90,6 +97,10 @@ import { useAuthStore } from 'src/stores/auth-store'
 import { Dark } from 'quasar'
 import type { UserStatus } from 'src/utils/types'
 import { useContacts } from 'src/stores/contacts-store'
+
+const emit = defineEmits<{
+  channelSelected: []
+}>()
 
 const dialogStore = useDialogStore()
 const chatStore = useChatStore()
@@ -135,6 +146,7 @@ async function handleSelectChannel(channel: Channel | undefined) {
     channelStore.markAsRead(chatStore.channel.id)
   }
   await chatStore.openChat(channel)
+  emit('channelSelected')
 }
 
 const membersListContent = ref<Member[]>([])
@@ -196,6 +208,36 @@ async function logoutAndClose() {
   flex: 0 0 auto;
 }
 
+.console-shortcut-container {
+  padding: 0px 16px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex: 0 0 auto;
+}
+
+.console-label {
+  font-size: 14px;
+  color: #666;
+}
+
+.keyboard-shortcut {
+  display: inline-block;
+  padding: 4px 8px;
+  background-color: #3C6E71;
+  border: 1px solid #3C6E71;
+  border-radius: 4px;
+  font-size: 12px;
+  font-weight: 600;
+  color: white;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+}
+
+.body--dark .console-label {
+  color: #aaa;
+}
+
+
 .channels-list-container {
   width: 100%;
   flex: 1 1 auto;
@@ -211,5 +253,22 @@ async function logoutAndClose() {
   flex: 0 0 auto;
   display: flex;
   align-items: flex-end;
+}
+
+.status-buttons-container {
+  display: flex;
+  align-items: center;
+}
+
+.status-btn {
+  width: 100%;
+  justify-content: flex-start;
+}
+
+.status-btn :deep(.q-btn__content) {
+  width: 100%;
+  max-width: 150px;
+  margin: 0 auto;
+  justify-content: flex-start;
 }
 </style>

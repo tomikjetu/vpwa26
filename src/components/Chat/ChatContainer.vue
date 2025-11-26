@@ -5,7 +5,8 @@
       <ChatTopBar :channel="chatStore.channel" />
       <ChatMessageList :channel="chatStore.channel" :messages="chatStore.messages"
         :unreadMessages="chatStore.unreadMessages" />
-      <ChatInput @send="(msg: ChatMessagePayload, files: File[]) => chatStore.sendMessage(msg, files)" @typing="onTyping" />
+      <ChatInput @send="(msg: ChatMessagePayload, files: File[]) => chatStore.sendMessage(msg, files)"
+        @typing="onTyping" />
     </template>
 
     <template v-else>
@@ -49,8 +50,8 @@ function onTyping(text: string) {
   height: 100%;
   min-width: 0;
   min-height: 0;
+  max-height: 100%; /* Add this */
   overflow: hidden;
-  flex: 1 1 auto;
   border: 1px solid #ddd;
 }
 
@@ -63,7 +64,7 @@ function onTyping(text: string) {
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  height: 100%;
+  flex: 1;
   text-align: center;
   opacity: 0.8;
 }
