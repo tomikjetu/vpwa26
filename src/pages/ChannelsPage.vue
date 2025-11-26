@@ -1,29 +1,26 @@
 <template>
-  <MemberInfo v-model="dialog.showMemberInfoDialog" :member="dialog.dialogMember"
-    :channel-id="dialog.shownChannel ? dialog.shownChannel.id : null" />
+  <MemberInfo v-model="dialog.showMemberInfoDialog" :member="dialog.dialogMember" :channel-id="dialog.shownChannel ? dialog.shownChannel.id : null" />
   <ChannelInviteAccept v-model="dialog.showChannelInviteAcceptation" />
 
-  <q-layout view="hHh lpR FfF" class="channels-layout">
-    <!-- Header with burger menu (only visible on mobile) -->
-    <q-header elevated class="bg-primary text-white">
-      <q-toolbar>
-        <q-btn flat dense round icon="menu" aria-label="Menu" @click="leftDrawerOpen = !leftDrawerOpen" />
-        <q-toolbar-title>Channels</q-toolbar-title>
-      </q-toolbar>
-    </q-header>
+  <q-splitter
+    v-model="splitter"
+    unit="px"
+    :limits="[280, 560]"
+    separator-style="width: 4px"
+    class="splitter-root"
+  >
+    <template #before>
+      <div class="pane">
+        <ChannelsBar class="pane-fill" />
+      </div>
+    </template>
 
-    <!-- Drawer for channels sidebar -->
-    <q-drawer v-model="leftDrawerOpen" show-if-above :width="280" :breakpoint="1024" bordered class="channels-drawer">
-      <ChannelsBar class="pane-fill" @channel-selected="onChannelSelected" />
-    </q-drawer>
-
-    <!-- Main content area -->
-    <q-page-container>
-      <q-page class="chat-page column no-wrap">
+    <template #after>
+      <div class="pane">
         <ChatContainer class="pane-fill" />
-      </q-page>
-    </q-page-container>
-  </q-layout>
+      </div>
+    </template>
+  </q-splitter>
 </template>
 
 <script setup lang="ts">
@@ -40,14 +37,15 @@ import { useQuasar } from 'quasar'
 const $q = useQuasar()
 const channelStore = useChannelStore();
 const dialog = useDialogStore()
-const leftDrawerOpen = ref<boolean>(false)
+// const leftDrawerOpen = ref<boolean>(false)
+const splitter = ref<number>(280)
 
-const onChannelSelected = () => {
-  // Close drawer on mobile when channel is selected
-  if ($q.screen.lt.sm) {
-    leftDrawerOpen.value = false
-  }
-}
+// const onChannelSelected = () => {
+//   // Close drawer on mobile when channel is selected
+//   if ($q.screen.lt.sm) {
+//     leftDrawerOpen.value = false
+//   }
+// }
 
 
 onMounted(() => {
@@ -59,7 +57,7 @@ onMounted(() => {
 </script>
 
 <style scoped>
-.channels-layout {
+.splitter-root {
   min-height: 0;
   max-height: 100vh;
 } 
@@ -68,13 +66,12 @@ onMounted(() => {
   display: none;
 }
 
-.chat-page {
+.pane {
   height: 100%;
   width: 100%;
   min-width: 0;
   min-height: 0;
   display: flex;
-  flex-direction: column;
   overflow: hidden;
 }
 
