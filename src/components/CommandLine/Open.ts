@@ -12,7 +12,7 @@ export default function Open() {
       if (args.length === 0 || !args[0])
         return Notify.create({
           type: 'negative',
-          message: 'Channel name is required',
+          message: 'Usage: /open channelName',
           position: 'top',
         });
       const channel = channelStore.channels.find((ch) => ch.name === args[0]);

@@ -20,7 +20,7 @@ export default function Join() {
       if (args.length === 0)
         return Notify.create({
           type: 'negative',
-          message: 'Usage: /join channelName',
+          message: 'Usage: /join channelName [private]',
         });
       channelStore.joinChannelAction(args[0] as string);
     },

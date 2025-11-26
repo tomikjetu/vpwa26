@@ -77,8 +77,6 @@ export function disconnectSocket(): void {
  * Register all socket event listeners using controllers
  */
 function registerSocketListeners(socket: Socket): void {
-
-
   const authStore = useAuthStore();
 
   // ==================== CONNECTION EVENTS ====================
@@ -103,7 +101,7 @@ function registerSocketListeners(socket: Socket): void {
     console.error('Socket error:', error);
     Notify.create({
       type: 'negative',
-      message: error.message || 'Socket error occurred',
+      message: error.error || 'Socket error occurred',
       position: 'top',
     });
   });
@@ -121,22 +119,22 @@ export const socketEmit = {
   // Channel operations
   listChannels: () => {
     getSocket().emit('channel:list');
-    console.log("channel:list emited")
+    console.log('channel:list emited');
   },
 
   listMembers: (channelId: number) => {
     getSocket().emit('channel:listMembers', { channelId });
-    console.log("members:list emited")
+    console.log('members:list emited');
   },
 
   listMessages: (channelId: number, offset: number) => {
     getSocket().emit('msg:list', { channelId, offset });
-    console.log('msg:list emitted')
+    console.log('msg:list emitted');
   },
 
   listInvites: () => {
     getSocket().emit('invite:list');
-    console.log("invite:list emited")
+    console.log('invite:list emited');
   },
 
   createChannel: (name: string, isPrivate: boolean) => {
@@ -153,13 +151,13 @@ export const socketEmit = {
 
   deleteChannel: (channelId: number) => {
     getSocket().emit('channel:quit', { channelId });
-    console.log('channel:quit emitted')
+    console.log('channel:quit emitted');
   },
 
   // Invitations
   inviteUser: (channelId: number, nickname: string) => {
     getSocket().emit('invite:create', { channelId, nickname });
-    console.log("invite:create emited")
+    console.log('invite:create emited');
   },
 
   acceptInvite: (channelId: number) => {
@@ -175,9 +173,9 @@ export const socketEmit = {
   },
 
   // Messages
-  sendMessage: (channelId: number, content: string, files: File[] ) => {
+  sendMessage: (channelId: number, content: string, files: File[]) => {
     getSocket().emit('msg:send', { channelId, content, files });
-    console.log("msg:send emitted")
+    console.log('msg:send emitted');
   },
 
   deleteMessage: (channelId: number, messageId: number) => {

@@ -18,7 +18,7 @@ export default function Revoke() {
       if (args.length !== 2)
         return Notify.create({
           type: 'negative',
-          message: 'Usage: /revoke channelName userName',
+          message: 'Usage: /revoke channelName nickName',
         });
 
       const channel = channelStore.channels.find((ch) => ch.name === args[0]);
