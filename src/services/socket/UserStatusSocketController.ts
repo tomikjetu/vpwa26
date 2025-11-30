@@ -1,6 +1,8 @@
-import type { Socket } from 'socket.io-client';
+﻿import type { Socket } from 'socket.io-client';
 import type { ISocketController } from './types';
 import { useContacts } from 'src/stores/contacts-store';
+import { useChannelStore } from 'src/stores/channelStore';
+import { useAuthStore } from 'src/stores/auth-store';
 import type { UserStatus } from 'src/utils/types';
 
 /**
@@ -8,34 +10,45 @@ import type { UserStatus } from 'src/utils/types';
  */
 export class UserStatusSocketController implements ISocketController {
   registerListeners(socket: Socket): void {
-    // User status changed
-    socket.on('user:status', this.handleUserStatus.bind(this));
-
-    // User came online
-    socket.on('user:online', this.handleUserOnline.bind(this));
-
-    // User went offline
-    socket.on('user:offline', this.handleUserOffline.bind(this));
+    // User event handler (status updates come via user:event)
+    socket.on('user:event', this.handleUserEvent.bind(this));
   }
 
   cleanup(socket: Socket): void {
-    socket.off('user:status');
-    socket.off('user:online');
-    socket.off('user:offline');
+    socket.off('user:event');
   }
 
-  private handleUserStatus(data: { userId: number; status: UserStatus }): void {
-    const contactsStore = useContacts();
-    contactsStore.updateStatus(data.userId, data.status);
+  private handleUserEvent(data: {
+    type: string;
+    userId?: number;
+    status?: UserStatus;
+    updates?: Array<{ userId: number; status: UserStatus }>;
+  }): void {
+    if (data.type === 'status_updated' && data.userId !== undefined && data.status !== undefined) {
+      this.handleStatusUpdate(data.userId, data.status);
+    } else if (data.type === 'status_update_success' && data.status !== undefined) {
+      // Handle current user's own status update confirmation
+      const authStore = useAuthStore();
+      const currentUserId = authStore.getCurrentUser?.id;
+      if (currentUserId) {
+        this.handleStatusUpdate(currentUserId, data.status);
+      }
+    }
   }
 
-  private handleUserOnline(data: { userId: number }): void {
+  private handleStatusUpdate(userId: number, status: UserStatus): void {
+    // Update in contacts store
     const contactsStore = useContacts();
-    contactsStore.updateStatus(data.userId, 'online');
-  }
+    contactsStore.updateStatus(userId, status);
 
-  private handleUserOffline(data: { userId: number }): void {
-    const contactsStore = useContacts();
-    contactsStore.updateStatus(data.userId, 'offline');
+    // Update in channel store (all channels where user is a member)
+    const channelStore = useChannelStore();
+    channelStore.updateMemberStatus(userId, status);
+
+    // Update auth store if it's the current user
+    const authStore = useAuthStore();
+    if (authStore.getCurrentUser?.id === userId) {
+      authStore.setStatus(status);
+    }
   }
 }

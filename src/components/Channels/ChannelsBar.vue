@@ -176,10 +176,11 @@ function setDark(val: boolean) {
   isDark.value = Dark.isActive
 }
 
-function changeStatus(s: UserStatus) {
-  auth.setStatus(s)
-  if (!auth.getCurrentUser) return
-  contactStore.updateStatus(auth.getCurrentUser.id, s)
+async function changeStatus(s: UserStatus) {
+  const wasOffline = currentStatus.value === 'offline'
+  contactStore.changeStatus(s)
+
+  if (wasOffline && s !== 'offline') await chatStore.openChat(chatStore.channel)
 }
 
 async function logoutAndClose() {

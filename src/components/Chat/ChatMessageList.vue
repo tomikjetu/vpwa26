@@ -14,14 +14,12 @@
     <ChatMessage v-for="(m, index) in unreadMessages" :payload="m" :key="`new-${index}`"
       @show-member-info="onShowMemberInfo" />
 
-    <TypingIndicator :typingUsers="typingUsers" />
   </div>
 </template>
 
 <script setup lang="ts">
 import { ref, onMounted, nextTick, watch, computed } from 'vue'
 import ChatMessage from './ChatMessage.vue'
-import TypingIndicator from './TypingIndicator.vue'
 import type { ChatMessagePayload, Channel } from 'src/utils/types'
 import { useDialogStore } from 'src/stores/dialog-store'
 import { useChannelStore } from 'src/stores/channelStore'
@@ -40,17 +38,7 @@ const container = ref<HTMLElement | null>(null)
 const loadingTop = ref(false)
 let isPrepending = false
 
-const typingUsers = computed(() => {
-  if (!props.channel) return []
 
-  // Extract typing users from member objects
-  return Object.values(props.channel.members)
-    .filter(member => member.currentlyTyping && member.currentlyTyping.trim().length > 0)
-    .map(member => ({
-      nickname: member.nickname,
-      message: member.currentlyTyping || ''
-    }))
-})
 
 const hasMoreOlder = computed(() => {
   if (!props.channel) return false

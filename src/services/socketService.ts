@@ -1,4 +1,4 @@
-import { io, type Socket } from 'socket.io-client';
+﻿import { io, type Socket } from 'socket.io-client';
 import { useAuthStore } from 'src/stores/auth-store';
 import { Notify } from 'quasar';
 import type { NotifStatus, UserStatus } from 'src/utils/types';
@@ -28,7 +28,9 @@ const controllers: ISocketController[] = [
  * Initialize socket connection with authentication
  */
 export function initSocket(): Socket {
-  if (socket?.connected) {
+  // If socket already exists (connected or connecting), return it
+  if (socket) {
+    // Prevent duplicate initialization - just return existing socket
     return socket;
   }
 
@@ -47,7 +49,7 @@ export function initSocket(): Socket {
     autoConnect: true,
   });
 
-  // Register all event listeners
+  // Register all event listeners (only once per socket instance)
   registerSocketListeners(socket);
 
   return socket;
@@ -57,7 +59,7 @@ export function initSocket(): Socket {
  * Get existing socket instance
  */
 export function getSocket(): Socket {
-  if (!socket?.connected) {
+  if (!socket) {
     return initSocket();
   }
   return socket;
@@ -88,11 +90,11 @@ function registerSocketListeners(socket: Socket): void {
   // ==================== CONNECTION EVENTS ====================
 
   socket.on('connect', () => {
-    console.log('✅ Socket connected:', socket.id);
+    console.log('Socket connected:', socket.id);
   });
 
   socket.on('disconnect', (reason) => {
-    console.log('❌ Socket disconnected:', reason);
+    console.log('Socket disconnected:', reason);
   });
 
   socket.on('connect_error', (error) => {
@@ -188,6 +190,16 @@ export const socketEmit = {
 
   // Messages
   sendMessage: (channelId: number, content: string, files: File[]) => {
+    // Check if user is offline - can't send messages
+    const authStore = useAuthStore();
+    if (authStore.getCurrentUser?.status === 'offline') {
+      Notify.create({
+        type: 'negative',
+        message: 'You cannot send messages while offline',
+        position: 'top',
+      });
+      return;
+    }
     getSocket().emit('msg:send', { channelId, content, files });
     console.log('msg:send emitted');
   },
@@ -217,6 +229,11 @@ export const socketEmit = {
   // User status
   updateStatus: (status: UserStatus) => {
     getSocket().emit('user:status', { status });
+  },
+
+  // Activity ping - keeps user marked as online
+  sendPing: () => {
+    getSocket().emit('user:ping');
   },
 
   // File operations

@@ -1,5 +1,5 @@
-import { defineStore } from 'pinia';
-import type { Channel, ChatMessagePayload, ChannelInvite, NotifStatus } from 'src/utils/types';
+﻿import { defineStore } from 'pinia';
+import type { Channel, ChatMessagePayload, ChannelInvite, NotifStatus, UserStatus } from 'src/utils/types';
 import { useAuthStore } from 'src/stores/auth-store';
 import { Notify } from 'quasar';
 import { channelService } from 'src/services/channelService';
@@ -162,6 +162,21 @@ export const useChannelStore = defineStore('channels', {
       return { older: [] as ChatMessagePayload[], remaining: 0 };
     },
 
+
+    /**
+     * Update a member's status across all channels they belong to.
+     */
+    updateMemberStatus(userId: number, status: UserStatus) {
+      // Update the member's status across all channels
+      for (const channel of this.channels) {
+        for (const memberId of Object.keys(channel.members)) {
+          const member = channel.members[Number(memberId)];
+          if (member && member.userId === userId) {
+            member.status = status;
+          }
+        }
+      }
+    },
     /**
      * Update a member's typing text for a specific channel.
      * Pass an empty string to clear the indicator.
@@ -370,3 +385,6 @@ export const useChannelStore = defineStore('channels', {
     getError: (state) => state.error,
   },
 });
+
+
+

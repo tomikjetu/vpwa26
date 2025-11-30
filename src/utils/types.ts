@@ -1,4 +1,4 @@
-export type Channel = {
+﻿export type Channel = {
   id: number;
   ownerId: number;
   name: string;
@@ -30,7 +30,16 @@ export type ChannelInvite = {
 /*
   Currently logged in user
 */
-export type UserStatus = 'online' | 'dnd' | 'offline';
+// User presence statuses:
+// - online: actively using the app (receiving pings)
+// - inactive: online but not active for a while (auto-set)
+// - dnd: Do Not Disturb - no notifications (user-set)
+// - offline: disconnected/app closed
+export type UserStatus = 'online' | 'inactive' | 'dnd' | 'offline';
+
+// The "visible" status the user chose before going offline/inactive
+// Used to restore status when user becomes active again
+export type UserVisibleStatus = 'online' | 'dnd';
 
 export type User = {
   id: number /** contact id */;

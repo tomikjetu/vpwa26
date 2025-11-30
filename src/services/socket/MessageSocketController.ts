@@ -3,7 +3,7 @@ import type { ISocketController } from './types';
 import { useChannelStore } from 'src/stores/channelStore';
 import { useAuthStore } from 'src/stores/auth-store';
 import { AppVisibility, Notify } from 'quasar';
-import type { ChatMessagePayload, ServerReplyMsg } from 'src/utils/types';
+import type { ChatMessagePayload, ServerReplyMsg, UserStatus } from 'src/utils/types';
 import { useChatStore } from 'src/stores/chat-store';
 
 /**
@@ -51,6 +51,7 @@ export class MessageSocketController implements ISocketController {
         files: file_names || [],
         userNickname: channelStore.getMemberById(message.memberId, message.channelId)?.nickname,
       };
+
       channelStore.messages.unshift(transformedMessage);
     }
     console.log(data.messages);
@@ -95,10 +96,15 @@ export class MessageSocketController implements ISocketController {
     if (is_chat_open) channelStore.addMessage(transformedMessage, data.channelId);
 
     // Mark as unread if not viewing this channel (handled by store)
-    // Show notification if message is from another user
+    // Check if user is in DND mode - don't show notifications
+    const currentUserStatus = authStore.getCurrentUser?.status;
+    const isDnd = currentUserStatus === 'dnd';
+
+    // Show notification if message is from another user (and not in DND mode)
     if (
       transformedMessage.user !== authStore.getCurrentUser?.id &&
       !is_chat_open &&
+      !isDnd &&
       AppVisibility.appVisible
     ) {
       Notify.create({
@@ -108,7 +114,7 @@ export class MessageSocketController implements ISocketController {
         position: 'bottom-right',
         timeout: 3000,
       });
-    } else if (!AppVisibility.appVisible) {
+    } else if (!AppVisibility.appVisible && !isDnd) {
       console.log('BIG NOTIF');
       new Notification(`New message in  ${channel.name}`, {
         body: transformedMessage.text.substring(0, 50),
@@ -147,7 +153,12 @@ export class MessageSocketController implements ISocketController {
   }): void {
     const channelStore = useChannelStore();
     const authStore = useAuthStore();
+    const auth = useAuthStore();
     const channel = channelStore.getChannelById(data.channelId);
+
+    const status = auth.getCurrentUser?.status as UserStatus;
+
+    if (status === 'offline') return;
 
     if (!channel) return;
 

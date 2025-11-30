@@ -9,6 +9,11 @@
       </div>
     </div>
 
+    <!-- Reserved space for typing indicator (always present to avoid layout shift) -->
+    <div class="typing-area">
+      <TypingIndicator v-if="typingUsers.length > 0" :typingUsers="typingUsers" />
+    </div>
+
     <div class="row items-center input-wrapper">
       <q-btn flat round dense icon="attach_file" color="grey-7" @click="attachFile" />
 
@@ -39,7 +44,8 @@
 
 <script setup lang="ts">
 import { ref, computed, watch, onUnmounted } from 'vue'
-import type { ChatMessagePayload } from 'src/utils/types'
+import TypingIndicator from './TypingIndicator.vue'
+import type { ChatMessagePayload, Member } from 'src/utils/types'
 import { storeToRefs } from 'pinia'
 import { useAuthStore } from 'src/stores/auth-store'
 import { useChatStore } from 'src/stores/chat-store'
@@ -70,6 +76,14 @@ const channelMembers = computed(() => {
   const channel = chatStore.channel
   if (!channel || !channel.members) return []
   return Object.values(channel.members)
+})
+
+const typingUsers = computed(() => {
+  const channel = chatStore.channel
+  if (!channel || !channel.members) return []
+  return Object.values(channel.members)
+    .filter((member: Member) => member.currentlyTyping && member.currentlyTyping.trim().length > 0)
+    .map((member: Member) => ({ nickname: member.nickname, message: member.currentlyTyping || '' }))
 })
 
 const filteredMembers = computed(() => {
@@ -262,6 +276,16 @@ function removeFile(index: number) {
 
 .input-wrapper {
   position: relative;
+}
+
+.typing-area {
+  height: 36px;
+  display: flex;
+  align-items: center;
+  padding-left: 20px;
+  padding-right: 12px;
+  pointer-events: none;
+  box-sizing: border-box;
 }
 
 .attached-files {
