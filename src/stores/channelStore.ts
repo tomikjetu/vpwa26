@@ -14,7 +14,7 @@ interface ChannelState {
   olderPagesLeft: Record<number, number>;
   isLoading: boolean;
   error: string | null;
-  _pendingResolve: null | (() => void),
+  _pendingResolve: null | (() => void);
 }
 
 export const useChannelStore = defineStore('channels', {
@@ -33,34 +33,34 @@ export const useChannelStore = defineStore('channels', {
 
   actions: {
     loadChannelsAndInvites() {
-      this.loadInvites()
-      this.loadChannels()
+      this.loadInvites();
+      this.loadChannels();
     },
 
     loadInvites() {
-      channelService.listChannelInvites()
+      channelService.listChannelInvites();
     },
 
     loadChannels() {
-      channelService.listChannels()
+      channelService.listChannels();
     },
 
     async loadNextMessages(channelId: number, offset: number) {
       // So the scrollbar works
       return new Promise<void>((resolve) => {
-        this._pendingResolve = resolve
-        channelService.listMessages(channelId, offset)
-      })
+        this._pendingResolve = resolve;
+        channelService.listMessages(channelId, offset);
+      });
     },
 
     async loadMessages(channelId: number) {
-      this.setMessages([])
-      await this.loadNextMessages(channelId, 0)
-      console.log("msg:list:load")
+      this.setMessages([]);
+      await this.loadNextMessages(channelId, 0);
+      console.log('msg:list:load');
     },
 
     removeInvite(channelId: number) {
-      this.channelInvites = this.channelInvites.filter((invite) => invite.channelId!== channelId);
+      this.channelInvites = this.channelInvites.filter((invite) => invite.channelId !== channelId);
     },
 
     addChannel(channel: Channel) {
@@ -79,36 +79,34 @@ export const useChannelStore = defineStore('channels', {
 
     removeChannel(channelId: number) {
       this.channels = this.channels.filter((c) => c.id !== channelId);
-      console.log(this.channels)
+      console.log(this.channels);
     },
 
     cancelChannel(channelId: number) {
-      const chatStore = useChatStore()
-      if(chatStore.channel && chatStore.channel.id == channelId) 
-        chatStore.closeChat()
+      const chatStore = useChatStore();
+      if (chatStore.channel && chatStore.channel.id == channelId) chatStore.closeChat();
       this.channels = this.channels.filter((c) => c.id !== channelId);
     },
 
     removeMember(channelId: number, memberId: number) {
-      const channel = this.getChannelById(channelId)
-      if(!channel) return
-      delete channel.members[memberId]
+      const channel = this.getChannelById(channelId);
+      if (!channel) return;
+      delete channel.members[memberId];
 
-      const dialogStore = useDialogStore()
-      if(dialogStore.dialogMember && dialogStore.dialogMember.id == memberId) {
-        dialogStore.closeMemberInfo()
+      const dialogStore = useDialogStore();
+      if (dialogStore.dialogMember && dialogStore.dialogMember.id == memberId) {
+        dialogStore.closeMemberInfo();
       }
     },
 
     setUpdateStatus(channelId: number, notifStatus: NotifStatus) {
-      const channel = this.getChannelById(channelId)
-      if(!channel) return
-      channel.notifStatus = notifStatus
+      const channel = this.getChannelById(channelId);
+      if (!channel) return;
+      channel.notifStatus = notifStatus;
     },
 
     sendMessage(msg: ChatMessagePayload, channelId: number, files: File[]) {
-
-      channelService.sendMessage(channelId, msg.text, files)
+      channelService.sendMessage(channelId, msg.text, files);
     },
 
     addMessage(msg: ChatMessagePayload, channelId: number) {
@@ -156,7 +154,6 @@ export const useChannelStore = defineStore('channels', {
     },
 
     fetchOlderMessages(channelId: number): { older: ChatMessagePayload[]; remaining: number } {
-
       this.messages = [];
 
       // For now, return empty - backend should provide pagination
@@ -175,6 +172,13 @@ export const useChannelStore = defineStore('channels', {
       const member = channel.members[memberId];
       if (!member) return;
       member.currentlyTyping = text;
+    },
+
+    /**
+     * Send typing indicator to server
+     */
+    sendTypingAction(channelId: number, message: string) {
+      channelService.sendTyping(channelId, message);
     },
 
     // === Async Actions coordinating with channelService ===
@@ -213,7 +217,7 @@ export const useChannelStore = defineStore('channels', {
     quitChannelAction(channelId: number) {
       this.isLoading = true;
       this.error = null;
-      console.log("QUIT CHANNEL ACTION")
+      console.log('QUIT CHANNEL ACTION');
       try {
         channelService.quitChannel(channelId);
         // Channel will be removed via socket event 'channel:left'
@@ -310,16 +314,15 @@ export const useChannelStore = defineStore('channels', {
     },
 
     updateNotifStatusAction(channelId: number, notifStatus: NotifStatus) {
-      channelService.updateNotifStatus(channelId, notifStatus)
+      channelService.updateNotifStatus(channelId, notifStatus);
     },
 
     listMembersAction(channelId: number) {
-      channelService.listMembers(channelId)
-    }
+      channelService.listMembers(channelId);
+    },
   },
 
   getters: {
-
     getChannelById: (state) => {
       return (id: number) => state.channels.find((c) => c.id === id);
     },
@@ -341,15 +344,17 @@ export const useChannelStore = defineStore('channels', {
       return () => state.unreadMessages || [];
     },
     getMemberById: (state) => {
-      return (id: number, channelId: number) => { return state.channels.find((c) => c.id === channelId)?.members[id] }
+      return (id: number, channelId: number) => {
+        return state.channels.find((c) => c.id === channelId)?.members[id];
+      };
     },
     getMemberByUserId: (state) => {
       return (userId: number, channelId: number) => {
-        const channel = state.channels.find((c) => c.id === channelId)
-        if (!channel) return undefined
+        const channel = state.channels.find((c) => c.id === channelId);
+        if (!channel) return undefined;
 
-        return Object.values(channel.members).find(m => m.userId === userId)
-      }
+        return Object.values(channel.members).find((m) => m.userId === userId);
+      };
     },
     getChannelInviteById: (state) => {
       return (id: number) => state.channelInvites.find((c) => c.id === id);

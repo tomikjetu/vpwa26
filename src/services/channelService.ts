@@ -10,14 +10,14 @@ class ChannelService {
   /**
    * List channels relevant to the user (via socket)
    */
-  listChannels() : void {
-    console.log("OGA BOGA")
+  listChannels(): void {
+    console.log('OGA BOGA');
     socketEmit.listChannels();
   }
   /**
    * List members relevant to a channel (for when a channel is being inspected) (via socket)
    */
-  listMembers(channelId: number) : void {
+  listMembers(channelId: number): void {
     socketEmit.listMembers(channelId);
   }
   /**
@@ -76,8 +76,8 @@ class ChannelService {
     // Response will come via socket event 'member:kick-vote' or 'member:kicked'
   }
 
-  listChannelInvites() : void {
-    socketEmit.listInvites()
+  listChannelInvites(): void {
+    socketEmit.listInvites();
   }
 
   /**
@@ -96,7 +96,7 @@ class ChannelService {
     // Response will come via socket event 'channel:invite:declined'
   }
 
-  listMessages(channelId: number, offset: number) : void {
+  listMessages(channelId: number, offset: number): void {
     socketEmit.listMessages(channelId, offset);
   }
 
@@ -117,18 +117,14 @@ class ChannelService {
   }
 
   updateNotifStatus(channelId: number, notifStatus: NotifStatus) {
-    socketEmit.updateNotifStatus(channelId, notifStatus)
+    socketEmit.updateNotifStatus(channelId, notifStatus);
   }
 
   /**
-   * Update typing indicator (via socket)
+   * Send typing indicator (via socket)
    */
-  startTyping(channelId: number, text: string): void {
-    socketEmit.startTyping(channelId, text);
-  }
-
-  stopTyping(channelId: number): void {
-    socketEmit.stopTyping(channelId);
+  sendTyping(channelId: number, message: string): void {
+    socketEmit.sendTyping(channelId, message);
   }
 }
 

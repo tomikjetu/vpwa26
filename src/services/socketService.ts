@@ -120,7 +120,7 @@ function registerSocketListeners(socket: Socket): void {
 }
 
 export function cleanupSocketListeners(): void {
-  const socket = getSocket()
+  const socket = getSocket();
 
   controllers.forEach((controller) => {
     controller.cleanup(socket);
@@ -201,12 +201,8 @@ export const socketEmit = {
   },
 
   // Typing indicator
-  startTyping: (channelId: number, text: string) => {
-    getSocket().emit('member:typing', { channelId, typing: true, text });
-  },
-
-  stopTyping: (channelId: number) => {
-    getSocket().emit('member:typing', { channelId, typing: false });
+  sendTyping: (channelId: number, message: string) => {
+    getSocket().emit('msg:typing', { channelId, message });
   },
 
   // Kick voting
@@ -230,7 +226,7 @@ export const socketEmit = {
   },
 
   updateNotifStatus: (channelId: number, notifStatus: NotifStatus) => {
-    getSocket().emit('member:notif-status:update', { channelId, status: notifStatus })
-    console.log('member:notif-status:update emitted')
-  }
+    getSocket().emit('member:notif-status:update', { channelId, status: notifStatus });
+    console.log('member:notif-status:update emitted');
+  },
 };

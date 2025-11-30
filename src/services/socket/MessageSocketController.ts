@@ -6,7 +6,6 @@ import { AppVisibility, Notify } from 'quasar';
 import type { ChatMessagePayload, ServerReplyMsg } from 'src/utils/types';
 import { useChatStore } from 'src/stores/chat-store';
 
-
 /**
  * Handles message-related socket events
  */
@@ -22,6 +21,9 @@ export class MessageSocketController implements ISocketController {
     socket.on('message:edited', this.handleMessageEdited.bind(this));
 
     socket.on('msg:list', this.handleMessageList.bind(this));
+
+    // Typing indicator
+    socket.on('msg:typing', this.handleTyping.bind(this));
   }
 
   cleanup(socket: Socket): void {
@@ -29,15 +31,16 @@ export class MessageSocketController implements ISocketController {
     socket.off('message:deleted');
     socket.off('message:edited');
     socket.off('msg:list');
+    socket.off('msg:typing');
   }
 
-  private handleMessageList(data: { messages: ServerReplyMsg[] }) : void {
+  private handleMessageList(data: { messages: ServerReplyMsg[] }): void {
     const channelStore = useChannelStore();
 
-    for(const message of data.messages) {
+    for (const message of data.messages) {
       // Get file names
-      const file_names : string[] = []
-      for (const file of message.files) file_names.push(`${file.name}.${file.mime}`)
+      const file_names: string[] = [];
+      for (const file of message.files) file_names.push(`${file.name}.${file.mime}`);
 
       // Transform backend message data
       const transformedMessage: ChatMessagePayload = {
@@ -48,30 +51,32 @@ export class MessageSocketController implements ISocketController {
         files: file_names || [],
         userNickname: channelStore.getMemberById(message.memberId, message.channelId)?.nickname,
       };
-      channelStore.messages.unshift(transformedMessage)
+      channelStore.messages.unshift(transformedMessage);
     }
-    console.log(data.messages)
+    console.log(data.messages);
 
     if (channelStore._pendingResolve) {
-      channelStore._pendingResolve()
-      channelStore._pendingResolve = null
+      channelStore._pendingResolve();
+      channelStore._pendingResolve = null;
     }
   }
 
-
-
-  private handleMessageNew(data: { channelId: number; message: ServerReplyMsg, memberId: number }): void {
+  private handleMessageNew(data: {
+    channelId: number;
+    message: ServerReplyMsg;
+    memberId: number;
+  }): void {
     const channelStore = useChannelStore();
     const authStore = useAuthStore();
     const channel = channelStore.getChannelById(data.channelId);
-    const chatStore = useChatStore()
+    const chatStore = useChatStore();
 
     if (!channel) return;
 
     // Get file names
-    const file_names : string[] = []
-    for (const file of data.message.files) file_names.push(`${file.name}.${file.mime}`)
-    
+    const file_names: string[] = [];
+    for (const file of data.message.files) file_names.push(`${file.name}.${file.mime}`);
+
     // Transform backend message data
     const transformedMessage: ChatMessagePayload = {
       ...(data.message.id !== undefined && { id: data.message.id }),
@@ -82,17 +87,20 @@ export class MessageSocketController implements ISocketController {
       userNickname: data.message.user.nick,
     };
 
-    console.log(data.message)
-    console.log("message:new")
+    console.log(data.message);
+    console.log('message:new');
 
-    const is_chat_open = chatStore.channel && data.channelId == chatStore.channel.id
+    const is_chat_open = chatStore.channel && data.channelId == chatStore.channel.id;
     // Add message to store
-    if(is_chat_open)
-      channelStore.addMessage(transformedMessage, data.channelId);
+    if (is_chat_open) channelStore.addMessage(transformedMessage, data.channelId);
 
     // Mark as unread if not viewing this channel (handled by store)
     // Show notification if message is from another user
-    if (transformedMessage.user !== authStore.getCurrentUser?.id && !is_chat_open && AppVisibility.appVisible) {
+    if (
+      transformedMessage.user !== authStore.getCurrentUser?.id &&
+      !is_chat_open &&
+      AppVisibility.appVisible
+    ) {
       Notify.create({
         type: 'info',
         message: `New message in ${channel.name}`,
@@ -101,9 +109,9 @@ export class MessageSocketController implements ISocketController {
         timeout: 3000,
       });
     } else if (!AppVisibility.appVisible) {
-      console.log("BIG NOTIF")
+      console.log('BIG NOTIF');
       new Notification(`New message in  ${channel.name}`, {
-        body:  transformedMessage.text.substring(0, 50),
+        body: transformedMessage.text.substring(0, 50),
       });
     }
   }
@@ -131,5 +139,31 @@ export class MessageSocketController implements ISocketController {
         files: data.message.files || messages[index].files,
       });
     }
+  }
+
+  private handleTyping(data: {
+    channelId: number;
+    typing: Array<{ memberId: number; message: string }>;
+  }): void {
+    const channelStore = useChannelStore();
+    const authStore = useAuthStore();
+    const channel = channelStore.getChannelById(data.channelId);
+
+    if (!channel) return;
+
+    const currentUserId = authStore.getCurrentUser?.id;
+
+    // Clear all typing states first
+    Object.values(channel.members).forEach((member) => {
+      member.currentlyTyping = '';
+    });
+
+    // Update typing state for each typing member (excluding current user)
+    data.typing.forEach(({ memberId, message }) => {
+      const member = channel.members[memberId];
+      if (member && member.userId !== currentUserId) {
+        member.currentlyTyping = message;
+      }
+    });
   }
 }

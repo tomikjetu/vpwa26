@@ -38,15 +38,17 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed } from 'vue'
+import { ref, computed, watch, onUnmounted } from 'vue'
 import type { ChatMessagePayload } from 'src/utils/types'
 import { storeToRefs } from 'pinia'
 import { useAuthStore } from 'src/stores/auth-store'
 import { useChatStore } from 'src/stores/chat-store'
+import { useChannelStore } from 'src/stores/channelStore'
 import type { QInput } from 'quasar'
 
 const authStore = useAuthStore()
 const chatStore = useChatStore()
+const channelStore = useChannelStore()
 const { getCurrentUser } = storeToRefs(authStore)
 
 const text = ref('')
@@ -62,7 +64,6 @@ const selectedMemberIndex = ref<number | null>(null)
 
 const emit = defineEmits<{
   (e: 'send', msg: ChatMessagePayload, files: File[]): void
-  (e: 'typing', text: string): void
 }>()
 
 const channelMembers = computed(() => {
@@ -80,12 +81,37 @@ const filteredMembers = computed(() => {
   )
 })
 
+const emitTyping = (channelId: number, message: string) => {
+  channelStore.sendTypingAction(channelId, message)
+}
+
+// Clear typing indicator on channel change
+watch(() => chatStore.channel?.id, (newId, oldId) => {
+  if (oldId && text.value.length > 0) {
+    channelStore.sendTypingAction(oldId, '')
+  }
+  text.value = ''
+  selectedFiles.value = []
+})
+
+// Cleanup on unmount
+onUnmounted(() => {
+  if (chatStore.channel && text.value.length > 0) {
+    channelStore.sendTypingAction(chatStore.channel.id, '')
+  }
+})
+
 function sendMessage() {
   if (!getCurrentUser.value?.id) return
   if (text.value.trim() || selectedFiles.value.length > 0) {
 
+    // Clear typing indicator before sending
+    if (chatStore.channel) {
+      channelStore.sendTypingAction(chatStore.channel.id, '')
+    }
+
     // Extract file names
-    const file_names : string[] = []
+    const file_names: string[] = []
     for (const file of selectedFiles.value) {
       file_names.push(file.name)
     }
@@ -101,13 +127,17 @@ function sendMessage() {
     selectedFiles.value = []
     showMentionDropdown.value = false
     mentionStartPos.value = -1
-    emit('typing', '') // clear typing indicator after sending
   }
 }
 
 const onInputUpdate = (value: string | number | null) => {
   text.value = value == null ? '' : String(value)
   checkForMention()
+
+  // Emit typing indicator
+  if (chatStore.channel) {
+    emitTyping(chatStore.channel.id, text.value)
+  }
 }
 
 function checkForMention() {

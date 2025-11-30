@@ -5,8 +5,7 @@
       <ChatTopBar :channel="chatStore.channel" />
       <ChatMessageList :channel="chatStore.channel" :messages="chatStore.messages"
         :unreadMessages="chatStore.unreadMessages" />
-      <ChatInput @send="(msg: ChatMessagePayload, files: File[]) => chatStore.sendMessage(msg, files)"
-        @typing="onTyping" />
+      <ChatInput @send="(msg: ChatMessagePayload, files: File[]) => chatStore.sendMessage(msg, files)" />
     </template>
 
     <template v-else>
@@ -26,18 +25,9 @@ import ChatInput from './ChatInput.vue'
 import ChatMessageList from './ChatMessageList.vue'
 import ChatTopBar from './ChatTopBar.vue'
 import { useChatStore } from 'src/stores/chat-store'
-import { useChannelStore } from 'src/stores/channelStore'
-import { useAuthStore } from 'src/stores/auth-store'
 import type { ChatMessagePayload } from 'src/utils/types'
 
 const chatStore = useChatStore()
-const channelStore = useChannelStore()
-const authStore = useAuthStore()
-
-function onTyping(text: string) {
-  if (!chatStore.channel || !authStore.getCurrentUser?.id) return
-  channelStore.updateMemberTyping(chatStore.channel.id, authStore.getCurrentUser.id, text)
-}
 
 </script>
 
@@ -50,7 +40,8 @@ function onTyping(text: string) {
   height: 100%;
   min-width: 0;
   min-height: 0;
-  max-height: 100%; /* Add this */
+  max-height: 100%;
+  /* Add this */
   overflow: hidden;
   border: 1px solid #ddd;
 }
