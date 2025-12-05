@@ -34,7 +34,7 @@
 import type { DropdownItem, Channel } from 'src/utils/types'
 import { handleDropdownSelect } from 'src/composables/useChannelList';
 import { ref } from 'vue'
-import { useChannelStore } from 'src/stores/channelStore';
+import { useChannelStore } from 'src/stores/channel';
 
 const props = defineProps<{
   items: DropdownItem[],

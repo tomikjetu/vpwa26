@@ -26,7 +26,7 @@
 
 <script setup lang="ts">
 import type { Member } from 'src/utils/types';
-import { useDialogStore } from 'src/stores/dialog-store';
+import { useDialogStore } from 'src/stores/dialog';
 
 const dialogStore = useDialogStore()
 const show = defineModel<boolean>('modelValue', { required: true })

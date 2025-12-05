@@ -1,8 +1,7 @@
 import { Notify } from 'quasar';
-import { useChannelStore } from 'src/stores/channelStore';
+import { useChannelStore } from 'src/stores/channel';
 
 export default function List() {
-
   const channelStore = useChannelStore();
   return {
     cmd: 'list',
@@ -19,7 +18,7 @@ export default function List() {
           type: 'negative',
           message: `Channel ${args[0]} not found`,
         });
-      console.log("LIST")
+      console.log('LIST');
       channelStore.listMembersAction(channel?.id);
     },
   };

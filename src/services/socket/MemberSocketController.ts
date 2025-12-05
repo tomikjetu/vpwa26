@@ -1,11 +1,11 @@
 import type { Socket } from 'socket.io-client';
 import type { ISocketController } from './types';
-import { useChannelStore } from 'src/stores/channelStore';
-import { useAuthStore } from 'src/stores/auth-store';
-import { useChatStore } from 'src/stores/chat-store';
+import { useChannelStore } from 'src/stores/channel';
+import { useAuthStore } from 'src/stores/auth';
+import { useChatStore } from 'src/stores/chat';
 import { Notify } from 'quasar';
 import type { Member, NotifStatus } from 'src/utils/types';
-import { useDialogStore } from 'src/stores/dialog-store';
+import { useDialogStore } from 'src/stores/dialog';
 
 /**
  * Handles member-related socket events
@@ -27,7 +27,7 @@ export class MemberSocketController implements ISocketController {
     // Member kick vote received
     socket.on('member:kick-voted', this.handleMemberKickVote.bind(this));
 
-    socket.on('member:notif-status:updated', this.handleNotifStatusUpdated.bind(this))
+    socket.on('member:notif-status:updated', this.handleNotifStatusUpdated.bind(this));
   }
 
   cleanup(socket: Socket): void {
@@ -36,16 +36,16 @@ export class MemberSocketController implements ISocketController {
     socket.off('member:kicked');
     socket.off('member:typing');
     socket.off('member:kick-voted');
-    socket.off('member:notif-status:updated')
+    socket.off('member:notif-status:updated');
   }
 
   private handleMemberJoined(data: { channelId: number; member: Member }): void {
     const channelStore = useChannelStore();
     const channel = channelStore.getChannelById(data.channelId);
-    
-    console.log(`member: `)
-    console.log(data.member)
-    console.log(`id: ${data.channelId}`)
+
+    console.log(`member: `);
+    console.log(data.member);
+    console.log(`id: ${data.channelId}`);
 
     if (channel) {
       // Transform backend member data
@@ -60,9 +60,9 @@ export class MemberSocketController implements ISocketController {
         status: data.member.status || 'offline',
       };
 
-      console.log(data)
+      console.log(data);
 
-      console.log(data.member.nickname)
+      console.log(data.member.nickname);
 
       Notify.create({
         type: 'info',
@@ -77,9 +77,9 @@ export class MemberSocketController implements ISocketController {
     const channel = channelStore.getChannelById(data.channelId);
 
     if (channel && channel.members[data.memberId]) {
-      const member = channelStore.getMemberById(data.memberId, data.channelId)
-      const memberName = member?.nickname
-      channelStore.removeMember(data.channelId, data.memberId)
+      const member = channelStore.getMemberById(data.memberId, data.channelId);
+      const memberName = member?.nickname;
+      channelStore.removeMember(data.channelId, data.memberId);
 
       Notify.create({
         type: 'info',
@@ -89,14 +89,19 @@ export class MemberSocketController implements ISocketController {
     }
   }
 
-  private handleMemberKicked(data: { channelId: number;  memberId : number, userId : number; kickedBy: number }): void {
+  private handleMemberKicked(data: {
+    channelId: number;
+    memberId: number;
+    userId: number;
+    kickedBy: number;
+  }): void {
     const channelStore = useChannelStore();
     const authStore = useAuthStore();
     const chatStore = useChatStore();
     const channel = channelStore.getChannelById(data.channelId);
-    const dialogStore = useDialogStore()
+    const dialogStore = useDialogStore();
 
-    console.log(data)
+    console.log(data);
     if (!channel) return;
 
     const isCurrentUser = data.userId === authStore.getCurrentUser?.id;
@@ -106,8 +111,8 @@ export class MemberSocketController implements ISocketController {
       if (chatStore.channel?.id === data.channelId) {
         chatStore.closeChat();
       }
-      if(dialogStore.showMemberInfoDialog) {
-        dialogStore.closeMemberInfo()
+      if (dialogStore.showMemberInfoDialog) {
+        dialogStore.closeMemberInfo();
       }
 
       Notify.create({
@@ -117,10 +122,10 @@ export class MemberSocketController implements ISocketController {
       });
     } else if (channel.members[data.memberId]) {
       const member = channel.members[data.memberId];
-      if(!member) return
+      if (!member) return;
       const memberName = member.nickname || 'User';
-      
-      channelStore.removeMember(data.channelId, data.memberId)
+
+      channelStore.removeMember(data.channelId, data.memberId);
       Notify.create({
         type: 'info',
         message: `${memberName} was kicked from ${channel.name}`,
@@ -152,7 +157,7 @@ export class MemberSocketController implements ISocketController {
     const channelStore = useChannelStore();
     const channel = channelStore.getChannelById(data.channelId);
 
-    console.log(data)
+    console.log(data);
 
     if (channel && channel.members[data.targetMemberId]) {
       const member = channel.members[data.targetMemberId];
@@ -170,14 +175,14 @@ export class MemberSocketController implements ISocketController {
     }
   }
 
-  private handleNotifStatusUpdated(data: { channelId: number, notifStatus: NotifStatus }) : void {
-    console.log("Notif status updated")
-    console.log(data.notifStatus)
-    const channelStore = useChannelStore()
-    const channel = channelStore.getChannelById(data.channelId)
+  private handleNotifStatusUpdated(data: { channelId: number; notifStatus: NotifStatus }): void {
+    console.log('Notif status updated');
+    console.log(data.notifStatus);
+    const channelStore = useChannelStore();
+    const channel = channelStore.getChannelById(data.channelId);
 
-    if(!channel) return
-    
-    channel.notifStatus = data.notifStatus
+    if (!channel) return;
+
+    channel.notifStatus = data.notifStatus;
   }
 }

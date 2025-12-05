@@ -1,6 +1,6 @@
 import type { Socket } from 'socket.io-client';
 import type { ISocketController } from './types';
-import { useChannelStore } from 'src/stores/channelStore';
+import { useChannelStore } from 'src/stores/channel';
 import type { Channel } from 'src/utils/types';
 
 /**
@@ -39,7 +39,7 @@ export class ConnectionSocketController implements ISocketController {
       isPrivate: channel.isPrivate,
       hasUnreadMsgs: false,
       members: channel.members || {},
-      notifStatus: channel.notifStatus
+      notifStatus: channel.notifStatus,
     }));
 
     // Set all channels at once

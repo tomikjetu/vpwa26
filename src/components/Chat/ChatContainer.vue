@@ -24,7 +24,7 @@
 import ChatInput from './ChatInput.vue'
 import ChatMessageList from './ChatMessageList.vue'
 import ChatTopBar from './ChatTopBar.vue'
-import { useChatStore } from 'src/stores/chat-store'
+import { useChatStore } from 'src/stores/chat'
 import type { ChatMessagePayload } from 'src/utils/types'
 
 const chatStore = useChatStore()

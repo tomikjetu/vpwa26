@@ -32,11 +32,11 @@
 import { ref } from 'vue'
 import ChannelsBar from 'src/components/Channels/ChannelsBar.vue'
 import ChatContainer from 'src/components/Chat/ChatContainer.vue'
-import { useDialogStore } from 'src/stores/dialog-store'
+import { useDialogStore } from 'src/stores/dialog'
 import MemberInfo from 'src/components/Dialog/MemberInfo.vue'
 import ChannelInviteAccept from 'src/components/Dialog/ChannelInviteAccept.vue'
 import { onMounted } from 'vue';
-import { useChannelStore } from 'src/stores/channelStore';
+import { useChannelStore } from 'src/stores/channel';
 import { useQuasar } from 'quasar'
 import MemberNamesList from 'src/components/Dialog/MemberNamesList.vue'
 
@@ -55,7 +55,7 @@ const onChannelSelected = () => {
 
 onMounted(() => {
   channelStore.loadChannelsAndInvites();
-  
+
   // For correct burger menu
   document.documentElement.style.setProperty('--sm-width', `${$q.screen.sizes.sm}px`)
 });
@@ -64,7 +64,8 @@ onMounted(() => {
 <style scoped>
 .channels-layout {
   height: 100vh;
-  height: 100dvh; /* Better for mobile */
+  height: 100dvh;
+  /* Better for mobile */
   min-height: 0;
   display: flex;
   flex-direction: column;
@@ -85,7 +86,8 @@ onMounted(() => {
   min-height: 0;
   display: flex;
   overflow: hidden;
-  padding: 0 !important; /* Remove any default Quasar padding */
+  padding: 0 !important;
+  /* Remove any default Quasar padding */
 }
 
 .pane-fill {

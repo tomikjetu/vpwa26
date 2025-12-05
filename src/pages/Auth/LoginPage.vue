@@ -50,10 +50,10 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue';
+import { ref, computed } from 'vue';
 import { useRouter } from 'vue-router';
 import { Notify } from 'quasar';
-import { useAuthStore } from 'src/stores/auth-store';
+import { useAuthStore } from 'src/stores/auth';
 import type { LoginCredentials } from 'src/utils/types';
 
 const router = useRouter();
@@ -66,17 +66,15 @@ const form = ref<LoginCredentials>({
 const showPassword = ref(false);
 const rememberMe = ref(false);
 const auth = useAuthStore();
-const loading = ref(false);
 
-async function onSubmit() : Promise<void> {
-    
-    loading.value = true;
+// Use store loading state instead of local ref
+const loading = computed(() => auth.getLoading);
 
+async function onSubmit(): Promise<void> {
     try {
         const user = await auth.login(form.value);
 
         Notify.create({
-
             type: 'positive',
             message: `Welcome back, ${user.name}!`,
             position: 'top'
@@ -86,10 +84,8 @@ async function onSubmit() : Promise<void> {
         const redirect = router.currentRoute.value.query.redirect as string || '/';
         await router.push(redirect);
     } catch (error) {
-
         let errorMessage = 'Login failed'; // Default message
         console.log(error)
-        // If the error has a 'response' property (e.g., from Axios)
         // If the error is an instance of Error (generic JavaScript Error)
         if (error instanceof Error) {
             errorMessage = error.message;
@@ -99,14 +95,12 @@ async function onSubmit() : Promise<void> {
             const axiosError = error as { response?: { data?: { error?: string } } };
             errorMessage = axiosError.response?.data?.error || 'Unknown error';
         }
-        
+
         Notify.create({
             type: 'negative',
             message: errorMessage,
             position: 'top'
         });
-    } finally {
-        loading.value = false;
     }
 }
 </script>

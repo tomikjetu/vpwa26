@@ -1,7 +1,7 @@
 import type { Socket } from 'socket.io-client';
 import type { ISocketController } from './types';
-import { useChannelStore } from 'src/stores/channelStore';
-import { useAuthStore } from 'src/stores/auth-store';
+import { useChannelStore } from 'src/stores/channel';
+import { useAuthStore } from 'src/stores/auth';
 import { Notify } from 'quasar';
 import type { ChannelInvite, Channel } from 'src/utils/types';
 
@@ -21,7 +21,7 @@ export class InviteSocketController implements ISocketController {
     // Invitation declined
     socket.on('channel:invite:declined', this.handleInviteDeclined.bind(this));
 
-    socket.on('invite:list', this.handleInviteList.bind(this))
+    socket.on('invite:list', this.handleInviteList.bind(this));
   }
 
   cleanup(socket: Socket): void {
@@ -32,10 +32,10 @@ export class InviteSocketController implements ISocketController {
     socket.off('invite:sent');
   }
 
-  private handleInviteList(data: { invites: ChannelInvite[] }) : void {
+  private handleInviteList(data: { invites: ChannelInvite[] }): void {
     const channelStore = useChannelStore();
-    console.log(data)
-    for(const invite of data.invites) {
+    console.log(data);
+    for (const invite of data.invites) {
       // Transform backend invite data
       const transformedInvite: ChannelInvite = {
         id: invite.id,
@@ -50,7 +50,12 @@ export class InviteSocketController implements ISocketController {
     }
   }
 
-  private handleInviteSent(data: {invitedAt: Date, channelName: string, inviteId: number, nickname: string}) : void {
+  private handleInviteSent(data: {
+    invitedAt: Date;
+    channelName: string;
+    inviteId: number;
+    nickname: string;
+  }): void {
     Notify.create({
       type: 'info',
       message: `You've successfully invited ${data.nickname} to the channel ${data.channelName}`,
@@ -59,7 +64,12 @@ export class InviteSocketController implements ISocketController {
     });
   }
 
-  private handleInviteReceived(data: { invitedAt: Date, channelName: string, inviteId: number, channelId: number }): void {
+  private handleInviteReceived(data: {
+    invitedAt: Date;
+    channelName: string;
+    inviteId: number;
+    channelId: number;
+  }): void {
     const channelStore = useChannelStore();
 
     // Transform backend invite data
@@ -104,9 +114,9 @@ export class InviteSocketController implements ISocketController {
         isPrivate: data.channel.isPrivate,
         hasUnreadMsgs: false,
         members: data.channel.members || {},
-        notifStatus: 'all'
+        notifStatus: 'all',
       };
-      channelStore.removeInvite(transformedChannel.id)
+      channelStore.removeInvite(transformedChannel.id);
       channelStore.addChannel(transformedChannel);
     } else {
       // Another user accepted invite to our channel
@@ -121,10 +131,10 @@ export class InviteSocketController implements ISocketController {
   }
 
   private handleInviteDeclined(data: { channelId: number }): void {
-    console.log("DECLINED")
+    console.log('DECLINED');
     const channelStore = useChannelStore();
-    console.log(data.channelId)
+    console.log(data.channelId);
     channelStore.removeInvite(data.channelId);
-    console.log(channelStore.channelInvites)
+    console.log(channelStore.channelInvites);
   }
 }

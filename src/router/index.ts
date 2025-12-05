@@ -6,7 +6,7 @@ import {
   createWebHistory,
 } from 'vue-router';
 import routes from './routes';
-import { useAuthStore } from 'src/stores/auth-store';
+import { useAuthStore } from 'src/stores/auth';
 
 export default defineRouter(function () {
   const createHistory = process.env.SERVER

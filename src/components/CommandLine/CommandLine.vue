@@ -33,7 +33,7 @@
 
 <script setup lang="ts">
 import { onMounted, onBeforeUnmount, computed } from 'vue';
-import { useChannelStore } from 'src/stores/channelStore';
+import { useChannelStore } from 'src/stores/channel';
 import { ref } from 'vue';
 
 import Logout from './Logout';
@@ -44,7 +44,7 @@ import Revoke from './Revoke';
 import Quit from './Quit';
 import Join from './Join';
 import Kick from './Kick';
-import { useAuthStore } from 'src/stores/auth-store';
+import { useAuthStore } from 'src/stores/auth';
 import { storeToRefs } from 'pinia';
 import List from './List';
 
@@ -122,7 +122,7 @@ const channelListCommands = computed(() => {
             cmd: 'list ' + channel.name,
             description: `List members in ${channel.name}`,
             icon: 'person',
-            format: `/list ${channel.name}` 
+            format: `/list ${channel.name}`
         };
     });
 })

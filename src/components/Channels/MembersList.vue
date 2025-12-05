@@ -29,10 +29,10 @@
 <script setup lang="ts">
 import { computed, defineProps, toRef } from 'vue'
 import type { Member, Channel, UserStatus } from 'src/utils/types'
-import { useDialogStore } from 'src/stores/dialog-store'
+import { useDialogStore } from 'src/stores/dialog'
 import { storeToRefs } from 'pinia'
-import { useAuthStore } from 'src/stores/auth-store'
-import { useChannelStore } from 'src/stores/channelStore'
+import { useAuthStore } from 'src/stores/auth'
+import { useChannelStore } from 'src/stores/channel'
 
 const authStore = useAuthStore()
 const channelStore = useChannelStore()
@@ -52,11 +52,11 @@ const channel = toRef(props, 'channel')
  */
 const membersList = computed(() => {
   if (!channel.value) return []
-  
+
   // Get the channel from the store (this ensures we get reactive updates)
   const storeChannel = channelStore.getChannelById(channel.value.id)
   if (!storeChannel) return []
-  
+
   // Convert members object to array
   const rawMembers = storeChannel.members
   return Array.isArray(rawMembers) ? rawMembers : Object.values(rawMembers ?? {})
@@ -71,9 +71,9 @@ function handleShowMemberInfo(member: Member) {
 /** Returns the color based on member's status */
 function getMemberStatusColor(member: Member): string {
   if (!member || !getCurrentUser.value) return 'grey'
-  
+
   const status: UserStatus | undefined = member.status
-  
+
   // Hide offline status for other users (show grey)
   if (status === 'offline' && member.userId !== getCurrentUser.value.id) return 'grey'
 
@@ -134,5 +134,3 @@ function getMemberStatusColor(member: Member): string {
   align-items: center;
 }
 </style>
-
-

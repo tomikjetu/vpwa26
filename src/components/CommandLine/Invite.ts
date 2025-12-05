@@ -1,5 +1,5 @@
 import { Notify } from 'quasar';
-import { useChannelStore } from 'src/stores/channelStore';
+import { useChannelStore } from 'src/stores/channel';
 
 export default function Invite() {
   /*

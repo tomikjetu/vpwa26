@@ -1,4 +1,4 @@
-﻿import { useAuthStore } from 'src/stores/auth-store';
+﻿import { useAuthStore } from 'src/stores/auth';
 
 /**
  * Check if notifications should be suppressed based on user status
@@ -7,7 +7,7 @@
 export function shouldSuppressNotifications(): boolean {
   const authStore = useAuthStore();
   const status = authStore.getCurrentUser?.status;
-  
+
   // Suppress notifications when user is in DND or offline mode
   return status === 'dnd' || status === 'offline';
 }

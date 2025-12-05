@@ -87,16 +87,16 @@
 
 <script setup lang="ts">
 import { ref, computed } from 'vue'
-import { useChannelStore } from 'src/stores/channelStore'
+import { useChannelStore } from 'src/stores/channel'
 import ChannelList from './ChannelList.vue'
 import MembersList from './MembersList.vue'
 import type { Channel, Member, ChannelInvite } from 'src/utils/types.ts'
-import { useChatStore } from 'src/stores/chat-store'
-import { useDialogStore } from 'src/stores/dialog-store'
-import { useAuthStore } from 'src/stores/auth-store'
+import { useChatStore } from 'src/stores/chat'
+import { useDialogStore } from 'src/stores/dialog'
+import { useAuthStore } from 'src/stores/auth'
 import { Dark } from 'quasar'
 import type { UserStatus } from 'src/utils/types'
-import { useContacts } from 'src/stores/contacts-store'
+import { useContacts } from 'src/stores/contacts'
 
 const emit = defineEmits<{
   channelSelected: []

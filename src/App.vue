@@ -5,7 +5,7 @@
 <script setup lang="ts">
 import { onMounted, onUnmounted, watch } from 'vue'
 import { initSocket, disconnectSocket, cleanupSocketListeners } from 'src/services/socketService'
-import { useAuthStore } from 'src/stores/auth-store'
+import { useAuthStore } from 'src/stores/auth'
 
 const authStore = useAuthStore()
 

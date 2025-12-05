@@ -27,8 +27,8 @@
 
 <script setup lang="ts">
 import { defineModel } from 'vue';
-import { useDialogStore } from 'src/stores/dialog-store'
-import { useChannelStore } from 'src/stores/channelStore'
+import { useDialogStore } from 'src/stores/dialog'
+import { useChannelStore } from 'src/stores/channel'
 
 const dialogStore = useDialogStore()
 const channelStore = useChannelStore()

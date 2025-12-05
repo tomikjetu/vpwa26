@@ -1,10 +1,10 @@
-import { useChannelStore } from 'src/stores/channelStore';
+import { useChannelStore } from 'src/stores/channel';
 import type { Channel, DropdownItem } from 'src/utils/types';
-import { useAuthStore } from 'src/stores/auth-store';
+import { useAuthStore } from 'src/stores/auth';
 import { storeToRefs } from 'pinia';
 import { type Ref } from 'vue';
-import { useChatStore } from 'src/stores/chat-store';
-import { useDialogStore } from 'src/stores/dialog-store';
+import { useChatStore } from 'src/stores/chat';
+import { useDialogStore } from 'src/stores/dialog';
 
 export const getMenuOptions = (channel: Channel): DropdownItem[] => {
   const authStore = useAuthStore();
@@ -17,8 +17,12 @@ export const getMenuOptions = (channel: Channel): DropdownItem[] => {
       disable: channel.ownerId != getCurrentUser.value?.id && channel.isPrivate,
     },
     { label: 'Members', class: '', disable: false },
-   // { label: 'Change icon', class: '', disable: false },
-    { label: channel.notifStatus == 'all' ? 'Mentions only notifs' : 'All notifs', class: '', disable: false },
+    // { label: 'Change icon', class: '', disable: false },
+    {
+      label: channel.notifStatus == 'all' ? 'Mentions only notifs' : 'All notifs',
+      class: '',
+      disable: false,
+    },
     {
       label: channel.ownerId != getCurrentUser.value?.id ? 'Leave' : 'Remove',
       class: 'warning',
@@ -35,14 +39,12 @@ export function addChannel(newChannel: Channel, channels: Channel[]): void {
 }
 
 export function removeChannel(channelId: number): void {
-
   const channelStore = useChannelStore();
-  console.log("DROPDOWN")
+  console.log('DROPDOWN');
   channelStore.quitChannelAction(channelId);
 }
 
 export function cancelChannel(channelId: number): void {
-
   const channelStore = useChannelStore();
   channelStore.cancelChannelAction(channelId);
 }
@@ -94,8 +96,8 @@ export async function handleDropdownSelect(
   } else if (label.includes('remove')) {
     await quitChannel(channel);
   } else if (label.includes('mentions only notifs')) {
-    useChannelStore().updateNotifStatusAction(channel.id, 'mentions')
+    useChannelStore().updateNotifStatusAction(channel.id, 'mentions');
   } else if (label.includes('all notifs')) {
-    useChannelStore().updateNotifStatusAction(channel.id, 'all')
+    useChannelStore().updateNotifStatusAction(channel.id, 'all');
   }
 }

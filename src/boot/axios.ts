@@ -1,6 +1,6 @@
 import { defineBoot } from '#q-app/wrappers';
 import axios, { type AxiosInstance } from 'axios';
-import { useAuthStore } from 'src/stores/auth-store';
+import { useAuthStore } from 'src/stores/auth';
 
 declare module 'vue' {
   interface ComponentCustomProperties {

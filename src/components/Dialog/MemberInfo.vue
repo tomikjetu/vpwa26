@@ -22,10 +22,8 @@
               <span class="text-subtitle2 text-grey-8">
                 {{ (hasVoted ? 'Voted: ' : 'Vote to kick: ') + (props.member?.kickVotes ?? 0) + ' / 3' }}
               </span>
-              <q-btn :disable="hasVoted" flat
-                dense round icon="person_off" color="red" size="sm"
-                :class="'q-ml-sm ' + (hasVoted ? 'disabled-btn' : '')"
-                @click="confirmKickVote" />
+              <q-btn :disable="hasVoted" flat dense round icon="person_off" color="red" size="sm"
+                :class="'q-ml-sm ' + (hasVoted ? 'disabled-btn' : '')" @click="confirmKickVote" />
             </div>
           </template>
         </div>
@@ -61,9 +59,9 @@
 import { defineProps, defineModel, computed } from 'vue'
 import { useQuasar } from 'quasar'
 import type { Member } from 'src/utils/types'
-import { useChannelStore } from 'src/stores/channelStore';
+import { useChannelStore } from 'src/stores/channel';
 import { storeToRefs } from 'pinia'
-import { useAuthStore } from 'src/stores/auth-store'
+import { useAuthStore } from 'src/stores/auth'
 
 const authStore = useAuthStore()
 const { getCurrentUser } = storeToRefs(authStore)

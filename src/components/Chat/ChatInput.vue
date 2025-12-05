@@ -47,9 +47,9 @@ import { ref, computed, watch, onUnmounted } from 'vue'
 import TypingIndicator from './TypingIndicator.vue'
 import type { ChatMessagePayload, Member } from 'src/utils/types'
 import { storeToRefs } from 'pinia'
-import { useAuthStore } from 'src/stores/auth-store'
-import { useChatStore } from 'src/stores/chat-store'
-import { useChannelStore } from 'src/stores/channelStore'
+import { useAuthStore } from 'src/stores/auth'
+import { useChatStore } from 'src/stores/chat'
+import { useChannelStore } from 'src/stores/channel'
 import type { QInput } from 'quasar'
 
 const authStore = useAuthStore()

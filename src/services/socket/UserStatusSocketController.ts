@@ -1,8 +1,8 @@
 ﻿import type { Socket } from 'socket.io-client';
 import type { ISocketController } from './types';
-import { useContacts } from 'src/stores/contacts-store';
-import { useChannelStore } from 'src/stores/channelStore';
-import { useAuthStore } from 'src/stores/auth-store';
+import { useContacts } from 'src/stores/contacts';
+import { useChannelStore } from 'src/stores/channel';
+import { useAuthStore } from 'src/stores/auth';
 import type { UserStatus } from 'src/utils/types';
 
 /**

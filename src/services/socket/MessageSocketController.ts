@@ -1,10 +1,10 @@
 import type { Socket } from 'socket.io-client';
 import type { ISocketController } from './types';
-import { useChannelStore } from 'src/stores/channelStore';
-import { useAuthStore } from 'src/stores/auth-store';
+import { useChannelStore } from 'src/stores/channel';
+import { useAuthStore } from 'src/stores/auth';
 import { AppVisibility, Notify } from 'quasar';
 import type { ChatMessagePayload, ServerReplyMsg, UserStatus } from 'src/utils/types';
-import { useChatStore } from 'src/stores/chat-store';
+import { useChatStore } from 'src/stores/chat';
 
 /**
  * Handles message-related socket events

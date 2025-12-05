@@ -1,5 +1,5 @@
-import { useChatStore } from 'src/stores/chat-store';
-import { useChannelStore } from 'src/stores/channelStore';
+import { useChatStore } from 'src/stores/chat';
+import { useChannelStore } from 'src/stores/channel';
 import { Notify } from 'quasar';
 
 export default function Open() {

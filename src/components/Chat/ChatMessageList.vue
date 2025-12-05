@@ -21,9 +21,9 @@
 import { ref, onMounted, nextTick, watch, computed } from 'vue'
 import ChatMessage from './ChatMessage.vue'
 import type { ChatMessagePayload, Channel } from 'src/utils/types'
-import { useDialogStore } from 'src/stores/dialog-store'
-import { useChannelStore } from 'src/stores/channelStore'
-import { useChatStore } from 'src/stores/chat-store'
+import { useDialogStore } from 'src/stores/dialog'
+import { useChannelStore } from 'src/stores/channel'
+import { useChatStore } from 'src/stores/chat'
 
 const props = defineProps<{
   messages: ChatMessagePayload[],

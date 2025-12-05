@@ -18,7 +18,7 @@
       </q-card-section>
 
       <q-separator />
-      
+
       <q-card-section>
         <q-input v-model="newChannelName" :label="mode === 'owned' ? 'Channel name' : 'Enter channel name to join'"
           dense autofocus />
@@ -123,8 +123,8 @@
 <script setup lang="ts">
 import type { Channel, ChannelInvite } from 'src/utils/types'
 import ChannelDropdown from './ChannelDropdown.vue'
-import { useAuthStore } from 'src/stores/auth-store'
-import { useChannelStore } from 'src/stores/channelStore'
+import { useAuthStore } from 'src/stores/auth'
+import { useChannelStore } from 'src/stores/channel'
 import { storeToRefs } from 'pinia'
 import { toRef, ref, computed } from 'vue'
 import { getMenuOptions } from 'src/composables/useChannelList'

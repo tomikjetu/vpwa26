@@ -1,5 +1,5 @@
 ﻿import { io, type Socket } from 'socket.io-client';
-import { useAuthStore } from 'src/stores/auth-store';
+import { useAuthStore } from 'src/stores/auth';
 import { Notify } from 'quasar';
 import type { NotifStatus, UserStatus } from 'src/utils/types';
 import {
@@ -99,7 +99,11 @@ function registerSocketListeners(socket: Socket): void {
 
   socket.on('connect_error', (error) => {
     console.error('Socket connection error:', error);
-    if (error.message.includes('unauthorized') || error.message.includes('authentication')) {
+    if (
+      error.message.includes('unauthorized') ||
+      error.message.includes('authentication') ||
+      error.message.includes('expired')
+    ) {
       authStore.clearAuth();
       window.location.href = '/auth/login';
     }
