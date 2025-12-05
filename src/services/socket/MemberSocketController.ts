@@ -57,7 +57,8 @@ export class MemberSocketController implements ISocketController {
         kickVotes: data.member.kickVotes || 0,
         currentlyTyping: '',
         receivedKickVotes: data.member.receivedKickVotes || [],
-        status: data.member.status || 'offline',
+        status: data.member.status || 'active',
+        isConnected: data.member.isConnected ?? true,
       };
 
       console.log(data);

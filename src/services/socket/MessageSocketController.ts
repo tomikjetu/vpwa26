@@ -3,7 +3,7 @@ import type { ISocketController } from './types';
 import { useChannelStore } from 'src/stores/channel';
 import { useAuthStore } from 'src/stores/auth';
 import { AppVisibility, Notify } from 'quasar';
-import type { ChatMessagePayload, ServerReplyMsg, UserStatus } from 'src/utils/types';
+import type { ChatMessagePayload, ServerReplyMsg } from 'src/utils/types';
 import { useChatStore } from 'src/stores/chat';
 
 /**
@@ -153,12 +153,7 @@ export class MessageSocketController implements ISocketController {
   }): void {
     const channelStore = useChannelStore();
     const authStore = useAuthStore();
-    const auth = useAuthStore();
     const channel = channelStore.getChannelById(data.channelId);
-
-    const status = auth.getCurrentUser?.status as UserStatus;
-
-    if (status === 'offline') return;
 
     if (!channel) return;
 

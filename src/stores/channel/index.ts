@@ -107,6 +107,14 @@ export const useChannelStore = defineStore('channels', {
       this._getActions().updateMemberStatus(userId, status);
     },
 
+    updateMemberConnection(userId: number, isConnected: boolean) {
+      this._getActions().updateMemberConnection(userId, isConnected);
+    },
+
+    updateMemberState(userId: number, status: UserStatus, isConnected: boolean) {
+      this._getActions().updateMemberState(userId, status, isConnected);
+    },
+
     updateMemberTyping(channelId: number, memberId: number, text: string) {
       this._getActions().updateMemberTyping(channelId, memberId, text);
     },

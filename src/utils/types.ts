@@ -15,7 +15,7 @@
   notifStatus: NotifStatus;
 };
 
-export type NotifStatus = 'mentions' | 'all'
+export type NotifStatus = 'mentions' | 'all';
 
 export type ChannelInvite = {
   id: number;
@@ -30,16 +30,11 @@ export type ChannelInvite = {
 /*
   Currently logged in user
 */
-// User presence statuses:
-// - online: actively using the app (receiving pings)
-// - inactive: online but not active for a while (auto-set)
-// - dnd: Do Not Disturb - no notifications (user-set)
-// - offline: disconnected/app closed
-export type UserStatus = 'online' | 'inactive' | 'dnd' | 'offline';
-
-// The "visible" status the user chose before going offline/inactive
-// Used to restore status when user becomes active again
-export type UserVisibleStatus = 'online' | 'dnd';
+// User presence statuses (user-selectable):
+// - active: available and receiving notifications
+// - dnd: Do Not Disturb - no notifications
+// Note: online/offline are connection states managed by socket, not user statuses
+export type UserStatus = 'active' | 'dnd';
 
 export type User = {
   id: number /** contact id */;
@@ -67,6 +62,7 @@ export type Member = {
   currentlyTyping?: string;
   receivedKickVotes: number[];
   status: UserStatus;
+  isConnected: boolean;
 };
 
 export type LoginCredentials = {
@@ -99,21 +95,21 @@ export interface ChatMessagePayload {
 }
 
 export interface ServerReplyMsg {
+  id: number;
+  content: string;
+  createdAt: Date;
+  channelId: number;
+  memberId: number;
+  files: {
+    name: string;
+    mime: string;
+    size: number;
     id: number;
-    content: string;
-    createdAt: Date;
-    channelId: number;
-    memberId: number;
-    files: {
-        name: string;
-        mime: string;
-        size: number;
-        id: number;
-    }[];
-    user: {
-        id: number;
-        nick: string;
-    };
+  }[];
+  user: {
+    id: number;
+    nick: string;
+  };
 }
 
 export interface ServerReplyMember {
@@ -123,5 +119,5 @@ export interface ServerReplyMember {
   user_id: number;
   user: {
     nick: string;
-  }
+  };
 }

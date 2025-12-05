@@ -121,6 +121,32 @@ export const channelMutations = {
     }
   },
 
+  UPDATE_MEMBER_CONNECTION(state: ChannelState, payload: { userId: number; isConnected: boolean }) {
+    for (const channel of state.channels) {
+      for (const memberId of Object.keys(channel.members)) {
+        const member = channel.members[Number(memberId)];
+        if (member && member.userId === payload.userId) {
+          member.isConnected = payload.isConnected;
+        }
+      }
+    }
+  },
+
+  UPDATE_MEMBER_STATE(
+    state: ChannelState,
+    payload: { userId: number; status: UserStatus; isConnected: boolean },
+  ) {
+    for (const channel of state.channels) {
+      for (const memberId of Object.keys(channel.members)) {
+        const member = channel.members[Number(memberId)];
+        if (member && member.userId === payload.userId) {
+          member.status = payload.status;
+          member.isConnected = payload.isConnected;
+        }
+      }
+    }
+  },
+
   UPDATE_MEMBER_TYPING(
     state: ChannelState,
     payload: { channelId: number; memberId: number; text: string },

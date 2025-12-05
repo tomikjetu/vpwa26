@@ -28,11 +28,12 @@
 
 <script setup lang="ts">
 import { computed, defineProps, toRef } from 'vue'
-import type { Member, Channel, UserStatus } from 'src/utils/types'
+import type { Member, Channel } from 'src/utils/types'
 import { useDialogStore } from 'src/stores/dialog'
 import { storeToRefs } from 'pinia'
 import { useAuthStore } from 'src/stores/auth'
 import { useChannelStore } from 'src/stores/channel'
+import { isSocketConnected } from 'src/services/socketService'
 
 const authStore = useAuthStore()
 const channelStore = useChannelStore()
@@ -68,23 +69,21 @@ function handleShowMemberInfo(member: Member) {
   dialog.openMemberInfo(member, channel.value)
 }
 
-/** Returns the color based on member's status */
+/** Returns the color based on member's connection and status */
 function getMemberStatusColor(member: Member): string {
   if (!member || !getCurrentUser.value) return 'grey'
 
-  const status: UserStatus | undefined = member.status
+  // If current user is offline, everyone appears grey (can't see real statuses)
+  if (!isSocketConnected.value) return 'grey'
 
-  // Hide offline status for other users (show grey)
-  if (status === 'offline' && member.userId !== getCurrentUser.value.id) return 'grey'
+  // Disconnected users are always grey
+  if (!member.isConnected) return 'grey'
 
-  switch (status) {
-    case 'online':
+  // Connected users show their status color
+  switch (member.status) {
+    case 'active':
       return 'green'
-    case 'inactive':
-      return 'yellow'
     case 'dnd':
-      return 'orange'
-    case 'offline':
       return 'red'
     default:
       return 'grey'

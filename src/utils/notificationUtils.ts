@@ -8,16 +8,8 @@ export function shouldSuppressNotifications(): boolean {
   const authStore = useAuthStore();
   const status = authStore.getCurrentUser?.status;
 
-  // Suppress notifications when user is in DND or offline mode
-  return status === 'dnd' || status === 'offline';
-}
-
-/**
- * Check if user is in offline mode
- */
-export function isUserOffline(): boolean {
-  const authStore = useAuthStore();
-  return authStore.getCurrentUser?.status === 'offline';
+  // Suppress notifications when user is in DND mode
+  return status === 'dnd';
 }
 
 /**

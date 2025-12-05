@@ -59,15 +59,22 @@
         <q-card-section>
           <div class="text-subtitle2 q-mb-sm">Status</div>
           <div class="column q-gutter-sm status-buttons-container">
-            <q-btn :outline="currentStatus !== 'online'" :color="currentStatus === 'online' ? 'positive' : 'grey-7'"
-              icon="circle" label="Online" @click="changeStatus('online')" align="left" class="status-btn" />
+            <q-btn :outline="currentStatus !== 'active'" :color="currentStatus === 'active' ? 'positive' : 'grey-7'"
+              icon="circle" label="Active" @click="changeStatus('active')" align="left" class="status-btn"
+              :disable="!isSocketConnected" />
             <q-btn :outline="currentStatus !== 'dnd'" :color="currentStatus === 'dnd' ? 'negative' : 'grey-7'"
               icon="do_not_disturb_on" label="Do Not Disturb" @click="changeStatus('dnd')" align="left"
-              class="status-btn" />
-            <q-btn :outline="currentStatus !== 'offline'" :color="currentStatus === 'offline' ? 'grey' : 'grey-7'"
-              icon="radio_button_unchecked" label="Offline" @click="changeStatus('offline')" align="left"
-              class="status-btn" />
+              class="status-btn" :disable="!isSocketConnected" />
           </div>
+        </q-card-section>
+
+        <q-separator />
+
+        <q-card-section>
+          <div class="text-subtitle2 q-mb-sm">Connection</div>
+          <q-btn :color="isSocketConnected ? 'positive' : 'negative'" :icon="isSocketConnected ? 'wifi' : 'wifi_off'"
+            :label="isSocketConnected ? 'Connected' : 'Disconnected'" @click="toggleConnection" align="left"
+            class="status-btn full-width" />
         </q-card-section>
 
         <q-separator />
@@ -97,6 +104,7 @@ import { useAuthStore } from 'src/stores/auth'
 import { Dark } from 'quasar'
 import type { UserStatus } from 'src/utils/types'
 import { useContacts } from 'src/stores/contacts'
+import { disconnectSocket, reconnectSocket, isSocketConnected } from 'src/services/socketService'
 
 const emit = defineEmits<{
   channelSelected: []
@@ -120,7 +128,7 @@ const isDark
 const showProfileDialog = ref(false)
 
 // Derived user info
-const currentStatus = computed<UserStatus>(() => (auth.getCurrentUser?.status as UserStatus) ?? 'online')
+const currentStatus = computed<UserStatus>(() => (auth.getCurrentUser?.status as UserStatus) ?? 'active')
 const displayName = computed(() => {
   const u = auth.getCurrentUser
   if (!u) return 'Guest'
@@ -176,11 +184,17 @@ function setDark(val: boolean) {
   isDark.value = Dark.isActive
 }
 
-async function changeStatus(s: UserStatus) {
-  const wasOffline = currentStatus.value === 'offline'
+function changeStatus(s: UserStatus) {
   contactStore.changeStatus(s)
+}
 
-  if (wasOffline && s !== 'offline') await chatStore.openChat(chatStore.channel)
+function toggleConnection() {
+  if (isSocketConnected.value) {
+    disconnectSocket()
+    chatStore.closeChat()
+  } else {
+    reconnectSocket()
+  }
 }
 
 async function logoutAndClose() {

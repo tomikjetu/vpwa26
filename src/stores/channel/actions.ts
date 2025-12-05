@@ -133,6 +133,14 @@ export function createChannelActions(state: ChannelState, commit: Commit) {
       commit('UPDATE_MEMBER_STATUS', { userId, status });
     },
 
+    updateMemberConnection(userId: number, isConnected: boolean) {
+      commit('UPDATE_MEMBER_CONNECTION', { userId, isConnected });
+    },
+
+    updateMemberState(userId: number, status: UserStatus, isConnected: boolean) {
+      commit('UPDATE_MEMBER_STATE', { userId, status, isConnected });
+    },
+
     updateMemberTyping(channelId: number, memberId: number, text: string) {
       commit('UPDATE_MEMBER_TYPING', { channelId, memberId, text });
     },
