@@ -2,6 +2,39 @@ import type { Socket } from 'socket.io-client';
 import type { ISocketController } from './types';
 import { useChannelStore } from 'src/stores/channel';
 import type { Channel } from 'src/utils/types';
+import type { ChannelListResponse } from 'src/utils/contracts';
+
+/**
+ * Transforms backend ChannelWithMembers to frontend Channel
+ */
+function transformChannel(ch: ChannelListResponse['channels'][number]): Channel {
+  // Transform members to include frontend-only fields
+  const members: Record<number, Channel['members'][number]> = {};
+  if (ch.members) {
+    for (const [id, member] of Object.entries(ch.members)) {
+      members[Number(id)] = {
+        ...member,
+        currentlyTyping: '',
+      };
+    }
+  }
+
+  return {
+    id: ch.id,
+    ownerId: ch.ownerId,
+    name: ch.name,
+    createdAt: ch.createdAt,
+    updatedAt: ch.updatedAt,
+    description: '',
+    icon: ch.isPrivate ? 'lock' : 'tag',
+    color: ch.isPrivate ? 'purple' : 'primary',
+    infoColor: 'grey',
+    isPrivate: ch.isPrivate,
+    hasUnreadMsgs: false,
+    members,
+    notifStatus: ch.notifStatus,
+  };
+}
 
 /**
  * Handles initial connection and channel list events
@@ -20,27 +53,12 @@ export class ConnectionSocketController implements ISocketController {
     socket.off('channels:error');
   }
 
-  private handleChannelsList(data: { channels: Channel[] }): void {
+  private handleChannelsList(data: ChannelListResponse): void {
     const channelStore = useChannelStore();
     console.log('📋 Received initial channels list:', data.channels);
 
     // Transform all channels from backend
-    const transformedChannels: Channel[] = data.channels.map((channel) => ({
-      id: channel.id,
-      ownerId: channel.ownerId,
-      name: channel.name,
-      createdAt: new Date(channel.createdAt),
-      updatedAt: new Date(channel.updatedAt),
-      joinedAt: new Date(channel.joinedAt || channel.createdAt),
-      description: channel.description || '',
-      icon: channel.isPrivate ? 'lock' : 'tag',
-      color: channel.isPrivate ? 'purple' : 'primary',
-      infoColor: 'grey',
-      isPrivate: channel.isPrivate,
-      hasUnreadMsgs: false,
-      members: channel.members || {},
-      notifStatus: channel.notifStatus,
-    }));
+    const transformedChannels = data.channels.map(transformChannel);
 
     // Set all channels at once
     channelStore.setChannels(transformedChannels);

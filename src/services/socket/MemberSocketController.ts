@@ -4,8 +4,14 @@ import { useChannelStore } from 'src/stores/channel';
 import { useAuthStore } from 'src/stores/auth';
 import { useChatStore } from 'src/stores/chat';
 import { Notify } from 'quasar';
-import type { Member, NotifStatus } from 'src/utils/types';
 import { useDialogStore } from 'src/stores/dialog';
+import type {
+  MemberJoinedBroadcast,
+  MemberLeftBroadcast,
+  MemberKickedBroadcast,
+  MemberKickVotedBroadcast,
+  MemberNotifStatusUpdatedResponse,
+} from 'src/utils/contracts';
 
 /**
  * Handles member-related socket events
@@ -39,7 +45,7 @@ export class MemberSocketController implements ISocketController {
     socket.off('member:notif-status:updated');
   }
 
-  private handleMemberJoined(data: { channelId: number; member: Member }): void {
+  private handleMemberJoined(data: MemberJoinedBroadcast): void {
     const channelStore = useChannelStore();
     const channel = channelStore.getChannelById(data.channelId);
 
@@ -48,17 +54,10 @@ export class MemberSocketController implements ISocketController {
     console.log(`id: ${data.channelId}`);
 
     if (channel) {
-      // Transform backend member data
+      // Use backend MemberEnriched data, add frontend-only field
       channel.members[data.member.id] = {
-        id: data.member.id,
-        userId: data.member.userId,
-        nickname: data.member.nickname,
-        isOwner: data.member.isOwner,
-        kickVotes: data.member.kickVotes || 0,
+        ...data.member,
         currentlyTyping: '',
-        receivedKickVotes: data.member.receivedKickVotes || [],
-        status: data.member.status || 'active',
-        isConnected: data.member.isConnected ?? true,
       };
 
       console.log(data);
@@ -73,7 +72,7 @@ export class MemberSocketController implements ISocketController {
     }
   }
 
-  private handleMemberLeft(data: { channelId: number; memberId: number }): void {
+  private handleMemberLeft(data: MemberLeftBroadcast): void {
     const channelStore = useChannelStore();
     const channel = channelStore.getChannelById(data.channelId);
 
@@ -90,12 +89,7 @@ export class MemberSocketController implements ISocketController {
     }
   }
 
-  private handleMemberKicked(data: {
-    channelId: number;
-    memberId: number;
-    userId: number;
-    kickedBy: number;
-  }): void {
+  private handleMemberKicked(data: MemberKickedBroadcast): void {
     const channelStore = useChannelStore();
     const authStore = useAuthStore();
     const chatStore = useChatStore();
@@ -149,12 +143,7 @@ export class MemberSocketController implements ISocketController {
     );
   }
 
-  private handleMemberKickVote(data: {
-    channelId: number;
-    targetMemberId: number;
-    voterId: number;
-    voteCount: number;
-  }): void {
+  private handleMemberKickVote(data: MemberKickVotedBroadcast): void {
     const channelStore = useChannelStore();
     const channel = channelStore.getChannelById(data.channelId);
 
@@ -176,7 +165,7 @@ export class MemberSocketController implements ISocketController {
     }
   }
 
-  private handleNotifStatusUpdated(data: { channelId: number; notifStatus: NotifStatus }): void {
+  private handleNotifStatusUpdated(data: MemberNotifStatusUpdatedResponse): void {
     console.log('Notif status updated');
     console.log(data.notifStatus);
     const channelStore = useChannelStore();

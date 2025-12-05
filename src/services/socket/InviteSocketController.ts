@@ -4,6 +4,45 @@ import { useChannelStore } from 'src/stores/channel';
 import { useAuthStore } from 'src/stores/auth';
 import { Notify } from 'quasar';
 import type { ChannelInvite, Channel } from 'src/utils/types';
+import type {
+  InviteListResponse,
+  InviteSentResponse,
+  InviteReceivedBroadcast,
+  InviteAcceptedResponse,
+  InviteDeclinedResponse,
+} from 'src/utils/contracts';
+
+/**
+ * Transforms backend ChannelWithMembers to frontend Channel
+ */
+function transformChannel(ch: InviteAcceptedResponse['channel']): Channel {
+  // Transform members to include frontend-only fields
+  const members: Record<number, Channel['members'][number]> = {};
+  if (ch.members) {
+    for (const [id, member] of Object.entries(ch.members)) {
+      members[Number(id)] = {
+        ...member,
+        currentlyTyping: '',
+      };
+    }
+  }
+
+  return {
+    id: ch.id,
+    ownerId: ch.ownerId,
+    name: ch.name,
+    createdAt: ch.createdAt,
+    updatedAt: ch.updatedAt,
+    description: '',
+    icon: 'tag',
+    color: 'primary',
+    infoColor: 'grey',
+    isPrivate: ch.isPrivate,
+    hasUnreadMsgs: false,
+    members,
+    notifStatus: ch.notifStatus || 'all',
+  };
+}
 
 /**
  * Handles channel invitation-related socket events
@@ -32,7 +71,7 @@ export class InviteSocketController implements ISocketController {
     socket.off('invite:sent');
   }
 
-  private handleInviteList(data: { invites: ChannelInvite[] }): void {
+  private handleInviteList(data: InviteListResponse): void {
     const channelStore = useChannelStore();
     console.log(data);
     for (const invite of data.invites) {
@@ -40,8 +79,8 @@ export class InviteSocketController implements ISocketController {
       const transformedInvite: ChannelInvite = {
         id: invite.id,
         channelId: invite.channelId,
-        name: invite.name,
-        invitedAt: new Date(invite.invitedAt),
+        name: invite.channelName,
+        invitedAt: new Date(invite.createdAt),
         description: '',
         icon: 'tag',
         color: 'primary',
@@ -50,12 +89,7 @@ export class InviteSocketController implements ISocketController {
     }
   }
 
-  private handleInviteSent(data: {
-    invitedAt: Date;
-    channelName: string;
-    inviteId: number;
-    nickname: string;
-  }): void {
+  private handleInviteSent(data: InviteSentResponse): void {
     Notify.create({
       type: 'info',
       message: `You've successfully invited ${data.nickname} to the channel ${data.channelName}`,
@@ -64,12 +98,7 @@ export class InviteSocketController implements ISocketController {
     });
   }
 
-  private handleInviteReceived(data: {
-    invitedAt: Date;
-    channelName: string;
-    inviteId: number;
-    channelId: number;
-  }): void {
+  private handleInviteReceived(data: InviteReceivedBroadcast): void {
     const channelStore = useChannelStore();
 
     // Transform backend invite data
@@ -93,29 +122,14 @@ export class InviteSocketController implements ISocketController {
     });
   }
 
-  private handleInviteAccepted(data: { channel: Channel; userId: number }): void {
+  private handleInviteAccepted(data: InviteAcceptedResponse): void {
     const channelStore = useChannelStore();
     const authStore = useAuthStore();
     const isCurrentUser = data.userId === authStore.getCurrentUser?.id;
 
     if (isCurrentUser) {
       // Transform backend channel data
-      const transformedChannel: Channel = {
-        id: data.channel.id,
-        ownerId: data.channel.ownerId,
-        name: data.channel.name,
-        createdAt: new Date(data.channel.createdAt),
-        updatedAt: new Date(data.channel.updatedAt),
-        joinedAt: new Date(data.channel.joinedAt || data.channel.createdAt),
-        description: data.channel.description || '',
-        icon: 'tag',
-        color: 'primary',
-        infoColor: 'grey',
-        isPrivate: data.channel.isPrivate,
-        hasUnreadMsgs: false,
-        members: data.channel.members || {},
-        notifStatus: 'all',
-      };
+      const transformedChannel = transformChannel(data.channel);
       channelStore.removeInvite(transformedChannel.id);
       channelStore.addChannel(transformedChannel);
     } else {
@@ -124,13 +138,18 @@ export class InviteSocketController implements ISocketController {
       if (channel) {
         // Update members
         if (data.channel.members) {
-          channel.members = data.channel.members;
+          for (const [id, member] of Object.entries(data.channel.members)) {
+            channel.members[Number(id)] = {
+              ...member,
+              currentlyTyping: channel.members[Number(id)]?.currentlyTyping || '',
+            };
+          }
         }
       }
     }
   }
 
-  private handleInviteDeclined(data: { channelId: number }): void {
+  private handleInviteDeclined(data: InviteDeclinedResponse): void {
     console.log('DECLINED');
     const channelStore = useChannelStore();
     console.log(data.channelId);

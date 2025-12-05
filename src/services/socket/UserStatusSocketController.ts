@@ -2,7 +2,7 @@
 import type { ISocketController } from './types';
 import { useChannelStore } from 'src/stores/channel';
 import { useAuthStore } from 'src/stores/auth';
-import type { UserStatus } from 'src/utils/types';
+import type { UserEvent } from 'src/utils/contracts';
 
 /**
  * Handles user status-related socket events
@@ -17,36 +17,36 @@ export class UserStatusSocketController implements ISocketController {
     socket.off('user:event');
   }
 
-  private handleUserEvent(data: {
-    type: string;
-    userId?: number;
-    status?: UserStatus;
-    isConnected?: boolean;
-  }): void {
+  private handleUserEvent(data: UserEvent): void {
     const channelStore = useChannelStore();
     const authStore = useAuthStore();
 
-    if (data.type === 'user_state_changed' && data.userId !== undefined) {
+    if (data.type === 'user_state_changed') {
       // Handle combined status + connection state change
-      if (data.status !== undefined && data.isConnected !== undefined) {
-        channelStore.updateMemberState(data.userId, data.status, data.isConnected);
-      } else if (data.status !== undefined) {
-        channelStore.updateMemberStatus(data.userId, data.status);
-      } else if (data.isConnected !== undefined) {
-        channelStore.updateMemberConnection(data.userId, data.isConnected);
-      }
+      channelStore.updateMemberState(data.userId, data.status, data.isConnected);
 
       // Update auth store if it's the current user
-      if (authStore.getCurrentUser?.id === data.userId && data.status !== undefined) {
+      if (authStore.getCurrentUser?.id === data.userId) {
         authStore.setStatus(data.status);
       }
-    } else if (data.type === 'status_update_success' && data.status !== undefined) {
+    } else if (data.type === 'status_update_success') {
       // Handle current user's own status update confirmation
       const currentUserId = authStore.getCurrentUser?.id;
       if (currentUserId) {
         channelStore.updateMemberStatus(currentUserId, data.status);
         authStore.setStatus(data.status);
       }
+    } else if (data.type === 'profile') {
+      // Handle profile data (e.g., on initial connection)
+      const user = data.user;
+      authStore.updateUser({
+        id: user.id,
+        name: user.firstName,
+        surname: user.lastName,
+        nickName: user.nick,
+        email: user.email,
+        status: user.status,
+      });
     }
   }
 }

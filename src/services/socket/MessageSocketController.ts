@@ -3,7 +3,12 @@ import type { ISocketController } from './types';
 import { useChannelStore } from 'src/stores/channel';
 import { useAuthStore } from 'src/stores/auth';
 import { AppVisibility, Notify } from 'quasar';
-import type { ChatMessagePayload, ServerReplyMsg } from 'src/utils/types';
+import type { ChatMessagePayload } from 'src/utils/types';
+import type {
+  MessageListResponse,
+  MessageNewBroadcast,
+  MessageTypingBroadcast,
+} from 'src/utils/contracts';
 import { useChatStore } from 'src/stores/chat';
 
 /**
@@ -34,13 +39,13 @@ export class MessageSocketController implements ISocketController {
     socket.off('msg:typing');
   }
 
-  private handleMessageList(data: { messages: ServerReplyMsg[] }): void {
+  private handleMessageList(data: MessageListResponse): void {
     const channelStore = useChannelStore();
 
     for (const message of data.messages) {
       // Get file names
       const file_names: string[] = [];
-      for (const file of message.files) file_names.push(`${file.name}.${file.mime}`);
+      for (const file of message.files) file_names.push(`${file.name}.${file.mime_type}`);
 
       // Transform backend message data
       const transformedMessage: ChatMessagePayload = {
@@ -62,11 +67,7 @@ export class MessageSocketController implements ISocketController {
     }
   }
 
-  private handleMessageNew(data: {
-    channelId: number;
-    message: ServerReplyMsg;
-    memberId: number;
-  }): void {
+  private handleMessageNew(data: MessageNewBroadcast): void {
     const channelStore = useChannelStore();
     const authStore = useAuthStore();
     const channel = channelStore.getChannelById(data.channelId);
@@ -76,7 +77,7 @@ export class MessageSocketController implements ISocketController {
 
     // Get file names
     const file_names: string[] = [];
-    for (const file of data.message.files) file_names.push(`${file.name}.${file.mime}`);
+    for (const file of data.message.files) file_names.push(`${file.name}.${file.mime_type}`);
 
     // Transform backend message data
     const transformedMessage: ChatMessagePayload = {
@@ -147,10 +148,7 @@ export class MessageSocketController implements ISocketController {
     }
   }
 
-  private handleTyping(data: {
-    channelId: number;
-    typing: Array<{ memberId: number; message: string }>;
-  }): void {
+  private handleTyping(data: MessageTypingBroadcast): void {
     const channelStore = useChannelStore();
     const authStore = useAuthStore();
     const channel = channelStore.getChannelById(data.channelId);

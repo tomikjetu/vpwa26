@@ -4,8 +4,48 @@ import { useChannelStore } from 'src/stores/channel';
 import { useAuthStore } from 'src/stores/auth';
 import { useChatStore } from 'src/stores/chat';
 import { Notify } from 'quasar';
-import type { Channel, Member } from 'src/utils/types';
+import type { Channel } from 'src/utils/types';
+import type {
+  ChannelListResponse,
+  ChannelCreatedResponse,
+  ChannelJoinedResponse,
+  ChannelListMembersResponse,
+  ChannelDeletedBroadcast,
+  ChannelLeftResponse,
+} from 'src/utils/contracts';
 import { useDialogStore } from 'src/stores/dialog';
+
+/**
+ * Transforms backend ChannelWithMembers to frontend Channel
+ */
+function transformChannel(ch: ChannelCreatedResponse['channel']): Channel {
+  // Transform members to include frontend-only fields
+  const members: Record<number, Channel['members'][number]> = {};
+  if (ch.members) {
+    for (const [id, member] of Object.entries(ch.members)) {
+      members[Number(id)] = {
+        ...member,
+        currentlyTyping: '',
+      };
+    }
+  }
+
+  return {
+    id: ch.id,
+    ownerId: ch.ownerId,
+    name: ch.name,
+    createdAt: ch.createdAt,
+    updatedAt: ch.updatedAt,
+    description: '',
+    icon: 'tag',
+    color: 'primary',
+    infoColor: 'grey',
+    isPrivate: ch.isPrivate,
+    hasUnreadMsgs: false,
+    members,
+    notifStatus: ch.notifStatus || 'all',
+  };
+}
 
 /**
  * Handles channel-related socket events
@@ -42,56 +82,23 @@ export class ChannelSocketController implements ISocketController {
     socket.off('channel:updated');
   }
 
-  private handleChannelsList(data: { channels: Channel[] }): void {
+  private handleChannelsList(data: ChannelListResponse): void {
     const channelStore = useChannelStore();
 
     console.log(data);
 
     for (const ch of data.channels) {
-      const transformedChannel: Channel = {
-        id: ch.id,
-        ownerId: ch.ownerId,
-        name: ch.name,
-        createdAt: new Date(ch.createdAt),
-        updatedAt: new Date(ch.updatedAt),
-        joinedAt: new Date(ch.joinedAt || ch.createdAt),
-        description: ch.description || '',
-        icon: 'tag',
-        color: 'primary',
-        infoColor: 'grey',
-        isPrivate: ch.isPrivate,
-        hasUnreadMsgs: false,
-        members: ch.members || {},
-        notifStatus: ch.notifStatus,
-      };
-
+      const transformedChannel = transformChannel(ch);
       channelStore.addChannel(transformedChannel);
     }
   }
 
-  private handleChannelCreated(data: { channel: Channel }): void {
+  private handleChannelCreated(data: ChannelCreatedResponse): void {
     const channelStore = useChannelStore();
 
     console.log(data.channel);
 
-    // Transform backend data to frontend format
-    const transformedChannel: Channel = {
-      id: data.channel.id,
-      ownerId: data.channel.ownerId,
-      name: data.channel.name,
-      createdAt: new Date(data.channel.createdAt),
-      updatedAt: new Date(data.channel.updatedAt),
-      joinedAt: new Date(data.channel.joinedAt || data.channel.createdAt),
-      description: data.channel.description || '',
-      icon: 'tag',
-      color: 'primary',
-      infoColor: 'grey',
-      isPrivate: data.channel.isPrivate,
-      hasUnreadMsgs: false,
-      members: data.channel.members || {},
-      notifStatus: 'all',
-    };
-
+    const transformedChannel = transformChannel(data.channel);
     channelStore.addChannel(transformedChannel);
 
     Notify.create({
@@ -101,7 +108,7 @@ export class ChannelSocketController implements ISocketController {
     });
   }
 
-  private handleChannelJoined(data: { userId: number; channel: Channel }): void {
+  private handleChannelJoined(data: ChannelJoinedResponse): void {
     const channelStore = useChannelStore();
     const authStore = useAuthStore();
     const existingChannel = channelStore.getChannelById(data.channel.id);
@@ -109,29 +116,17 @@ export class ChannelSocketController implements ISocketController {
     console.log(data);
 
     if (!existingChannel) {
-      // Transform backend data to frontend format
-      const transformedChannel: Channel = {
-        id: data.channel.id,
-        ownerId: data.channel.ownerId,
-        name: data.channel.name,
-        createdAt: new Date(data.channel.createdAt),
-        updatedAt: new Date(data.channel.updatedAt),
-        joinedAt: new Date(data.channel.joinedAt || data.channel.createdAt),
-        description: data.channel.description || '',
-        icon: 'tag',
-        color: 'primary',
-        infoColor: 'grey',
-        isPrivate: data.channel.isPrivate,
-        hasUnreadMsgs: false,
-        members: data.channel.members || {},
-        notifStatus: 'all',
-      };
-
+      const transformedChannel = transformChannel(data.channel);
       channelStore.addChannel(transformedChannel);
     } else {
       // Update existing channel with new members
       if (data.channel.members) {
-        existingChannel.members = data.channel.members;
+        for (const [id, member] of Object.entries(data.channel.members)) {
+          existingChannel.members[Number(id)] = {
+            ...member,
+            currentlyTyping: '',
+          };
+        }
       }
     }
 
@@ -145,13 +140,13 @@ export class ChannelSocketController implements ISocketController {
     }
   }
 
-  private handleChannelMembersList(data: { channelId: number; members: Member[] }): void {
+  private handleChannelMembersList(data: ChannelListMembersResponse): void {
     const dialogStore = useDialogStore();
     console.log(data);
     dialogStore.openMemberList(data.members);
   }
 
-  private handleChannelDeleted(data: { channelId: number }): void {
+  private handleChannelDeleted(data: ChannelDeletedBroadcast): void {
     const channelStore = useChannelStore();
     const chatStore = useChatStore();
 
@@ -170,7 +165,7 @@ export class ChannelSocketController implements ISocketController {
     });
   }
 
-  private handleChannelUpdated(data: { channel: Channel }): void {
+  private handleChannelUpdated(data: ChannelCreatedResponse): void {
     const channelStore = useChannelStore();
     const existingChannel = channelStore.getChannelById(data.channel.id);
 
@@ -178,15 +173,22 @@ export class ChannelSocketController implements ISocketController {
       // Update with backend data
       Object.assign(existingChannel, {
         name: data.channel.name,
-        description: data.channel.description,
         isPublic: data.channel.isPrivate,
-        updatedAt: new Date(data.channel.updatedAt),
-        members: data.channel.members || existingChannel.members,
+        updatedAt: data.channel.updatedAt,
       });
+      // Update members if provided
+      if (data.channel.members) {
+        for (const [id, member] of Object.entries(data.channel.members)) {
+          existingChannel.members[Number(id)] = {
+            ...member,
+            currentlyTyping: existingChannel.members[Number(id)]?.currentlyTyping || '',
+          };
+        }
+      }
     }
   }
 
-  private handleChannelLeft(data: { channelId: number }): void {
+  private handleChannelLeft(data: ChannelLeftResponse): void {
     const channelStore = useChannelStore();
     const chatStore = useChatStore();
 

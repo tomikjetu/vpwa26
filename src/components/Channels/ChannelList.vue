@@ -94,16 +94,16 @@
               {{ channel.ownerId != getCurrentUser?.id ? 'Joined' : 'Created' }}
               {{
                 channel.ownerId != getCurrentUser?.id
-                  ? channel.joinedAt.toDateString()
-                  : channel.createdAt.toDateString()
+                  ? getJoinedDate(channel)
+                  : formatDate(channel.createdAt)
               }}
             </template>
             <template v-else>
               {{ mode === 'owned' ? 'Created' : 'Joined' }}
               {{
                 channel.ownerId != getCurrentUser?.id
-                  ? channel.joinedAt.toDateString()
-                  : channel.createdAt.toDateString()
+                  ? getJoinedDate(channel)
+                  : formatDate(channel.createdAt)
               }}
             </template>
           </q-item-label>
@@ -152,6 +152,26 @@ const headerTitle = computed(() => {
   if (props.mode === 'joined') return 'Joined channels'
   return 'All channels'
 })
+
+// ---------- Helpers ----------
+/**
+ * Format a date string for display
+ */
+function formatDate(dateStr: string): string {
+  return new Date(dateStr).toDateString()
+}
+
+/**
+ * Get the joined date for current user in a channel
+ */
+function getJoinedDate(channel: Channel): string {
+  const currentUserId = getCurrentUser.value?.id
+  if (!currentUserId) return formatDate(channel.createdAt)
+
+  // Find the member entry for current user
+  const member = Object.values(channel.members).find(m => m.userId === currentUserId)
+  return member ? formatDate(member.joinedAt) : formatDate(channel.createdAt)
+}
 
 // ---------- Methods ----------
 function onAddClick(): void {
