@@ -1,11 +1,13 @@
 <template>
   <q-dialog v-model="show" persistent>
-    <q-card style="min-width: 400px; max-width: 500px;">
+    <q-card class="dialog-card rounded-lg">
       <!-- Header Section -->
       <q-card-section class="row items-center justify-between">
         <div class="row items-center">
-          <q-icon name="person" size="md" class="q-mr-sm" />
-          <div class="text-h6">{{ member ? member.nickname : '' }}</div>
+          <q-avatar color="primary" text-color="white" size="40px" class="q-mr-sm rounded-lg">
+            <q-icon name="person" size="24px" />
+          </q-avatar>
+          <div class="text-h6 text-color-primary">{{ member ? member.nickname : '' }}</div>
         </div>
 
         <!-- Right side: owner or vote count -->
@@ -19,11 +21,11 @@
 
           <template v-else>
             <div class="row items-center">
-              <span class="text-subtitle2 text-grey-8">
+              <span class="text-subtitle2 text-color-muted">
                 {{ (hasVoted ? 'Voted: ' : 'Vote to kick: ') + (props.member?.kickVotes ?? 0) + ' / 3' }}
               </span>
-              <q-btn :disable="hasVoted" flat dense round icon="person_off" color="red" size="sm"
-                :class="'q-ml-sm ' + (hasVoted ? 'disabled-btn' : '')" @click="confirmKickVote" />
+              <q-btn :disable="hasVoted" flat dense round icon="person_off" color="negative" size="sm"
+                :class="'q-ml-sm rounded-md ' + (hasVoted ? 'disabled-btn' : '')" @click="confirmKickVote" />
             </div>
           </template>
         </div>
@@ -31,11 +33,11 @@
 
       <!-- Typing Section -->
       <q-card-section>
-        <div class="text-subtitle2 text-grey-8 q-mb-xs">
+        <div class="text-subtitle2 q-mb-xs text-color-muted">
           Currently being typed by user:
         </div>
 
-        <div class="typing-box" :class="{
+        <div class="typing-box rounded-md" :class="{
           'text-grey-6':
             member && (!member.currentlyTyping || member.currentlyTyping.trim() === '')
         }">
@@ -49,7 +51,7 @@
 
       <!-- Actions -->
       <q-card-actions align="right">
-        <q-btn flat label="Close" color="primary" v-close-popup />
+        <q-btn flat label="Close" color="primary" v-close-popup class="rounded-md" />
       </q-card-actions>
     </q-card>
   </q-dialog>
@@ -120,24 +122,26 @@ function confirmKickVote() {
 </script>
 
 <style scoped>
-.typing-box {
-  min-height: 80px;
-  border: 1px solid #bfbfbf;
-  border-radius: 6px;
-  padding: 8px 10px;
-  background-color: #fafafa;
-  white-space: pre-wrap;
-  word-break: break-word;
-  font-size: 15px;
+.dialog-card {
+  min-width: 400px;
+  max-width: 500px;
+  background: var(--bg-surface);
 }
 
-.body--dark .typing-box {
-  background-color: #2a2a2a;
-  border-color: #444;
+.typing-box {
+  min-height: 80px;
+  border: 1px solid var(--border-medium);
+  border-radius: 12px;
+  padding: 12px 14px;
+  background: var(--bg-tertiary);
+  white-space: pre-wrap;
+  word-break: break-word;
+  font-size: 14px;
+  color: var(--text-primary);
 }
 
 .text-grey-6 {
-  color: #9e9e9e;
+  color: var(--text-muted) !important;
 }
 
 .disabled-btn {

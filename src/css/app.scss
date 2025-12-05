@@ -1,25 +1,146 @@
 // app global css in SCSS form
+
+// ===== CSS CUSTOM PROPERTIES =====
 .body--light {
+  // Layout colors
+  --bg-primary: #ffffff;
+  --bg-secondary: #f5f7fa;
+  --bg-tertiary: #e8ecf0;
+  --bg-surface: #ffffff;
+  --bg-elevated: #ffffff;
+
+  // Text colors
+  --text-primary: #1a1a2e;
+  --text-secondary: #4a4a5a;
+  --text-muted: #8a8a9a;
+  --text-inverse: #ffffff;
+
+  // Border colors
+  --border-light: rgba(0, 0, 0, 0.06);
+  --border-medium: rgba(0, 0, 0, 0.12);
+  --border-strong: rgba(0, 0, 0, 0.2);
+
+  // Message colors
+  --msg-own-bg: var(--q-primary);
+  --msg-own-text: #ffffff;
+  --msg-other-bg: #ffffff;
+  --msg-other-text: #1a1a2e;
+
+  // Chat background
+  --chat-bg: #f0f2f5;
+
+  // Notification colors
   --notif-bg: #ffffff;
   --notif-text: #1a1a1a;
   --notif-hover: #f5f5f5;
   --notif-border: rgba(0, 0, 0, 0.08);
   --notif-icon: #3b82f6;
+
+  // Scrollbar colors
+  --scrollbar-track: transparent;
+  --scrollbar-thumb: rgba(0, 0, 0, 0.2);
+  --scrollbar-thumb-hover: rgba(0, 0, 0, 0.35);
+
+  // Sidebar
+  --sidebar-bg: #f8f9fa;
+  --sidebar-border: rgba(0, 0, 0, 0.08);
+
+  // Profile/footer
+  --profile-bg: #ffffff;
+  --profile-border: rgba(0, 0, 0, 0.08);
 }
 
 .body--dark {
-  --q-primary: #7DDFE4;
+  --q-primary: #7ddfe4;
+
+  // Layout colors
+  --bg-primary: #1a1a1e;
+  --bg-secondary: #232328;
+  --bg-tertiary: #2a2a30;
+  --bg-surface: #28282e;
+  --bg-elevated: #323238;
+
+  // Text colors
+  --text-primary: #f0f0f5;
+  --text-secondary: #b0b0ba;
+  --text-muted: #707080;
+  --text-inverse: #1a1a1e;
+
+  // Border colors
+  --border-light: rgba(255, 255, 255, 0.06);
+  --border-medium: rgba(255, 255, 255, 0.12);
+  --border-strong: rgba(255, 255, 255, 0.2);
+
+  // Message colors
+  --msg-own-bg: var(--q-primary);
+  --msg-own-text: #1a1a1e;
+  --msg-other-bg: #323238;
+  --msg-other-text: #f0f0f5;
+
+  // Chat background
+  --chat-bg: #1e1e22;
+
+  // Notification colors
   --notif-bg: #1c1c1e;
   --notif-text: #e6e6e6;
   --notif-hover: #2a2a2d;
   --notif-border: rgba(255, 255, 255, 0.12);
   --notif-icon: #60a5fa;
+
+  // Scrollbar colors
+  --scrollbar-track: transparent;
+  --scrollbar-thumb: rgba(255, 255, 255, 0.2);
+  --scrollbar-thumb-hover: rgba(255, 255, 255, 0.35);
+
+  // Sidebar
+  --sidebar-bg: #202024;
+  --sidebar-border: rgba(255, 255, 255, 0.08);
+
+  // Profile/footer
+  --profile-bg: #28282e;
+  --profile-border: rgba(255, 255, 255, 0.08);
 }
 
 .body--dark .text-primary {
-  color: #7DDFE4 !important;
+  color: #7ddfe4 !important;
 }
 
+// ===== GLOBAL ROUNDED BORDERS =====
+$border-radius-sm: 8px;
+$border-radius-md: 12px;
+$border-radius-lg: 16px;
+$border-radius-xl: 20px;
+$border-radius-full: 9999px;
+
+// ===== CUSTOM SCROLLBAR =====
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--scrollbar-thumb) var(--scrollbar-track);
+}
+
+*::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+*::-webkit-scrollbar-track {
+  background: var(--scrollbar-track);
+  border-radius: $border-radius-full;
+}
+
+*::-webkit-scrollbar-thumb {
+  background: var(--scrollbar-thumb);
+  border-radius: $border-radius-full;
+  border: 2px solid transparent;
+  background-clip: padding-box;
+}
+
+*::-webkit-scrollbar-thumb:hover {
+  background: var(--scrollbar-thumb-hover);
+  background-clip: padding-box;
+}
+
+// ===== NOTIFICATIONS =====
 .messenger-notify {
   background: var(--notif-bg) !important;
   color: var(--notif-text) !important;
@@ -28,7 +149,7 @@
   max-width: 420px !important;
   min-width: 320px;
   padding: 10px 14px !important;
-  border-radius: 14px !important;
+  border-radius: $border-radius-lg !important;
   background: var(--notif-bg) !important;
   display: flex;
   align-items: center;
@@ -39,4 +160,104 @@
 }
 .messenger-notify .q-icon {
   color: var(--notif-icon) !important;
+}
+
+// ===== GLOBAL UTILITY CLASSES =====
+.rounded-sm {
+  border-radius: $border-radius-sm !important;
+}
+.rounded-md {
+  border-radius: $border-radius-md !important;
+}
+.rounded-lg {
+  border-radius: $border-radius-lg !important;
+}
+.rounded-xl {
+  border-radius: $border-radius-xl !important;
+}
+.rounded-full {
+  border-radius: $border-radius-full !important;
+}
+
+// ===== TEXT COLOR UTILITY CLASSES =====
+.text-color-primary {
+  color: var(--text-primary) !important;
+}
+.text-color-secondary {
+  color: var(--text-secondary) !important;
+}
+.text-color-muted {
+  color: var(--text-muted) !important;
+}
+.text-color-inverse {
+  color: var(--text-inverse) !important;
+}
+
+// ===== BACKGROUND UTILITY CLASSES =====
+.bg-page {
+  background: var(--bg-secondary) !important;
+}
+.bg-surface {
+  background: var(--bg-surface) !important;
+}
+.bg-elevated {
+  background: var(--bg-elevated) !important;
+}
+.bg-tertiary {
+  background: var(--bg-tertiary) !important;
+}
+
+// ===== SMOOTH TRANSITIONS =====
+.transition-smooth {
+  transition: all 0.2s ease-in-out;
+}
+
+// ===== HIDDEN FILE INPUT =====
+.hidden-input {
+  display: none !important;
+}
+
+// ===== DIALOG CARDS =====
+.dialog-card-sm {
+  min-width: 320px;
+}
+.dialog-card-md {
+  min-width: 350px;
+}
+.dialog-card-lg {
+  min-width: 400px;
+}
+
+// ===== FLEX UTILITIES =====
+.flex-row {
+  display: flex;
+  flex-direction: row;
+}
+.flex-col {
+  display: flex;
+  flex-direction: column;
+}
+.scroll-flex-1 {
+  flex: 1;
+}
+.scroll-flex-2 {
+  flex: 2;
+}
+
+// ===== DROPDOWN LIST =====
+.dropdown-list {
+  min-width: 120px;
+}
+
+// ===== CLI SCROLL AREA =====
+.cli-scroll-area {
+  height: 300px;
+}
+
+// ===== ERROR PAGE =====
+.error-code {
+  font-size: 30vh;
+}
+.error-text {
+  opacity: 0.4;
 }

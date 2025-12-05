@@ -5,23 +5,16 @@
   <MemberNamesList v-model="dialog.showMemberListDialog" :members="dialog.memberList" />
 
   <q-layout view="hHh lpR FfF" class="channels-layout">
-    <!-- Header with burger menu (only visible on mobile) -->
-    <q-header elevated class="bg-primary text-white mobile-only-header">
-      <q-toolbar>
-        <q-btn flat dense round icon="menu" aria-label="Menu" @click="leftDrawerOpen = !leftDrawerOpen" />
-        <q-toolbar-title>Channels</q-toolbar-title>
-      </q-toolbar>
-    </q-header>
-
     <!-- Drawer for channels sidebar -->
-    <q-drawer v-model="leftDrawerOpen" show-if-above :width="280" :breakpoint="1024" bordered class="channels-drawer">
-      <ChannelsBar class="pane-fill" @channel-selected="onChannelSelected" />
+    <q-drawer v-model="leftDrawerOpen" show-if-above :width="320" :breakpoint="1024" bordered class="channels-drawer">
+      <ChannelsBar class="pane-fill" @channel-selected="onChannelSelected"
+        @toggle-drawer="leftDrawerOpen = !leftDrawerOpen" />
     </q-drawer>
 
     <!-- Main content area -->
     <q-page-container>
       <q-page class="chat-page">
-        <ChatContainer class="pane-fill" />
+        <ChatContainer class="pane-fill" @toggle-drawer="leftDrawerOpen = !leftDrawerOpen" />
       </q-page>
     </q-page-container>
   </q-layout>
@@ -65,10 +58,10 @@ onMounted(() => {
 .channels-layout {
   height: 100vh;
   height: 100dvh;
-  /* Better for mobile */
   min-height: 0;
   display: flex;
   flex-direction: column;
+  background: var(--bg-secondary);
 }
 
 :deep(.q-page-container) {
@@ -87,7 +80,6 @@ onMounted(() => {
   display: flex;
   overflow: hidden;
   padding: 0 !important;
-  /* Remove any default Quasar padding */
 }
 
 .pane-fill {
@@ -99,13 +91,11 @@ onMounted(() => {
 }
 
 .channels-drawer {
-  background: inherit;
+  background: var(--sidebar-bg) !important;
+  border-right: 1px solid var(--sidebar-border) !important;
 }
 
-/* Mobile styles - show header with burger menu */
-@media (max-width: 1023px) {
-  .mobile-only-header {
-    display: flex;
-  }
+:deep(.channels-drawer .q-drawer__content) {
+  background: var(--sidebar-bg);
 }
 </style>

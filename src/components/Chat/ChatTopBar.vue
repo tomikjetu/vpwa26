@@ -1,16 +1,23 @@
 <template>
-  <div class="info-bar row items-start justify-between q-pa-sm">
-    <!-- Left side (Name + Created) -->
-    <div class="column">
-      <div class="text-bold q-ma-sm text-h5">{{ props.channel ? props.channel.name : '' }}</div>
-      <div class="text-caption text-grey-7 q-ml-sm">
-        {{ props.channel ? formatDate(props.channel.createdAt) : '' }}
+  <div class="info-bar row items-center q-pa-md">
+    <!-- Mobile burger menu -->
+    <q-btn flat dense round icon="menu" class="burger-btn q-mr-sm" @click="$emit('toggle-drawer')" />
+
+    <!-- Channel info -->
+    <div class="column q-mr-auto">
+      <div class="row items-center q-gutter-sm">
+        <span class="text-weight-bold text-h6 text-color-primary">
+          {{ props.channel ? props.channel.name : '' }}
+        </span>
+        <q-badge :color="props.channel?.isPrivate ? 'orange' : 'positive'" rounded class="q-px-sm">
+          <q-icon :name="props.channel?.isPrivate ? 'lock' : 'public'" size="12px" class="q-mr-xs" />
+          {{ props.channel ? props.channel.isPrivate ? 'Private' : 'Public' : '' }}
+        </q-badge>
+      </div>
+      <div class="text-caption text-color-muted">
+        Created {{ props.channel ? formatDate(props.channel.createdAt) : '' }}
       </div>
     </div>
-
-    <!-- Right side (Private) -->
-    <div class="text-caption text-grey-8 q-mr-lg">{{ props.channel ? props.channel.isPrivate ? 'Private' : 'Public' : ''
-    }}</div>
   </div>
 </template>
 
@@ -21,21 +28,40 @@ const props = defineProps<{
   channel: Channel | null
 }>()
 
+defineEmits<{
+  (e: 'toggle-drawer'): void
+}>()
+
 function formatDate(dateStr: string): string {
-  return new Date(dateStr).toDateString()
+  return new Date(dateStr).toLocaleDateString(undefined, {
+    year: 'numeric',
+    month: 'short',
+    day: 'numeric'
+  })
 }
 </script>
 
 <style scoped>
 .info-bar {
   width: 100%;
-  border-bottom: 1px solid #ddd;
-  background: #fff;
+  background: var(--bg-surface);
   flex: 0 0 auto;
+  border-bottom: 1px solid var(--border-light);
+  border-radius: 16px 16px 0 0;
 }
 
-.body--dark .info-bar {
-  border-color: #444;
-  background: #2c2c2c;
+/* Hide burger on desktop */
+.burger-btn {
+  display: none;
+}
+
+@media (max-width: 1023px) {
+  .burger-btn {
+    display: flex;
+  }
+
+  .info-bar {
+    border-radius: 0;
+  }
 }
 </style>

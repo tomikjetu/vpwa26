@@ -43,10 +43,10 @@ const typingText = computed(() => {
 
 <style scoped>
 .typing-indicator {
-    padding: 8px 16px;
+    padding: 4px 0;
     display: flex;
     align-items: center;
-    min-height: 36px;
+    min-height: 28px;
 }
 
 .typing-text {
@@ -56,13 +56,9 @@ const typingText = computed(() => {
 }
 
 .typing-names {
-    font-size: 13px;
-    color: #666;
+    font-size: 12px;
+    color: var(--text-muted);
     font-style: italic;
-}
-
-.body--dark .typing-names {
-    color: #aaa;
 }
 
 .typing-dots {
@@ -72,15 +68,11 @@ const typingText = computed(() => {
 }
 
 .dot {
-    font-size: 16px;
+    font-size: 14px;
     font-weight: bold;
-    color: #666;
+    color: var(--text-muted);
     animation: typing-dot 1.4s infinite;
     line-height: 1;
-}
-
-.body--dark .dot {
-    color: #aaa;
 }
 
 .dot:nth-child(1) {

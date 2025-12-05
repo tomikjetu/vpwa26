@@ -2,7 +2,7 @@
   <div class="chat-container">
 
     <template v-if="chatStore.channel">
-      <ChatTopBar :channel="chatStore.channel" />
+      <ChatTopBar :channel="chatStore.channel" @toggle-drawer="emit('toggle-drawer')" />
       <ChatMessageList :channel="chatStore.channel" :messages="chatStore.messages"
         :unreadMessages="chatStore.unreadMessages" />
       <ChatInput @send="(msg: ChatMessagePayload, files: File[]) => chatStore.sendMessage(msg, files)" />
@@ -10,9 +10,12 @@
 
     <template v-else>
       <div class="empty-chat">
-        <q-icon name="chat" size="48px" color="grey-6" />
-        <div class="text-subtitle1 text-grey-7 q-mt-md">
-          Select a channel to start chatting
+        <q-icon name="chat_bubble_outline" size="64px" color="grey-5" />
+        <div class="text-h6 text-grey-6 q-mt-lg">
+          Select a channel
+        </div>
+        <div class="text-body2 text-grey-5 q-mt-sm">
+          Choose a channel from the sidebar to start chatting
         </div>
       </div>
     </template>
@@ -26,6 +29,10 @@ import ChatMessageList from './ChatMessageList.vue'
 import ChatTopBar from './ChatTopBar.vue'
 import { useChatStore } from 'src/stores/chat'
 import type { ChatMessagePayload } from 'src/utils/types'
+
+const emit = defineEmits<{
+  (e: 'toggle-drawer'): void
+}>()
 
 const chatStore = useChatStore()
 
@@ -41,13 +48,20 @@ const chatStore = useChatStore()
   min-width: 0;
   min-height: 0;
   max-height: 100%;
-  /* Add this */
   overflow: hidden;
-  border: 1px solid #ddd;
+  background: var(--bg-surface);
+  margin-left: 0;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+  border: 1px solid var(--border-light);
 }
 
-.body--dark .chat-container {
-  border-color: #444;
+/* Mobile: reduce margin */
+@media (max-width: 1023px) {
+  .chat-container {
+    margin: 0;
+    border-radius: 0;
+    border: none;
+  }
 }
 
 .empty-chat {
@@ -57,6 +71,6 @@ const chatStore = useChatStore()
   justify-content: center;
   flex: 1;
   text-align: center;
-  opacity: 0.8;
+  padding: 40px;
 }
 </style>

@@ -1,25 +1,25 @@
 <template>
   <q-dialog v-model="show" persistent>
-    <q-card class="q-pa-md q-pt-lg q-pb-lg channel-invite-dialog bg-surface text-app border-left-app">
+    <q-card class="channel-invite-dialog rounded-xl">
       <!-- Channel icon and name -->
       <div class="column items-center q-mb-md">
-        <q-avatar :color="dialogStore.channelInvite?.color" text-color="white" size="70px" class="q-mb-sm">
+        <q-avatar :color="dialogStore.channelInvite?.color" text-color="white" size="72px" class="q-mb-md rounded-xl">
           <q-icon :name="dialogStore.channelInvite?.icon || 'group_add'" size="32px" />
         </q-avatar>
 
-        <div class="text-h6 text-weight-medium text-center">
+        <div class="text-h6 text-weight-medium text-center text-color-primary">
           Join channel <span class="text-primary">{{ dialogStore.channelInvite?.name }}</span>?
         </div>
 
-        <q-item-label caption class="text-grey-7 q-mt-xs">
+        <q-item-label caption class="q-mt-xs text-color-muted">
           Invited {{ dialogStore.channelInvite?.invitedAt.toDateString() }}
         </q-item-label>
       </div>
 
       <!-- Action buttons -->
-      <div class="row justify-evenly q-mt-md">
-        <q-btn flat class="text-primary" label="Accept" icon="check" @click="onAcceptInvite()" />
-        <q-btn color="negative" label="Decline" icon="close" flat @click="onDeclineInvite()" />
+      <div class="row justify-evenly q-mt-lg q-gutter-sm">
+        <q-btn outline class="rounded-lg" color="primary" label="Accept" icon="check" @click="onAcceptInvite()" />
+        <q-btn flat class="rounded-lg" color="negative" label="Decline" icon="close" @click="onDeclineInvite()" />
       </div>
     </q-card>
   </q-dialog>
@@ -50,8 +50,9 @@ function onDeclineInvite() {
 
 <style scoped>
 .channel-invite-dialog {
-  min-width: 320px;
-  border-radius: 12px;
-  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.1);
+  min-width: 340px;
+  padding: 28px 24px;
+  background: var(--bg-surface);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12);
 }
 </style>

@@ -2,7 +2,7 @@
 
   <!-- 🟣 Dialog -->
   <q-dialog v-model="showInviteDialog" persistent>
-    <q-card style="min-width: 350px">
+    <q-card class="dialog-card-md">
       <q-card-section>
         <div class="text-h6">Invite to Channel</div>
       </q-card-section>
@@ -19,7 +19,7 @@
   </q-dialog>
 
   <q-menu anchor="bottom right" self="top right">
-    <q-list style="min-width: 120px">
+    <q-list class="dropdown-list">
       <q-item v-for="(option, oIndex) in props.items" :key="'menu-' + oIndex" clickable v-close-popup
         :class="option.class" :disable="option.disable" @click="onDropdownSelect(option)">
         <q-item-section>

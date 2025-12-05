@@ -1,28 +1,33 @@
 <template>
     <div v-if="isOpen" class="overlay">
-        <div class="cli-wrapper" id="cli">
+        <div class="cli-wrapper rounded-xl" id="cli">
             <q-input v-model="command" borderless placeholder="Enter command..." autofocus @keyup="filterCommands"
-                @keyup.enter="executeCommand" style="width: 600px;">
+                @keyup.enter="executeCommand" class="cli-input">
+                <template v-slot:prepend>
+                    <q-icon name="terminal" color="grey-6" />
+                </template>
                 <template v-slot:hint v-if="currentCommandFormat">
-                    <div class="text-caption text-grey-7">{{ currentCommandFormat }}</div>
+                    <div class="text-caption text-color-muted">{{ currentCommandFormat }}</div>
                 </template>
             </q-input>
 
-            <q-scroll-area style="height: 300px;">
-                <q-list id="cli-suggestions">
+            <q-scroll-area class="cli-scroll-area q-mt-sm">
+                <q-list id="cli-suggestions" class="q-pa-xs">
                     <q-item v-for="cmd in filteredCommands" :key="cmd.id" @focus="focusCommand(cmd.cmd)"
-                        @keydown="itemMove" clickable v-ripple @click="command = cmd.cmd; executeCommand()">
+                        @keydown="itemMove" clickable v-ripple @click="command = cmd.cmd; executeCommand()"
+                        class="cli-item rounded-lg">
                         <q-item-section avatar>
-                            <q-avatar rounded>
-                                <q-icon :name="cmd.icon" />
+                            <q-avatar rounded color="primary" text-color="white" size="36px" class="rounded-lg">
+                                <q-icon :name="cmd.icon" size="18px" />
                             </q-avatar>
                         </q-item-section>
                         <q-item-section>
                             <q-item-label>
-                                <span class="text-weight-medium">{{ cmd.name }}</span>
-                                <span v-if="cmd.format" class="text-grey-6 q-ml-sm text-caption">{{ cmd.format }}</span>
+                                <span class="text-weight-medium text-color-primary">{{ cmd.name }}</span>
+                                <span v-if="cmd.format" class="q-ml-sm text-caption text-color-muted">{{ cmd.format
+                                    }}</span>
                             </q-item-label>
-                            <q-item-label caption>{{ cmd.description }}</q-item-label>
+                            <q-item-label caption class="text-color-muted">{{ cmd.description }}</q-item-label>
                         </q-item-section>
                     </q-item>
                 </q-list>
@@ -241,19 +246,35 @@ onBeforeUnmount(() => window.removeEventListener('keydown', onKeydown));
     z-index: 9999;
     display: flex;
     justify-content: center;
-    background-color: rgba(0, 0, 0, 0.05);
-    align-items: center;
+    background-color: rgba(0, 0, 0, 0.4);
+    align-items: flex-start;
+    padding-top: 10vh;
+    backdrop-filter: blur(4px);
 }
 
 .cli-wrapper {
-    background: white;
-    padding: 20px;
-    border-radius: 8px;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    background: var(--bg-surface);
+    padding: 16px 20px;
+    width: 560px;
+    max-width: 90vw;
+    box-shadow: 0 16px 48px rgba(0, 0, 0, 0.2);
+    border: 1px solid var(--border-light);
 }
 
-.body--dark .cli-wrapper {
-    background: #1e1e1e;
-    color: white;
+.cli-input {
+    font-size: 16px;
+}
+
+.cli-input :deep(.q-field__control) {
+    padding-left: 8px;
+}
+
+.cli-item {
+    margin: 2px 0;
+    transition: background-color 0.15s ease;
+}
+
+.cli-item:hover {
+    background: var(--bg-tertiary);
 }
 </style>

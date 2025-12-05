@@ -6,18 +6,19 @@
       <span class="header-title">Members</span>
     </div>
 
-    <q-list class="q-pa-none">
-      <q-item v-for="member in membersList" :key="'member-' + member.id" clickable class="member-item"
+    <q-list class="q-pa-sm">
+      <q-item v-for="member in membersList" :key="'member-' + member.id" clickable class="member-item rounded-lg"
         @click="handleShowMemberInfo(member)">
         <q-item-section avatar>
-          <q-icon name="person" />
+          <q-avatar color="primary" text-color="white" size="36px" class="rounded-lg">
+            <q-icon name="person" size="20px" />
+          </q-avatar>
         </q-item-section>
 
         <q-item-section>
           <q-item-label class="member-name row items-center no-wrap">
-            <!-- Colored status circle -->
-            <q-icon name="circle" size="10px" class="q-mr-sm" :color="getMemberStatusColor(member)" />
-            {{ member.nickname }}
+            <q-icon name="circle" size="8px" class="q-mr-sm" :color="getMemberStatusColor(member)" />
+            <span class="text-color-primary">{{ member.nickname }}</span>
           </q-item-label>
         </q-item-section>
       </q-item>
@@ -103,8 +104,8 @@ function getMemberStatusColor(member: Member): string {
 .members-header {
   display: flex;
   align-items: center;
-  padding: 8px 12px;
-  border-bottom: 1px solid #cccccc;
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--border-light);
   flex-shrink: 0;
 }
 
@@ -115,13 +116,19 @@ function getMemberStatusColor(member: Member): string {
 .header-title {
   font-weight: 600;
   font-size: 16px;
-  color: #027be3;
+  color: var(--q-primary);
 }
 
 .member-item {
   display: flex;
   align-items: center;
   padding: 8px 12px;
+  margin: 2px 0;
+  transition: background-color 0.2s ease;
+}
+
+.member-item:hover {
+  background: var(--bg-tertiary);
 }
 
 .member-name {

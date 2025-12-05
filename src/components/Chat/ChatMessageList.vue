@@ -115,14 +115,10 @@ watch(
   flex-direction: column;
   width: 100%;
   overflow-y: auto;
-  padding: 1rem;
-  background: #e7e7e7;
+  padding: 16px;
+  background: var(--chat-bg);
   min-height: 0;
-  gap: 0.9rem;
-}
-
-.body--dark .messages-container {
-  background: #1e1e1e;
+  gap: 12px;
 }
 
 .unread-separator {
@@ -130,7 +126,7 @@ watch(
   display: flex;
   align-items: center;
   justify-content: center;
-  margin: 10px 0;
+  margin: 8px 0;
 }
 
 .unread-line {
@@ -145,16 +141,17 @@ watch(
   color: white;
   font-weight: 600;
   font-size: 10px;
-  border-radius: 3px;
-  padding: 2px 6px;
-  margin-left: 6px;
+  border-radius: 12px;
+  padding: 3px 10px;
+  margin-left: 8px;
   letter-spacing: 0.5px;
 }
 
-.top-loader {
+.top-loader,
+.top-info {
   text-align: center;
   font-size: 12px;
-  color: #666;
-  padding: 6px 0 10px 0;
+  color: var(--text-muted);
+  padding: 8px 0 12px 0;
 }
 </style>

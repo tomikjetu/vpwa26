@@ -1,11 +1,11 @@
 <template>
-  <div class="q-pa-sm column chat-input-bar">
+  <div class="chat-input-bar q-pa-md">
 
     <div v-if="selectedFiles.length > 0" class="attached-files row q-gutter-xs q-mb-sm">
-      <div v-for="(file, index) in selectedFiles" :key="index" class="file-chip row items-center q-pa-xs q-mr-xs">
-        <q-icon name="insert_drive_file" color="blue-6" size="18px" class="q-mr-xs" />
+      <div v-for="(file, index) in selectedFiles" :key="index" class="file-chip row items-center">
+        <q-icon name="attach_file" color="primary" size="16px" class="q-mr-xs" />
         <span class="file-name ellipsis">{{ file.name }}</span>
-        <q-btn flat dense round icon="close" size="sm" color="grey-7" @click="removeFile(index)" />
+        <q-btn flat dense round icon="close" size="xs" color="grey-6" @click="removeFile(index)" />
       </div>
     </div>
 
@@ -15,23 +15,23 @@
     </div>
 
     <div class="row items-center input-wrapper">
-      <q-btn flat round dense icon="attach_file" color="grey-7" @click="attachFile" />
+      <q-btn flat round dense icon="attach_file" color="grey-6" class="q-mr-sm" @click="attachFile" />
 
-      <input ref="fileInput" type="file" multiple style="display: none" @change="handleFileSelection" />
+      <input ref="fileInput" type="file" multiple class="hidden-input" @change="handleFileSelection" />
 
-      <q-input ref="inputRef" outlined dense v-model="text" placeholder="Type a message..." class="col q-mx-sm"
-        @update:model-value="onInputUpdate" @keydown="handleKeyDown">
+      <q-input ref="inputRef" rounded outlined dense v-model="text" placeholder="Type a message..."
+        class="col message-input" @update:model-value="onInputUpdate" @keydown="handleKeyDown">
       </q-input>
 
-      <q-btn round dense color="primary" icon="send" @click="sendMessage"
+      <q-btn round dense color="primary" icon="send" class="q-ml-sm send-btn" @click="sendMessage"
         :disable="!text.trim() && selectedFiles.length === 0" />
 
       <!-- Mention dropdown -->
-      <div v-if="showMentionDropdown" class="mention-dropdown">
+      <div v-if="showMentionDropdown" class="mention-dropdown rounded-lg">
         <div v-for="member in filteredMembers" :key="member.id" class="mention-item"
           :class="{ 'mention-item-selected': member.id === selectedMemberIndex }" @click="selectMember(member)"
           @mouseenter="selectedMemberIndex = member.id">
-          <q-avatar color="primary" text-color="white" size="24px" class="q-mr-sm">
+          <q-avatar color="primary" text-color="white" size="24px" class="q-mr-sm rounded-md">
             <q-icon name="person" size="16px" />
           </q-avatar>
           <span class="mention-nickname">{{ member.nickname }}</span>
@@ -272,17 +272,35 @@ function removeFile(index: number) {
 <style scoped>
 .chat-input-bar {
   flex: 0 0 auto;
+  background: var(--bg-surface);
+  border-top: 1px solid var(--border-light);
+  border-radius: 0 0 16px 16px;
+}
+
+@media (max-width: 1023px) {
+  .chat-input-bar {
+    border-radius: 0;
+  }
 }
 
 .input-wrapper {
   position: relative;
 }
 
+.message-input :deep(.q-field__control) {
+  border-radius: 20px !important;
+}
+
+.send-btn {
+  width: 40px;
+  height: 40px;
+}
+
 .typing-area {
-  height: 36px;
+  height: 28px;
   display: flex;
   align-items: center;
-  padding-left: 20px;
+  padding-left: 16px;
   padding-right: 12px;
   pointer-events: none;
   box-sizing: border-box;
@@ -293,19 +311,17 @@ function removeFile(index: number) {
 }
 
 .file-chip {
-  border: 1px solid var(#cfcfcf);
-  border-radius: 6px;
-  background-color: #f9f9f9;
+  border: 1px solid var(--border-medium);
+  border-radius: 20px;
+  background: var(--bg-tertiary);
+  padding: 4px 8px 4px 12px;
   max-width: 200px;
 }
 
-.body--dark .file-chip {
-  background-color: #3a3a3a;
-}
-
 .file-name {
-  font-size: 13px;
+  font-size: 12px;
   max-width: 120px;
+  color: var(--text-primary);
 }
 
 .ellipsis {
@@ -322,17 +338,12 @@ function removeFile(index: number) {
   right: 48px;
   max-height: 250px;
   overflow-y: auto;
-  background-color: white;
-  border: 1px solid #e0e0e0;
-  border-radius: 8px;
-  box-shadow: 0 -4px 12px rgba(0, 0, 0, 0.15);
+  background: var(--bg-surface);
+  border: 1px solid var(--border-medium);
+  border-radius: 12px;
+  box-shadow: 0 -4px 16px rgba(0, 0, 0, 0.12);
   z-index: 1000;
   margin-bottom: 8px;
-}
-
-.body--dark .mention-dropdown {
-  background-color: #2c2c2c;
-  border-color: #444;
 }
 
 .mention-item {
@@ -341,11 +352,7 @@ function removeFile(index: number) {
   padding: 10px 12px;
   cursor: pointer;
   transition: background-color 0.2s ease;
-  border-bottom: 1px solid #f0f0f0;
-}
-
-.body--dark .mention-item {
-  border-bottom-color: #3a3a3a;
+  border-bottom: 1px solid var(--border-light);
 }
 
 .mention-item:last-child {
@@ -354,47 +361,18 @@ function removeFile(index: number) {
 
 .mention-item:hover,
 .mention-item-selected {
-  background-color: #f5f5f5;
-}
-
-.body--dark .mention-item:hover,
-.body--dark .mention-item-selected {
-  background-color: #3a3a3a;
+  background: var(--bg-tertiary);
 }
 
 .mention-nickname {
   font-weight: 500;
   margin-right: 8px;
+  color: var(--text-primary);
 }
 
 .mention-id {
   font-size: 12px;
   margin-left: auto;
-}
-
-/* Scrollbar styling for mention dropdown */
-.mention-dropdown::-webkit-scrollbar {
-  width: 6px;
-}
-
-.mention-dropdown::-webkit-scrollbar-track {
-  background: transparent;
-}
-
-.mention-dropdown::-webkit-scrollbar-thumb {
-  background: #ccc;
-  border-radius: 3px;
-}
-
-.mention-dropdown::-webkit-scrollbar-thumb:hover {
-  background: #aaa;
-}
-
-.body--dark .mention-dropdown::-webkit-scrollbar-thumb {
-  background: #555;
-}
-
-.body--dark .mention-dropdown::-webkit-scrollbar-thumb:hover {
-  background: #666;
+  color: var(--text-muted);
 }
 </style>
