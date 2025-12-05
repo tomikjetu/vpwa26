@@ -9,26 +9,28 @@
       </div>
     </div>
 
+    <!-- Reserved space for typing indicator (always present to avoid layout shift) -->
+    <div class="typing-area">
+      <TypingIndicator v-if="typingUsers.length > 0" :typingUsers="typingUsers" />
+    </div>
+
     <div class="row items-center input-wrapper">
       <q-btn flat round dense icon="attach_file" color="grey-7" @click="attachFile" />
 
       <input ref="fileInput" type="file" multiple style="display: none" @change="handleFileSelection" />
 
       <q-input ref="inputRef" outlined dense v-model="text" placeholder="Type a message..." class="col q-mx-sm"
-               @update:model-value="onInputUpdate" @keydown="handleKeyDown">
-        <template v-slot:append>
-          <q-icon name="mood" class="cursor-pointer" />
-        </template>
+        @update:model-value="onInputUpdate" @keydown="handleKeyDown">
       </q-input>
 
       <q-btn round dense color="primary" icon="send" @click="sendMessage"
-             :disable="!text.trim() && selectedFiles.length === 0" />
+        :disable="!text.trim() && selectedFiles.length === 0" />
 
       <!-- Mention dropdown -->
       <div v-if="showMentionDropdown" class="mention-dropdown">
         <div v-for="member in filteredMembers" :key="member.id" class="mention-item"
-             :class="{ 'mention-item-selected': member.id === selectedMemberIndex }" @click="selectMember(member)"
-             @mouseenter="selectedMemberIndex = member.id">
+          :class="{ 'mention-item-selected': member.id === selectedMemberIndex }" @click="selectMember(member)"
+          @mouseenter="selectedMemberIndex = member.id">
           <q-avatar color="primary" text-color="white" size="24px" class="q-mr-sm">
             <q-icon name="person" size="16px" />
           </q-avatar>
@@ -41,15 +43,18 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed } from 'vue'
-import type { ChatMessagePayload } from 'src/utils/types'
+import { ref, computed, watch, onUnmounted } from 'vue'
+import TypingIndicator from './TypingIndicator.vue'
+import type { ChatMessagePayload, Member } from 'src/utils/types'
 import { storeToRefs } from 'pinia'
-import { useAuthStore } from 'src/stores/auth-store'
-import { useChatStore } from 'src/stores/chat-store'
+import { useAuthStore } from 'src/stores/auth'
+import { useChatStore } from 'src/stores/chat'
+import { useChannelStore } from 'src/stores/channel'
 import type { QInput } from 'quasar'
 
 const authStore = useAuthStore()
 const chatStore = useChatStore()
+const channelStore = useChannelStore()
 const { getCurrentUser } = storeToRefs(authStore)
 
 const text = ref('')
@@ -64,14 +69,21 @@ const mentionQuery = ref('')
 const selectedMemberIndex = ref<number | null>(null)
 
 const emit = defineEmits<{
-  (e: 'send', msg: ChatMessagePayload): void
-  (e: 'typing', text: string): void
+  (e: 'send', msg: ChatMessagePayload, files: File[]): void
 }>()
 
 const channelMembers = computed(() => {
   const channel = chatStore.channel
   if (!channel || !channel.members) return []
   return Object.values(channel.members)
+})
+
+const typingUsers = computed(() => {
+  const channel = chatStore.channel
+  if (!channel || !channel.members) return []
+  return Object.values(channel.members)
+    .filter((member: Member) => member.currentlyTyping && member.currentlyTyping.trim().length > 0)
+    .map((member: Member) => ({ nickname: member.nickname, message: member.currentlyTyping || '' }))
 })
 
 const filteredMembers = computed(() => {
@@ -83,27 +95,63 @@ const filteredMembers = computed(() => {
   )
 })
 
+const emitTyping = (channelId: number, message: string) => {
+  channelStore.sendTypingAction(channelId, message)
+}
+
+// Clear typing indicator on channel change
+watch(() => chatStore.channel?.id, (newId, oldId) => {
+  if (oldId && text.value.length > 0) {
+    channelStore.sendTypingAction(oldId, '')
+  }
+  text.value = ''
+  selectedFiles.value = []
+})
+
+// Cleanup on unmount
+onUnmounted(() => {
+  if (chatStore.channel && text.value.length > 0) {
+    channelStore.sendTypingAction(chatStore.channel.id, '')
+  }
+})
+
 function sendMessage() {
   if (!getCurrentUser.value?.id) return
   if (text.value.trim() || selectedFiles.value.length > 0) {
+
+    // Clear typing indicator before sending
+    if (chatStore.channel) {
+      channelStore.sendTypingAction(chatStore.channel.id, '')
+    }
+
+    // Extract file names
+    const file_names: string[] = []
+    for (const file of selectedFiles.value) {
+      file_names.push(file.name)
+    }
+
     emit('send', {
       user: getCurrentUser.value.id,
       text: text.value,
       time: new Date(),
-      files: selectedFiles.value,
+      files: file_names,
       userNickname: getCurrentUser.value.nickName
-    })
+    }, selectedFiles.value)
     text.value = ''
     selectedFiles.value = []
     showMentionDropdown.value = false
     mentionStartPos.value = -1
-    emit('typing', '') // clear typing indicator after sending
   }
 }
 
 const onInputUpdate = (value: string | number | null) => {
   text.value = value == null ? '' : String(value)
   checkForMention()
+
+  // Emit typing indicator
+  if (chatStore.channel) {
+    emitTyping(chatStore.channel.id, text.value)
+  }
 }
 
 function checkForMention() {
@@ -228,6 +276,16 @@ function removeFile(index: number) {
 
 .input-wrapper {
   position: relative;
+}
+
+.typing-area {
+  height: 36px;
+  display: flex;
+  align-items: center;
+  padding-left: 20px;
+  padding-right: 12px;
+  pointer-events: none;
+  box-sizing: border-box;
 }
 
 .attached-files {

@@ -34,8 +34,7 @@
 import type { DropdownItem, Channel } from 'src/utils/types'
 import { handleDropdownSelect } from 'src/composables/useChannelList';
 import { ref } from 'vue'
-import { inviteUserToChannel } from 'src/services/channelService';
-import { Notify } from 'quasar';
+import { useChannelStore } from 'src/stores/channel';
 
 const props = defineProps<{
   items: DropdownItem[],
@@ -47,25 +46,21 @@ const emit = defineEmits<{
   (e: 'show-members', channel: Channel): void
 }>()
 
+const channelStore = useChannelStore()
 const showInviteDialog = ref(false)
 const personName = ref('')
 
 function invitePerson() {
   if (!personName.value.trim()) return
 
-  const user = Object.values(props.channel.members).find(u => u.nickname === personName.value.trim())
-  if (!user) return Notify.create({
-    type: 'negative',
-    message: `User ${personName.value} not found in this channel.`,
-  })
-  inviteUserToChannel(props.channel.id, user.id)
+  channelStore.inviteUserAction(props.channel.id, personName.value.trim())
 
   showInviteDialog.value = false
   personName.value = ''
 }
 
 async function onDropdownSelect(option: DropdownItem) {
-  await handleDropdownSelect(emit, showInviteDialog, props.channel, props.channels, option)
+  await handleDropdownSelect(emit, showInviteDialog, props.channel, option)
 }
 </script>
 

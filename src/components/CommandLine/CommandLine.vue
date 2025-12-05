@@ -2,7 +2,11 @@
     <div v-if="isOpen" class="overlay">
         <div class="cli-wrapper" id="cli">
             <q-input v-model="command" borderless placeholder="Enter command..." autofocus @keyup="filterCommands"
-                @keyup.enter="executeCommand" style="width: 600px;" />
+                @keyup.enter="executeCommand" style="width: 600px;">
+                <template v-slot:hint v-if="currentCommandFormat">
+                    <div class="text-caption text-grey-7">{{ currentCommandFormat }}</div>
+                </template>
+            </q-input>
 
             <q-scroll-area style="height: 300px;">
                 <q-list id="cli-suggestions">
@@ -14,7 +18,10 @@
                             </q-avatar>
                         </q-item-section>
                         <q-item-section>
-                            <q-item-label>{{ cmd.name }}</q-item-label>
+                            <q-item-label>
+                                <span class="text-weight-medium">{{ cmd.name }}</span>
+                                <span v-if="cmd.format" class="text-grey-6 q-ml-sm text-caption">{{ cmd.format }}</span>
+                            </q-item-label>
                             <q-item-label caption>{{ cmd.description }}</q-item-label>
                         </q-item-section>
                     </q-item>
@@ -26,7 +33,7 @@
 
 <script setup lang="ts">
 import { onMounted, onBeforeUnmount, computed } from 'vue';
-import { useChannelStore } from 'src/stores/channelStore';
+import { useChannelStore } from 'src/stores/channel';
 import { ref } from 'vue';
 
 import Logout from './Logout';
@@ -37,8 +44,9 @@ import Revoke from './Revoke';
 import Quit from './Quit';
 import Join from './Join';
 import Kick from './Kick';
-import { useAuthStore } from 'src/stores/auth-store';
+import { useAuthStore } from 'src/stores/auth';
 import { storeToRefs } from 'pinia';
+import List from './List';
 
 const channelStore = useChannelStore();
 const authStore = useAuthStore();
@@ -53,7 +61,8 @@ const channelToggleCommands = computed(() => {
         name: `${channel.name}`,
         cmd: 'open ' + channel.name,
         description: `Switch to channel ${channel.name}`,
-        icon: 'chat'
+        icon: 'chat',
+        format: `/open ${channel.name}`
     }));
 })
 
@@ -62,10 +71,11 @@ const channelLeaveCommands = computed(() => {
         const quit = getCurrentUser.value?.id === channel.ownerId;
         return {
             id: "leave-" + channel.id,
-            name: `${quit ? 'Quit ' : 'Leave '} ${channel.name}`,
-            cmd: 'quit ' + channel.name,
-            description: quit ? `Quit channel ${channel.name}` : `Leave channel ${channel.name}`,
-            icon: 'cancel'
+            name: `${quit ? 'quit ' : 'cancel '} ${channel.name}`,
+            cmd: quit ? 'quit ' + channel.name : 'cancel ' + channel.name,
+            description: quit ? `Quit and delete channel ${channel.name}` : `Leave channel ${channel.name}`,
+            icon: 'cancel',
+            format: quit ? `/quit ${channel.name}` : `/cancel ${channel.name}`
         };
     });
 })
@@ -81,10 +91,11 @@ const channelKickCommands = computed(() => {
                 return members.map(member => {
                     return {
                         id: "kick-" + channel.id + "-" + member.id,
-                        name: `Kick ${member.nickname} from ${channel.name}`,
+                        name: `kick ${channel.name} ${member.nickname}`,
                         cmd: 'kick ' + channel.name + ' ' + member.nickname,
-                        description: `Kick member ${member.nickname} from channel ${channel.name}`,
-                        icon: 'block'
+                        description: `Kick ${member.nickname} from ${channel.name}`,
+                        icon: 'block',
+                        format: `/kick ${channel.name} ${member.nickname}`
                     };
                 });
             }
@@ -94,26 +105,52 @@ const channelKickCommands = computed(() => {
     return channelStore.channels.map(channel => {
         return {
             id: "kick-" + channel.id,
-            name: `Kick from ${channel.name}`,
+            name: `kick ${channel.name}`,
             cmd: 'kick ' + channel.name,
             description: `Kick a member from channel ${channel.name}`,
-            icon: 'block'
+            icon: 'block',
+            format: `/kick ${channel.name} nickName`
         };
     })
 })
 
+const channelListCommands = computed(() => {
+    return channelStore.channels.map(channel => {
+        return {
+            id: "list-" + channel.id,
+            name: `list ${channel.name}`,
+            cmd: 'list ' + channel.name,
+            description: `List members in ${channel.name}`,
+            icon: 'person',
+            format: `/list ${channel.name}`
+        };
+    });
+})
+
 const commands = computed(() => [
-    { id: "1", name: 'Log Out', cmd: 'logout', description: 'Log out of the application', icon: 'logout' },
-    { id: "2", name: "Join", cmd: "join", description: "Join a channel", icon: "login" },
-    { id: "3", name: "Invite", cmd: "invite", description: "Invite a user to a channel", icon: "person_add" },
-    { id: "4", name: "Revoke", cmd: "revoke", description: "Revoke a user's access to a channel", icon: "person_remove" },
-    { id: "5", name: "Cancel", cmd: "cancel", description: "Cancel the current operation", icon: "close" },
+    { id: "1", name: 'logout', cmd: 'logout', description: 'Log out of the application', icon: 'logout', format: '/logout' },
+    { id: "2", name: "join", cmd: "join", description: "Join or create a channel", icon: "login", format: '/join channelName [private]' },
+    { id: "3", name: "invite", cmd: "invite", description: "Invite a user to a channel", icon: "person_add", format: '/invite channelName nickName' },
+    { id: "4", name: "revoke", cmd: "revoke", description: "Revoke user access from a private channel", icon: "person_remove", format: '/revoke channelName nickName' },
+    { id: "5", name: "cancel", cmd: "cancel", description: "Leave a channel", icon: "close", format: '/cancel channelName' },
     ...channelToggleCommands.value,
     ...channelLeaveCommands.value,
-    ...channelKickCommands.value
+    ...channelKickCommands.value,
+    ...channelListCommands.value
 ])
 
 const filteredCommands = ref([...commands.value]);
+
+const currentCommandFormat = computed(() => {
+    const cmdInput = command.value.trim();
+    if (!cmdInput) return '';
+
+    const parts = cmdInput.split(' ');
+    const baseCmd = parts[0];
+    const matchingCmd = commands.value.find(c => c.cmd.split(' ')[0] === baseCmd);
+
+    return matchingCmd?.format || '';
+});
 
 function filterCommands(e: KeyboardEvent) {
     if (!command.value) {
@@ -167,17 +204,21 @@ const executors = [
     Logout(),
     Open(),
     Quit(),
-    Revoke()
+    Revoke(),
+    List()
 ]
 
-function executeCommand() {
+async function executeCommand() {
     const cmdInput = command.value.trim();
     const cmd = cmdInput.split(' ')[0];
     const args = cmdInput.split(' ').slice(1);
     command.value = '';
     isOpen.value = false;
+    console.log(args)
+    console.log(cmd)
     const executor = executors.find(ex => ex.cmd === cmd);
-    if (executor) executor.execute(args);
+    console.log(executor)
+    if (executor) await executor.execute(args);
 }
 
 function onKeydown(e: KeyboardEvent) {

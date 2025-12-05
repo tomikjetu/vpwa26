@@ -4,13 +4,13 @@
     <div class="column">
       <div class="text-bold q-ma-sm text-h5">{{ props.channel ? props.channel.name : '' }}</div>
       <div class="text-caption text-grey-7 q-ml-sm">
-        {{ props.channel ? props.channel.createdAt.toDateString() : '' }}
+        {{ props.channel ? formatDate(props.channel.createdAt) : '' }}
       </div>
     </div>
 
     <!-- Right side (Private) -->
-    <div class="text-caption text-grey-8 q-mr-lg">{{ props.channel ? props.channel.isPublic ? 'Public' : 'Private' : ''
-      }}</div>
+    <div class="text-caption text-grey-8 q-mr-lg">{{ props.channel ? props.channel.isPrivate ? 'Private' : 'Public' : ''
+    }}</div>
   </div>
 </template>
 
@@ -21,6 +21,9 @@ const props = defineProps<{
   channel: Channel | null
 }>()
 
+function formatDate(dateStr: string): string {
+  return new Date(dateStr).toDateString()
+}
 </script>
 
 <style scoped>
@@ -28,6 +31,7 @@ const props = defineProps<{
   width: 100%;
   border-bottom: 1px solid #ddd;
   background: #fff;
+  flex: 0 0 auto;
 }
 
 .body--dark .info-bar {

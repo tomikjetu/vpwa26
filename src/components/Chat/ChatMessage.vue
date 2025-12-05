@@ -30,7 +30,7 @@
         class="file-chip row items-center q-pa-xs q-my-xs">
         <q-icon name="insert_drive_file" color="grey-8" class="q-mr-xs" />
         <a :href="getFileURL(file)" target="_blank" class="file-name">
-          {{ typeof file === 'string' ? file.split('/').pop() : file.name }}
+          {{ file.split('/').pop() }}
         </a>
       </div>
     </div>
@@ -38,8 +38,8 @@
 </template>
 
 <script setup lang="ts">
-import { useAuthStore } from 'src/stores/auth-store';
-import { useChatStore } from 'src/stores/chat-store';
+import { useAuthStore } from 'src/stores/auth';
+import { useChatStore } from 'src/stores/chat';
 import type { ChatMessagePayload } from 'src/utils/types'
 
 const auth = useAuthStore()
@@ -131,7 +131,8 @@ function replaceMentions(message: string) {
 }
 
 .body--dark .message-card :deep(.message-body .mention-part) {
-  background-color: rgba(204, 161, 5, 0.6) !important; /* neviem ako inak by som to spravil okrem !important */
+  background-color: rgba(204, 161, 5, 0.6) !important;
+  /* neviem ako inak by som to spravil okrem !important */
   color: #fff !important;
 }
 

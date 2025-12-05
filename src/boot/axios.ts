@@ -1,5 +1,6 @@
 import { defineBoot } from '#q-app/wrappers';
 import axios, { type AxiosInstance } from 'axios';
+import { useAuthStore } from 'src/stores/auth';
 
 declare module 'vue' {
   interface ComponentCustomProperties {
@@ -14,7 +15,38 @@ declare module 'vue' {
 // good idea to move this instance creation inside of the
 // "export default () => {}" function below (which runs individually
 // for each client)
-const api = axios.create({ baseURL: 'http://localhost:3333/' });
+const api = axios.create({ baseURL: process.env.BACKENDURL || 'http://localhost:3333/' });
+
+// Add request interceptor to attach Bearer token
+api.interceptors.request.use(
+  (config) => {
+    const authStore = useAuthStore();
+    const token = authStore.getToken;
+
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}`;
+    }
+
+    return config;
+  },
+  (error) => {
+    return Promise.reject(error instanceof Error ? error : new Error(String(error)));
+  },
+);
+
+// Add response interceptor for handling 401 errors
+api.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    if (error.response?.status === 401) {
+      const authStore = useAuthStore();
+      authStore.clearAuth();
+      //window.location.href = '/auth/login';
+      console.warn('401 detected');
+    }
+    return Promise.reject(error instanceof Error ? error : new Error(String(error)));
+  },
+);
 
 export default defineBoot(({ app }) => {
   // for use inside Vue files (Options API) through this.$axios and this.$api

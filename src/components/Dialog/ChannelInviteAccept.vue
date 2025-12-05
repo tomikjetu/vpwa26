@@ -18,20 +18,8 @@
 
       <!-- Action buttons -->
       <div class="row justify-evenly q-mt-md">
-        <q-btn
-          flat
-          class="text-primary"
-          label="Accept"
-          icon="check"
-          @click="onAcceptInvite()"
-        />
-        <q-btn
-          color="negative"
-          label="Decline"
-          icon="close"
-          flat
-          @click="onDeclineInvite()"
-        />
+        <q-btn flat class="text-primary" label="Accept" icon="check" @click="onAcceptInvite()" />
+        <q-btn color="negative" label="Decline" icon="close" flat @click="onDeclineInvite()" />
       </div>
     </q-card>
   </q-dialog>
@@ -39,22 +27,23 @@
 
 <script setup lang="ts">
 import { defineModel } from 'vue';
-import { useDialogStore } from 'src/stores/dialog-store'
-import { acceptChannelInvite, declineChannelInvite } from 'src/services/channelService';
+import { useDialogStore } from 'src/stores/dialog'
+import { useChannelStore } from 'src/stores/channel'
 
 const dialogStore = useDialogStore()
+const channelStore = useChannelStore()
 
 const show = defineModel<boolean>('modelValue', { required: true })
 
 function onAcceptInvite() {
-  if(!dialogStore.channelInvite) return
-  acceptChannelInvite(dialogStore.channelInvite.id)
+  if (!dialogStore.channelInvite) return
+  channelStore.acceptChannelInviteAction(dialogStore.channelInvite.channelId)
   dialogStore.closeChannelInviteAcceptation()
 }
 
 function onDeclineInvite() {
-  if(!dialogStore.channelInvite) return
-  declineChannelInvite(dialogStore.channelInvite.id)
+  if (!dialogStore.channelInvite) return
+  channelStore.declineChannelInviteAction(dialogStore.channelInvite.channelId)
   dialogStore.closeChannelInviteAcceptation()
 }
 </script>

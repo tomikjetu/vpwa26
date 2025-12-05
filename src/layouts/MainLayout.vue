@@ -1,4 +1,4 @@
-<template>
+﻿<template>
   <q-layout view="lHh Lpr lFf">
     <CommandLine />
     <q-page-container>

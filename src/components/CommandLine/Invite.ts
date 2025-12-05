@@ -1,6 +1,5 @@
 import { Notify } from 'quasar';
-import { inviteUserToChannel } from 'src/services/channelService';
-import { useChannelStore } from 'src/stores/channelStore';
+import { useChannelStore } from 'src/stores/channel';
 
 export default function Invite() {
   /*
@@ -19,7 +18,7 @@ export default function Invite() {
       if (args.length !== 2)
         return Notify.create({
           type: 'negative',
-          message: 'Usage: /revoke channelName userName',
+          message: 'Usage: /invite channelName nickName',
         });
 
       const channel = channelStore.channels.find((ch) => ch.name === args[0]);
@@ -29,14 +28,15 @@ export default function Invite() {
           message: `Channel ${args[0]} not found`,
         });
 
-      const user = Object.values(channel.members).find((member) => member.nickname === args[1]);
-      if (!user)
+      const nickname = args[1];
+      if (!nickname) {
         return Notify.create({
           type: 'negative',
-          message: `User ${args[1]} not found in channel ${args[0]}`,
+          message: `Nickname as second argument is necessary`,
         });
+      }
 
-      inviteUserToChannel(channel?.id, user.id);
+      channelStore.inviteUserAction(channel?.id, nickname);
     },
   };
 }

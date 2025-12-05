@@ -24,9 +24,9 @@
           dense autofocus />
 
         <!-- Only show public/private options for owned channels -->
-        <q-option-group v-if="mode === 'owned'" v-model="isPublic" :options="[
-          { label: 'Public', value: true },
-          { label: 'Private', value: false }
+        <q-option-group v-if="mode === 'owned'" v-model="isPrivate" :options="[
+          { label: 'Public', value: false },
+          { label: 'Private', value: true }
         ]" type="radio" inline class="q-mt-md" />
 
         <!-- Info for joined channels -->
@@ -48,14 +48,8 @@
   <!-- Channel List -->
   <q-scroll-area :style="'flex: ' + (mode == 'owned' ? '1' : '2')">
     <q-list padding>
-      <q-item
-        v-for="(invite, index) in channelInvs"
-        :key="'channel-invs' + index"
-        clickable
-        v-ripple
-        @click="onChannelInviteClick(invite)"
-        class="channel-invite shadow-1 rounded-borders"
-      >
+      <q-item v-for="(invite, index) in channelInvs" :key="'channel-invs' + index" clickable v-ripple
+        @click="onChannelInviteClick(invite)" class="channel-invite shadow-1 rounded-borders">
         <!-- Left icon/avatar -->
         <q-item-section avatar top>
           <q-avatar color="amber-6" text-color="white" size="42px">
@@ -100,16 +94,16 @@
               {{ channel.ownerId != getCurrentUser?.id ? 'Joined' : 'Created' }}
               {{
                 channel.ownerId != getCurrentUser?.id
-                  ? channel.joinedAt.toDateString()
-                  : channel.createdAt.toDateString()
+                  ? getJoinedDate(channel)
+                  : formatDate(channel.createdAt)
               }}
             </template>
             <template v-else>
               {{ mode === 'owned' ? 'Created' : 'Joined' }}
               {{
                 channel.ownerId != getCurrentUser?.id
-                  ? channel.joinedAt.toDateString()
-                  : channel.createdAt.toDateString()
+                  ? getJoinedDate(channel)
+                  : formatDate(channel.createdAt)
               }}
             </template>
           </q-item-label>
@@ -129,11 +123,11 @@
 <script setup lang="ts">
 import type { Channel, ChannelInvite } from 'src/utils/types'
 import ChannelDropdown from './ChannelDropdown.vue'
-import { useAuthStore } from 'src/stores/auth-store'
+import { useAuthStore } from 'src/stores/auth'
+import { useChannelStore } from 'src/stores/channel'
 import { storeToRefs } from 'pinia'
 import { toRef, ref, computed } from 'vue'
 import { getMenuOptions } from 'src/composables/useChannelList'
-import { createChannel, joinChannel } from 'src/services/channelService'
 
 // ---------- Props ----------
 const props = defineProps<{
@@ -146,17 +140,38 @@ const props = defineProps<{
 const channelInvs = toRef(props, 'channelInvites')
 const channels = toRef(props, 'channels')
 const authStore = useAuthStore()
+const channelStore = useChannelStore()
 const { getCurrentUser } = storeToRefs(authStore)
 
 const showAddDialog = ref(false)
 const newChannelName = ref('')
-const isPublic = ref(true)
+const isPrivate = ref(true)
 
 const headerTitle = computed(() => {
   if (props.mode === 'owned') return 'Owned channels'
   if (props.mode === 'joined') return 'Joined channels'
   return 'All channels'
 })
+
+// ---------- Helpers ----------
+/**
+ * Format a date string for display
+ */
+function formatDate(dateStr: string): string {
+  return new Date(dateStr).toDateString()
+}
+
+/**
+ * Get the joined date for current user in a channel
+ */
+function getJoinedDate(channel: Channel): string {
+  const currentUserId = getCurrentUser.value?.id
+  if (!currentUserId) return formatDate(channel.createdAt)
+
+  // Find the member entry for current user
+  const member = Object.values(channel.members).find(m => m.userId === currentUserId)
+  return member ? formatDate(member.joinedAt) : formatDate(channel.createdAt)
+}
 
 // ---------- Methods ----------
 function onAddClick(): void {
@@ -169,15 +184,15 @@ function confirmAdd(): void {
 
 
   if (props.mode === 'owned') {
-    createChannel(newChannelName.value.trim(), isPublic.value)
+    channelStore.createChannelAction(newChannelName.value.trim(), isPrivate.value)
   } else if (props.mode === 'joined') {
-    joinChannel(newChannelName.value.trim())
+    channelStore.joinChannelAction(newChannelName.value.trim())
   } else {
     return
   }
 
   newChannelName.value = ''
-  isPublic.value = true
+  isPrivate.value = false
   showAddDialog.value = false
 }
 

@@ -1,5 +1,5 @@
-import { useChatStore } from 'src/stores/chat-store';
-import { useChannelStore } from 'src/stores/channelStore';
+import { useChatStore } from 'src/stores/chat';
+import { useChannelStore } from 'src/stores/channel';
 import { Notify } from 'quasar';
 
 export default function Open() {
@@ -8,11 +8,11 @@ export default function Open() {
 
   return {
     cmd: 'open',
-    execute: (args: string[]) => {
+    execute: async (args: string[]) => {
       if (args.length === 0 || !args[0])
         return Notify.create({
           type: 'negative',
-          message: 'Channel name is required',
+          message: 'Usage: /open channelName',
           position: 'top',
         });
       const channel = channelStore.channels.find((ch) => ch.name === args[0]);
@@ -22,7 +22,7 @@ export default function Open() {
           message: 'Channel not found',
           position: 'top',
         });
-      chatStore.openChat(channel);
+      await chatStore.openChat(channel);
     },
   };
 }

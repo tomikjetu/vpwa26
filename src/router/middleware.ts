@@ -1,5 +1,5 @@
 import type { NavigationGuardNext, RouteLocationNormalized } from 'vue-router';
-import { authService } from 'src/services/authService';
+import { useAuthStore } from 'src/stores/auth';
 
 /**
  * Authentication middleware that checks if user is authenticated
@@ -10,7 +10,8 @@ export function requireAuth(
   from: RouteLocationNormalized,
   next: NavigationGuardNext,
 ): void {
-  if (authService.isAuthenticated()) {
+  const auth = useAuthStore();
+  if (auth.checkAuthenticated) {
     // User is authenticated, allow navigation
     next();
   } else {
@@ -32,7 +33,8 @@ export function requireGuest(
   from: RouteLocationNormalized,
   next: NavigationGuardNext,
 ): void {
-  if (authService.isAuthenticated()) {
+  const auth = useAuthStore();
+  if (auth.checkAuthenticated) {
     // User is already authenticated, redirect to home
     next('/');
   } else {

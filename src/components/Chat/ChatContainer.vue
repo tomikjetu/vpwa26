@@ -5,7 +5,7 @@
       <ChatTopBar :channel="chatStore.channel" />
       <ChatMessageList :channel="chatStore.channel" :messages="chatStore.messages"
         :unreadMessages="chatStore.unreadMessages" />
-      <ChatInput @send="chatStore.addMessage" @typing="onTyping" />
+      <ChatInput @send="(msg: ChatMessagePayload, files: File[]) => chatStore.sendMessage(msg, files)" />
     </template>
 
     <template v-else>
@@ -24,18 +24,10 @@
 import ChatInput from './ChatInput.vue'
 import ChatMessageList from './ChatMessageList.vue'
 import ChatTopBar from './ChatTopBar.vue'
-import { useChatStore } from 'src/stores/chat-store'
-import { useChannelStore } from 'src/stores/channelStore'
-import { useAuthStore } from 'src/stores/auth-store'
+import { useChatStore } from 'src/stores/chat'
+import type { ChatMessagePayload } from 'src/utils/types'
 
 const chatStore = useChatStore()
-const channelStore = useChannelStore()
-const authStore = useAuthStore()
-
-function onTyping(text: string) {
-  if (!chatStore.channel || !authStore.getCurrentUser?.id) return
-  channelStore.updateMemberTyping(chatStore.channel.id, authStore.getCurrentUser.id, text)
-}
 
 </script>
 
@@ -48,8 +40,9 @@ function onTyping(text: string) {
   height: 100%;
   min-width: 0;
   min-height: 0;
+  max-height: 100%;
+  /* Add this */
   overflow: hidden;
-  flex: 1 1 auto;
   border: 1px solid #ddd;
 }
 
@@ -62,7 +55,7 @@ function onTyping(text: string) {
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  height: 100%;
+  flex: 1;
   text-align: center;
   opacity: 0.8;
 }

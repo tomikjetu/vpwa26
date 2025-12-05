@@ -44,7 +44,8 @@
             <q-input v-model="form.password" :type="showPassword ? 'text' : 'password'" label="Password" outlined
                 :rules="[
                     val => !!val || 'Password is required',
-                    val => val.length >= 6 || 'Password must be at least 6 characters'
+                    val => val.length >= 8 || 'Password must be at least 8 characters',
+                    val => (/[0-9]/.test(val) && /[A-Za-z]/.test(val)) || 'Password must have letters and numbers'
                 ]" :loading="loading" :disable="loading">
                 <template v-slot:prepend>
                     <q-icon name="lock" />
@@ -100,10 +101,10 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue';
+import { ref, computed } from 'vue';
 import { useRouter } from 'vue-router';
 import { Notify } from 'quasar';
-import { authService } from 'src/services/authService';
+import { useAuthStore } from 'src/stores/auth';
 import type { RegisterCredentials } from 'src/utils/types';
 
 const router = useRouter();
@@ -120,13 +121,14 @@ const form = ref<RegisterCredentials>({
 const showPassword = ref(false);
 const showConfirmPassword = ref(false);
 const agreeToTerms = ref(false);
-const loading = ref(false);
+const auth = useAuthStore();
+
+// Use store loading state instead of local ref
+const loading = computed(() => auth.getLoading);
 
 async function onSubmit() {
-    loading.value = true;
-
     try {
-        const user = await authService.register(form.value);
+        const user = await auth.register(form.value);
 
         Notify.create({
             type: 'positive',
@@ -138,13 +140,23 @@ async function onSubmit() {
         const redirect = router.currentRoute.value.query.redirect as string;
         await router.push(redirect || '/');
     } catch (error) {
+        let errorMessage = 'Registration failed'; // Default message
+        console.log(error)
+        // If the error is an instance of Error (generic JavaScript Error)
+        if (error instanceof Error) {
+            errorMessage = error.message;
+        }
+        // If the error has a 'response' property (e.g., from Axios)
+        if (error && typeof error === 'object' && 'response' in error) {
+            const axiosError = error as { response?: { data?: { error?: string } } };
+            errorMessage = axiosError.response?.data?.error || 'Unknown error';
+        }
+
         Notify.create({
             type: 'negative',
-            message: error instanceof Error ? error.message : 'Registration failed',
+            message: errorMessage,
             position: 'top'
         });
-    } finally {
-        loading.value = false;
     }
 }
 </script>

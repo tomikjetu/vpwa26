@@ -1,27 +1,14 @@
-<template>
+﻿<template>
   <div class="members-list">
 
     <div class="members-header">
-      <q-btn
-        flat
-        dense
-        round
-        icon="arrow_back"
-        color="primary"
-        @click="$emit('cancel')"
-        class="back-btn"
-      />
+      <q-btn flat dense round icon="arrow_back" color="primary" @click="$emit('cancel')" class="back-btn" />
       <span class="header-title">Members</span>
     </div>
 
     <q-list class="q-pa-none">
-      <q-item
-        v-for="(member, index) in members"
-        :key="'member-' + index"
-        clickable
-        class="member-item"
-        @click="handleShowMemberInfo(member)"
-      >
+      <q-item v-for="member in membersList" :key="'member-' + member.id" clickable class="member-item"
+        @click="handleShowMemberInfo(member)">
         <q-item-section avatar>
           <q-icon name="person" />
         </q-item-section>
@@ -29,12 +16,7 @@
         <q-item-section>
           <q-item-label class="member-name row items-center no-wrap">
             <!-- Colored status circle -->
-            <q-icon
-              name="circle"
-              size="10px"
-              class="q-mr-sm"
-              :color="getStatusColor(member.id)"
-            />
+            <q-icon name="circle" size="10px" class="q-mr-sm" :color="getMemberStatusColor(member)" />
             {{ member.nickname }}
           </q-item-label>
         </q-item-section>
@@ -45,48 +27,68 @@
 </template>
 
 <script setup lang="ts">
-import { defineProps } from 'vue'
+import { computed, defineProps, toRef } from 'vue'
 import type { Member, Channel } from 'src/utils/types'
-import { useDialogStore } from 'src/stores/dialog-store'
-import { useContacts } from 'src/stores/contacts-store'
+import { useDialogStore } from 'src/stores/dialog'
 import { storeToRefs } from 'pinia'
-import { useAuthStore } from 'src/stores/auth-store'
+import { useAuthStore } from 'src/stores/auth'
+import { useChannelStore } from 'src/stores/channel'
+import { isSocketConnected } from 'src/services/socketService'
 
 const authStore = useAuthStore()
+const channelStore = useChannelStore()
 const { getCurrentUser } = storeToRefs(authStore)
 
 const dialog = useDialogStore()
-const contactsStore = useContacts()
+
+const props = defineProps<{
+  channel: Channel | undefined
+}>()
+
+const channel = toRef(props, 'channel')
+
+/** 
+ * Computed list of members that reacts to status changes.
+ * This reads from the channel store directly to ensure reactivity.
+ */
+const membersList = computed(() => {
+  if (!channel.value) return []
+
+  // Get the channel from the store (this ensures we get reactive updates)
+  const storeChannel = channelStore.getChannelById(channel.value.id)
+  if (!storeChannel) return []
+
+  // Convert members object to array
+  const rawMembers = storeChannel.members
+  return Array.isArray(rawMembers) ? rawMembers : Object.values(rawMembers ?? {})
+})
 
 /** Opens the member info dialog */
 function handleShowMemberInfo(member: Member) {
-  if(!props.channel) return
-  dialog.openMemberInfo(member, props.channel)
+  if (!channel.value) return
+  dialog.openMemberInfo(member, channel.value)
 }
 
-/** Returns the color based on contact status */
-function getStatusColor(memberId: number): string {
-  const contact = contactsStore.contacts[memberId]
-  if (!getCurrentUser.value) return 'grey'
-  const currentUserStatus = contactsStore.contacts[getCurrentUser.value.id]?.status
-  if (!contact || (currentUserStatus == 'offline' && contact?.id != getCurrentUser.value.id)) return 'grey'
+/** Returns the color based on member's connection and status */
+function getMemberStatusColor(member: Member): string {
+  if (!member || !getCurrentUser.value) return 'grey'
 
-  switch (contact.status) {
-    case 'online':
+  // If current user is offline, everyone appears grey (can't see real statuses)
+  if (!isSocketConnected.value) return 'grey'
+
+  // Disconnected users are always grey
+  if (!member.isConnected) return 'grey'
+
+  // Connected users show their status color
+  switch (member.status) {
+    case 'active':
       return 'green'
     case 'dnd':
-      return 'orange'
-    case 'offline':
       return 'red'
     default:
       return 'grey'
   }
 }
-
-const props = defineProps<{
-  members: Member[],
-  channel: Channel | undefined
-}>()
 </script>
 
 <style scoped>

@@ -1,6 +1,5 @@
-import { useChannelStore } from 'src/stores/channelStore';
+import { useChannelStore } from 'src/stores/channel';
 import { Notify } from 'quasar';
-import { cancelChannel } from 'src/services/channelService';
 
 export default function Quit() {
   const channelStore = useChannelStore();
@@ -10,7 +9,7 @@ export default function Quit() {
       if (args.length === 0 || !args[0])
         return Notify.create({
           type: 'negative',
-          message: 'Channel name is required',
+          message: 'Usage: /quit channelName',
           position: 'top',
         });
       const channel = channelStore.channels.find((ch) => ch.name === args[0]);
@@ -20,7 +19,7 @@ export default function Quit() {
           message: 'Channel not found',
           position: 'top',
         });
-      cancelChannel(channel.id);
+      channelStore.quitChannelAction(channel.id);
     },
   };
 }
