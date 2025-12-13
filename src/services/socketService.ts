@@ -252,7 +252,7 @@ export const socketEmit = {
   // Messages
   sendMessage: (channelId: number, content: string, files: File[]) => {
     if (!requireConnection('send message')) return;
-    getSocket().emit('msg:send', { channelId, content, files });
+    getSocket().emit('msg:send', { channelId, content });
     console.log('msg:send emitted');
   },
 

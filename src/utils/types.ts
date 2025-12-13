@@ -225,3 +225,5 @@ export interface ChatMessagePayload {
   files: string[];
   userNickname: string | undefined;
 }
+
+export interface 

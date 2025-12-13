@@ -88,6 +88,8 @@ export function createChannelActions(state: ChannelState, commit: Commit) {
 
     sendMessage(msg: ChatMessagePayload, channelId: number, files: File[]) {
       channelService.sendMessage(channelId, msg.text, files);
+
+      //await channelService.uploadFiles(files, channelId)
     },
 
     markAsRead(channelId: number) {

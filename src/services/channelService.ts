@@ -7,11 +7,27 @@ import type { NotifStatus } from 'src/utils/types';
  * All channel data comes from socket events pushed by the server
  */
 class ChannelService {
+
+  async uploadFiles(files: File[], channel_id: number): Promise<void> {
+
+    if (files.length > 0) {
+      const formData = new FormData()
+      files.forEach(file => formData.append("files", file))
+
+      const response = await fetch(`/channels/${channel_id}/files`, {
+        method: "POST",
+        body: formData,
+      })
+
+      if (!response.ok) {
+        throw new Error("Failed to upload files")
+      }
+    }
+  }
   /**
    * List channels relevant to the user (via socket)
    */
   listChannels(): void {
-    console.log('OGA BOGA');
     socketEmit.listChannels();
   }
   /**
