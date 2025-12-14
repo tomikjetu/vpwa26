@@ -21,8 +21,8 @@
 
         <!-- Attachments -->
         <div v-if="payload.files && payload.files.length" class="message-attachments">
-          <div v-for="(file, index) in payload.files" :key="'file-' + index" @click="downloadAttachment(getFileURL(file), file.name)"
-            class="attachment-link">
+          <div v-for="(file, index) in payload.files" :key="'file-' + index"
+            @click="downloadAttachment(getFileURL(file), file.name)" class="attachment-link">
             <q-icon name="attach_file" size="14px" />
             <span>{{ getFileName(file) }}</span>
           </div>
@@ -87,8 +87,8 @@ function getFileName(file: ChatMessageFile): string {
 }
 
 function messageContainsMention(message: string) {
-  if(!auth.getCurrentUser) return
-  if(!props.channel) return
+  if (!auth.getCurrentUser) return
+  if (!props.channel) return
 
   const ids: number[] = []
   const re = /@(\d+)/g
@@ -99,11 +99,11 @@ function messageContainsMention(message: string) {
     if (Number.isFinite(n)) ids.push(n)
   }
   console.log(ids)
-  for(const id of ids) {
+  for (const id of ids) {
     const mentioned_member = props.channel.members[id]
-    if(!mentioned_member) continue
+    if (!mentioned_member) continue
     console.log(mentioned_member)
-    if(auth.getCurrentUser.id === mentioned_member.userId) {
+    if (auth.getCurrentUser.id === mentioned_member.userId) {
       return true
     }
   }
@@ -238,6 +238,11 @@ function replaceMentions(message: string) {
   text-decoration: none;
   transition: background 0.2s ease;
   cursor: pointer;
+}
+
+.attachment-link span,
+.attachment-link i {
+  color: white;
 }
 
 .attachment-link:hover {
