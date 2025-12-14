@@ -46,11 +46,12 @@ const onChannelSelected = () => {
 }
 
 
-onMounted(() => {
+onMounted(async () => {
   channelStore.loadChannelsAndInvites();
 
   // For correct burger menu
   document.documentElement.style.setProperty('--sm-width', `${$q.screen.sizes.sm}px`)
+  await Notification.requestPermission()
 });
 </script>
 

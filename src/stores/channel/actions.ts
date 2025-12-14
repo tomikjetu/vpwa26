@@ -1,4 +1,4 @@
-import type { Channel, ChatMessagePayload, NotifStatus, UserStatus } from 'src/utils/types';
+import type { Channel, ChatMessagePayload, FileMetaData, NotifStatus, UserStatus } from 'src/utils/types';
 import { channelService } from 'src/services/channelService';
 import { Notify } from 'quasar';
 import type { ChannelState } from './state';
@@ -86,8 +86,19 @@ export function createChannelActions(state: ChannelState, commit: Commit) {
       commit('ADD_MESSAGES', msgs);
     },
 
-    sendMessage(msg: ChatMessagePayload, channelId: number, files: File[]) {
-      channelService.sendMessage(channelId, msg.text, files);
+    async sendMessage(msg: ChatMessagePayload, channelId: number, files: File[]) {
+      const response = await channelService.uploadFiles(files, channelId)
+      
+      let filesMetaData : FileMetaData[] = []
+      if(response) {
+        filesMetaData = files.map((file, i) => ({
+          name: file.name,
+          size: file.size,
+          mime_type: file.type,
+          path: `uploads/${channelId}/files/${response.data.file_UUID[i]}`
+        }));
+      }
+      channelService.sendMessage(channelId, msg.text, filesMetaData);
     },
 
     markAsRead(channelId: number) {

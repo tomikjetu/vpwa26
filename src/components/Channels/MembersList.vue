@@ -28,7 +28,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, defineProps, toRef } from 'vue'
+import { computed, toRef } from 'vue'
 import type { Member, Channel } from 'src/utils/types'
 import { useDialogStore } from 'src/stores/dialog'
 import { storeToRefs } from 'pinia'

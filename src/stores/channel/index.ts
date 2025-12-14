@@ -86,8 +86,8 @@ export const useChannelStore = defineStore('channels', {
       this._getActions().addMessages(msgs);
     },
 
-    sendMessage(msg: ChatMessagePayload, channelId: number, files: File[]) {
-      this._getActions().sendMessage(msg, channelId, files);
+    async sendMessage(msg: ChatMessagePayload, channelId: number, files: File[]) {
+      await this._getActions().sendMessage(msg, channelId, files);
     },
 
     markAsRead(channelId: number) {

@@ -3,7 +3,7 @@
     <div v-if="loadingTop" class="top-loader">Loading older messages...</div>
     <div v-else-if="!hasMoreOlder" class="top-info">No older messages</div>
 
-    <ChatMessage v-for="(m, index) in messages" :payload="m" :key="`old-${index}`"
+    <ChatMessage v-for="(m, index) in messages" :payload="m" :channel="props.channel" :key="`old-${index}`"
       @show-member-info="onShowMemberInfo" />
 
     <div v-if="unreadMessages.length > 0" class="unread-separator">
@@ -11,7 +11,7 @@
       <span class="unread-label">NEW</span>
     </div>
 
-    <ChatMessage v-for="(m, index) in unreadMessages" :payload="m" :key="`new-${index}`"
+    <ChatMessage v-for="(m, index) in unreadMessages" :payload="m" :channel="props.channel" :key="`new-${index}`"
       @show-member-info="onShowMemberInfo" />
 
   </div>

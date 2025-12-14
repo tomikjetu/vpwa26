@@ -120,21 +120,14 @@ function sendMessage() {
   if (text.value.trim() || selectedFiles.value.length > 0) {
 
     // Clear typing indicator before sending
-    if (chatStore.channel) {
-      channelStore.sendTypingAction(chatStore.channel.id, '')
-    }
-
-    // Extract file names
-    const file_names: string[] = []
-    for (const file of selectedFiles.value) {
-      file_names.push(file.name)
-    }
-
+    if (!chatStore.channel) return
+    
+    channelStore.sendTypingAction(chatStore.channel.id, '')
     emit('send', {
       user: getCurrentUser.value.id,
       text: text.value,
       time: new Date(),
-      files: file_names,
+      files: [],
       userNickname: getCurrentUser.value.nickName
     }, selectedFiles.value)
     text.value = ''

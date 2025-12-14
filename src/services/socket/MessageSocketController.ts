@@ -3,7 +3,7 @@ import type { ISocketController } from './types';
 import { useChannelStore } from 'src/stores/channel';
 import { useAuthStore } from 'src/stores/auth';
 import { AppVisibility, Notify } from 'quasar';
-import type { ChatMessagePayload } from 'src/utils/types';
+import type { ChatMessageFile, ChatMessagePayload } from 'src/utils/types';
 import type {
   MessageListResponse,
   MessageNewBroadcast,
@@ -43,17 +43,17 @@ export class MessageSocketController implements ISocketController {
     const channelStore = useChannelStore();
 
     for (const message of data.messages) {
-      // Get file names
-      const file_names: string[] = [];
-      for (const file of message.files) file_names.push(`${file.name}.${file.mime_type}`);
 
+      const files : ChatMessageFile[] = []
+      for(const file of message.files) files.push({ name: file.name, path: file.path })
+      
       // Transform backend message data
       const transformedMessage: ChatMessagePayload = {
         ...(message.id !== undefined && { id: message.id }),
         user: message.memberId,
         text: message.content,
         time: new Date(message.createdAt),
-        files: file_names || [],
+        files: files || [],
         userNickname: channelStore.getMemberById(message.memberId, message.channelId)?.nickname,
       };
 
@@ -73,11 +73,13 @@ export class MessageSocketController implements ISocketController {
     const channel = channelStore.getChannelById(data.channelId);
     const chatStore = useChatStore();
 
+    console.log(data)
+
     if (!channel) return;
 
     // Get file names
-    const file_names: string[] = [];
-    for (const file of data.message.files) file_names.push(`${file.name}.${file.mime_type}`);
+    const files : ChatMessageFile[] = []
+    for(const file of data.message.files) files.push({ name: file.name, path: file.path })
 
     // Transform backend message data
     const transformedMessage: ChatMessagePayload = {
@@ -85,7 +87,7 @@ export class MessageSocketController implements ISocketController {
       user: data.memberId,
       text: data.message.content,
       time: new Date(data.message.createdAt),
-      files: file_names || [],
+      files: files || [],
       userNickname: data.message.user.nick,
     };
 
@@ -116,10 +118,24 @@ export class MessageSocketController implements ISocketController {
         timeout: 3000,
       });
     } else if (!AppVisibility.appVisible && !isDnd) {
-      console.log('BIG NOTIF');
-      new Notification(`New message in  ${channel.name}`, {
-        body: transformedMessage.text.substring(0, 50),
-      });
+      console.log(`${transformedMessage.text}`)
+      console.log(Notification.permission)
+      console.log('document.visibilityState', document.visibilityState)
+      console.log('document.hasFocus()', document.hasFocus())
+      console.log('AppVisibility.appVisible', AppVisibility.appVisible)
+      try {
+        const n = new Notification(`New message in ${channel.name} from ${transformedMessage.userNickname}`, {
+          body: transformedMessage.text.substring(0, 50),
+          // helps you actually notice it
+          requireInteraction: true,
+        })
+
+        n.onshow = () => console.log('Notification shown')
+        n.onerror = (e) => console.error('Notification error', e)
+        n.onclick = () => window.focus()
+      } catch (e) {
+        console.error('Notification constructor threw', e)
+      }
     }
   }
 

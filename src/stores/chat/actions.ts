@@ -14,10 +14,10 @@ type Commit = <K extends keyof typeof chatMutations>(
  */
 export function createChatActions(state: ChatState, commit: Commit) {
   return {
-    sendMessage(msg: ChatMessagePayload, files: File[]) {
+    async sendMessage(msg: ChatMessagePayload, files: File[]) {
       if (!state.channel) return;
       const channelStore = useChannelStore();
-      channelStore.sendMessage(msg, state.channel.id, files);
+      await channelStore.sendMessage(msg, state.channel.id, files);
     },
 
     async openChat(newChannel: Channel | null): Promise<void> {

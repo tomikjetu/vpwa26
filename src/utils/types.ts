@@ -155,6 +155,7 @@ export interface FileAttachment {
   name: string;
   mime_type: string;
   size: number;
+  path: string;
 }
 
 /** Basic message (from backend MessageBasic) */
@@ -222,6 +223,18 @@ export interface ChatMessagePayload {
   user: number;
   text: string;
   time: Date;
-  files: string[];
+  files: ChatMessageFile[];
   userNickname: string | undefined;
+}
+
+export interface ChatMessageFile {
+  name: string;
+  path: string;
+}
+
+export interface FileMetaData {
+  name: string;
+  size: number;
+  mime_type: string;
+  path: string;
 }
