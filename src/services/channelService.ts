@@ -1,6 +1,8 @@
 import { Notify } from 'quasar';
 import { socketEmit } from './socketService';
-import type { NotifStatus } from 'src/utils/types';
+import type { FileMetaData, NotifStatus } from 'src/utils/types';
+import { api } from 'src/boot/axios';
+import type { AxiosResponse } from 'axios';
 
 /**
  * ChannelService - Socket-based service for real-time channel operations
@@ -8,20 +10,21 @@ import type { NotifStatus } from 'src/utils/types';
  */
 class ChannelService {
 
-  async uploadFiles(files: File[], channel_id: number): Promise<void> {
+  async uploadFiles(files: File[], channel_id: number): Promise<AxiosResponse | undefined> {
 
     if (files.length > 0) {
       const formData = new FormData()
       files.forEach(file => formData.append("files", file))
 
-      const response = await fetch(`/channels/${channel_id}/files`, {
-        method: "POST",
-        body: formData,
+      const response = await api.post(`/channels/${channel_id}/files`, formData, {
       })
 
-      if (!response.ok) {
+      console.log(response)
+
+      if (!response.status) {
         throw new Error("Failed to upload files")
       }
+      return response
     }
   }
   /**
@@ -119,7 +122,7 @@ class ChannelService {
   /**
    * Send a message to a channel (via socket)
    */
-  sendMessage(channelId: number, content: string, files: File[]): void {
+  sendMessage(channelId: number, content: string, files: FileMetaData[]): void {
     socketEmit.sendMessage(channelId, content, files);
     // Response will come via socket event 'message:new'
   }
@@ -165,7 +168,7 @@ export function msgNotif(name: string, text: string, onClick: () => void) {
     progress: false,
     html: true,
     classes:
-      'q-pa-lg q-ma-md shadow-4 rounded-2xl border cursor-pointer transition-all hover:bg-grey-2 messenger-notify',
+    'q-pa-lg q-ma-md shadow-4 rounded-2xl border cursor-pointer transition-all hover:bg-grey-2 messenger-notify',
     icon: 'account_circle',
     iconColor: 'blue-6',
     actions: [

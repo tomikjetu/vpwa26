@@ -21,11 +21,11 @@
 
         <!-- Attachments -->
         <div v-if="payload.files && payload.files.length" class="message-attachments">
-          <a v-for="(file, index) in payload.files" :key="'file-' + index" :href="getFileURL(file)" target="_blank"
+          <div v-for="(file, index) in payload.files" :key="'file-' + index" @click="downloadAttachment(getFileURL(file), file.name)"
             class="attachment-link">
             <q-icon name="attach_file" size="14px" />
             <span>{{ getFileName(file) }}</span>
-          </a>
+          </div>
         </div>
 
         <!-- Footer with time and status -->
@@ -42,47 +42,72 @@
 import { computed } from 'vue';
 import { useAuthStore } from 'src/stores/auth';
 import { useChatStore } from 'src/stores/chat';
-import type { ChatMessagePayload } from 'src/utils/types'
+import type { Channel, ChatMessageFile, ChatMessagePayload } from 'src/utils/types'
+import { api } from 'src/boot/axios';
 
 const auth = useAuthStore()
 const chatStore = useChatStore()
 
 const props = defineProps<{
-  payload: ChatMessagePayload
+  payload: ChatMessagePayload,
+  channel: Channel | null
 }>()
 
+async function downloadAttachment(path: string, filename: string) {
+  const urlPath = path.startsWith('/') ? path : `/${path}`
+
+  const res = await api.get(urlPath, { responseType: 'blob' })
+
+  const blob = new Blob([res.data], {
+    type: res.headers['content-type'] || 'application/octet-stream',
+  })
+
+  const url = URL.createObjectURL(blob)
+  const a = document.createElement('a')
+  a.href = url
+  a.download = filename
+  a.click()
+  URL.revokeObjectURL(url)
+}
+
 const isOwnMessage = computed(() => {
-  return props.payload.user === auth.getCurrentUser?.id
+  return auth.getCurrentUser?.id === props.channel?.members[props.payload.user]?.userId
 })
 
 function formatTime(date: Date): string {
   return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
 }
 
-/** Return file URL or object URL for locally attached files */
-function getFileURL(file: File | string): string {
-  if (typeof file === 'string') {
-    return file // e.g., a URL from your backend
-  }
-  if (file instanceof File) {
-    return URL.createObjectURL(file)
-  }
-  return ''
+function getFileURL(file: ChatMessageFile): string {
+  return file.path
 }
 
-function getFileName(file: File | string): string {
-  if (typeof file === 'string') {
-    return file.split('/').pop() || 'file'
-  }
-  if (file instanceof File) {
-    return file.name
-  }
-  return 'file'
+function getFileName(file: ChatMessageFile): string {
+  return file.name
 }
 
 function messageContainsMention(message: string) {
-  const id = auth.getCurrentUser?.id;
-  return message.includes(`@${id}`)
+  if(!auth.getCurrentUser) return
+  if(!props.channel) return
+
+  const ids: number[] = []
+  const re = /@(\d+)/g
+
+  let match: RegExpExecArray | null
+  while ((match = re.exec(message)) !== null) {
+    const n = Number.parseInt(match[1] ? match[1] : '', 10)
+    if (Number.isFinite(n)) ids.push(n)
+  }
+  console.log(ids)
+  for(const id of ids) {
+    const mentioned_member = props.channel.members[id]
+    if(!mentioned_member) continue
+    console.log(mentioned_member)
+    if(auth.getCurrentUser.id === mentioned_member.userId) {
+      return true
+    }
+  }
+  return false
 }
 
 function replaceMentions(message: string) {
@@ -169,9 +194,9 @@ function replaceMentions(message: string) {
 }
 
 .message-bubble.mention {
-  background: linear-gradient(135deg, #fff9c4 0%, #fff59d 100%);
-  color: #1a1a1a;
-  border-left: 3px solid #fbc02d;
+  background: linear-gradient(135deg, #6b4e00 0%, #c07a00 100%);
+  color: #ffffff;
+  border-left: 3px solid #ffdf7e;
 }
 
 .body--dark .message-bubble.mention {
@@ -212,6 +237,7 @@ function replaceMentions(message: string) {
   color: inherit;
   text-decoration: none;
   transition: background 0.2s ease;
+  cursor: pointer;
 }
 
 .attachment-link:hover {

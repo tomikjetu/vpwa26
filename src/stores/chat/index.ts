@@ -46,9 +46,10 @@ export const useChatStore = defineStore('chatContainer', () => {
   }
 
   // Actions
-  function sendMessage(msg: ChatMessagePayload, files: File[]) {
+  async function sendMessage(msg: ChatMessagePayload, files: File[]) {
+
     if (!channel.value) return;
-    channelStore.sendMessage(msg, channel.value.id, files);
+    await channelStore.sendMessage(msg, channel.value.id, files);
   }
 
   async function openChat(newChannel: Channel | null): Promise<void> {

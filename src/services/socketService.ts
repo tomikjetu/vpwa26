@@ -1,7 +1,7 @@
 ﻿import { io, type Socket } from 'socket.io-client';
 import { useAuthStore } from 'src/stores/auth';
 import { Notify } from 'quasar';
-import type { NotifStatus, UserStatus } from 'src/utils/types';
+import type { FileMetaData, NotifStatus, UserStatus } from 'src/utils/types';
 import { ref } from 'vue';
 import {
   ConnectionSocketController,
@@ -250,9 +250,9 @@ export const socketEmit = {
   },
 
   // Messages
-  sendMessage: (channelId: number, content: string, files: File[]) => {
+  sendMessage: (channelId: number, content: string, files: FileMetaData[]) => {
     if (!requireConnection('send message')) return;
-    getSocket().emit('msg:send', { channelId, content });
+    getSocket().emit('msg:send', { channelId: channelId, content: content, files: files });
     console.log('msg:send emitted');
   },
 
